@@ -210,12 +210,13 @@ sudo lightops-verify
 
 ~~~bash
 npm ci --prefix tools
-node tools/generate-render.mjs
+npm run render --prefix tools
 node --check app/static/render.js
 node --check app/static/app.js
 ~~~
 
 修改 app/static/index.html 后必须重新生成 app/static/render.js。不要手工编辑生成文件，也不要把 CSP 放宽到 unsafe-eval。
+`tools/build-release.py` 会在打包前重新编译一次并与已提交的 render.js 做比对，不同步就直接失败，避免发布包带上旧模板。
 
 ## 测试
 

@@ -5,12 +5,17 @@ import gzip
 import hashlib
 import io
 import re
+import shutil
+import subprocess
 import tarfile
+import tempfile
 from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
 VERSION_FILE = ROOT / "app" / "__init__.py"
+GENERATE_RENDER = ROOT / "tools" / "generate-render.mjs"
+RENDER_OUTPUT = ROOT / "app" / "static" / "render.js"
 EXCLUDED_PARTS = {
     ".git",
     ".npm-cache",
@@ -65,6 +70,30 @@ def normalized_info(path: Path, arcname: str) -> tarfile.TarInfo:
     return info
 
 
+def verify_render_is_fresh() -> None:
+    # render.js 是 index.html 的提交产物。CI 会重新生成并用 git diff 阻断，
+    # 但本地 build-release 直接打包工作区，忘记重新生成就会把旧模板带上生产。
+    # 这里重新编译到临时文件做二进制比对，让发布包不可能携带过期渲染函数。
+    if not (ROOT / "tools" / "node_modules" / "@vue" / "compiler-dom").is_dir():
+        raise RuntimeError("tools/node_modules is missing; run `npm ci --prefix tools` first")
+    node = shutil.which("node")
+    if node is None:
+        raise RuntimeError("node is not on PATH; cannot verify render.js freshness")
+    with tempfile.TemporaryDirectory() as workspace:
+        candidate = Path(workspace) / "render.js"
+        subprocess.run(
+            [node, str(GENERATE_RENDER), str(candidate)],
+            cwd=ROOT,
+            check=True,
+            capture_output=True,
+        )
+        generated = candidate.read_bytes()
+    if generated != RENDER_OUTPUT.read_bytes():
+        raise RuntimeError(
+            "app/static/render.js is stale; run `npm run render --prefix tools` before building a release"
+        )
+
+
 def normalized_file_content(path: Path) -> bytes:
     data = path.read_bytes()
     relative = path.relative_to(ROOT).as_posix()
@@ -83,6 +112,7 @@ def build(output: Path) -> str:
     # Asset completeness is enforced by validate_release_assets() in
     # deploy/install.sh; a second list here would just be a second place to
     # forget whenever a static file is added.
+    verify_render_is_fresh()
     output.parent.mkdir(parents=True, exist_ok=True)
     paths = [ROOT, *(path for path in ROOT.rglob("*") if included(path))]
     with output.open("wb") as raw:

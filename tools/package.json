@@ -3,6 +3,9 @@
   "private": true,
   "version": "1.4.1",
   "type": "module",
+  "scripts": {
+    "render": "node generate-render.mjs"
+  },
   "dependencies": {
     "@vue/compiler-dom": "3.5.17"
   }

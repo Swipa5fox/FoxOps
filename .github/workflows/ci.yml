@@ -78,7 +78,7 @@ jobs:
 
       - name: 前端渲染构建与语法检查
         run: |
-          node tools/generate-render.mjs
+          npm run render --prefix tools
           # 生成物已入仓：若与 index.html 不同步则阻断，避免线上跑旧模板
           git diff --exit-code app/static/render.js
           node --check app/static/render.js

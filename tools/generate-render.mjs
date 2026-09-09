@@ -8,7 +8,11 @@ import { compile } from "@vue/compiler-dom";
 const toolsDir = dirname(fileURLToPath(import.meta.url));
 const projectRoot = resolve(toolsDir, "..");
 const htmlPath = resolve(projectRoot, "app/static/index.html");
-const outputPath = resolve(projectRoot, "app/static/render.js");
+// 输出路径可被覆盖：发布前的同步校验会把结果生成到临时文件再与已提交版本比对。
+const outputArg = process.argv[2];
+const outputPath = outputArg
+  ? resolve(process.cwd(), outputArg)
+  : resolve(projectRoot, "app/static/render.js");
 const html = await readFile(htmlPath, "utf8");
 const opening = '<div id="app" v-cloak>';
 const start = html.indexOf(opening);
