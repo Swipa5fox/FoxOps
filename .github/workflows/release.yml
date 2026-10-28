@@ -43,6 +43,18 @@ jobs:
         with:
           python-version: '3.11'
 
+      # build-release.py 发布前要校验 render.js 与 index.html 同步，
+      # 这一步要跑 tools 下的 Vue 编译器，缺 node_modules 会直接抛错。
+      - name: 设置 Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: tools/package-lock.json
+
+      - name: 安装前端构建依赖
+        run: npm ci --prefix tools
+
       - name: 构建发布包
         shell: bash
         run: |
