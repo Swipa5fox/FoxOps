@@ -1,0 +1,10 @@
+[Unit]
+Description=Refresh FoxOps docker container data
+
+[Timer]
+OnBootSec=30s
+OnUnitActiveSec=10s
+AccuracySec=2s
+
+[Install]
+WantedBy=timers.target

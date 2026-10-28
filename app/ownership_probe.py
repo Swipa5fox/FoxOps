@@ -1,6 +1,6 @@
 """Root-side probe: record which systemd unit actually uses which service.
 
-Run from lightops-inspect.timer (root). Writes /var/lib/lightops/ownership.json
+Run from foxops-inspect.timer (root). Writes /var/lib/foxops/ownership.json
 for the unprivileged app to read (edges carry a 10-minute TTL so short-lived
 connections like periodic agent reports keep the label visible):
 
@@ -26,7 +26,7 @@ from pathlib import Path
 from typing import Any
 
 # 路径是常量：app/ownership.py 硬编码读同一个文件，一旦可配置就会静默错位。
-OUTPUT_FILE = Path("/var/lib/lightops/ownership.json")
+OUTPUT_FILE = Path("/var/lib/foxops/ownership.json")
 _SS = "/usr/sbin/ss"
 _RUN_ENV = {"PATH": "/usr/sbin:/usr/bin:/sbin:/bin", "LANG": "C"}
 
@@ -100,7 +100,7 @@ def dependency_edges(providers: set[str]) -> dict[str, set[str]]:
         try:
             result = subprocess.run(
                 [
-                    os.getenv("LIGHTOPS_SYSTEMCTL_PATH", "/usr/bin/systemctl"),
+                    os.getenv("FOXOPS_SYSTEMCTL_PATH", "/usr/bin/systemctl"),
                     "list-dependencies",
                     "--reverse",
                     "--plain",
@@ -253,7 +253,7 @@ def build_snapshot() -> tuple[
 
 # 连接是瞬时的（agent2 周期上报、fastcgi 按请求建连），把观测到的边持久化
 # 到状态文件并带 TTL 衰减，标签才不会在采样间隙消失。
-_STATE_FILE = Path("/var/lib/lightops/ownership_state.json")
+_STATE_FILE = Path("/var/lib/foxops/ownership_state.json")
 _EDGE_TTL_SECONDS = 600
 
 

@@ -1,11 +1,14 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <!-- 与 style.css 的 .brand-mark 保持一致：深色圆角底 + 紫色描边 + 纯色狐狸剪影 -->
   <defs>
-    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#0b1f30"/>
-      <stop offset="100%" stop-color="#050c14"/>
+    <linearGradient id="tile" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#2a2340"/>
+      <stop offset="100%" stop-color="#1c1828"/>
     </linearGradient>
   </defs>
-  <rect x="0" y="0" width="32" height="32" rx="7" fill="url(#bg)"/>
-  <rect x="0.5" y="0.5" width="31" height="31" rx="6.5" fill="none" stroke="rgba(94,234,212,0.45)"/>
-  <rect x="11.5" y="11.5" width="9" height="9" transform="rotate(45 16 16)" fill="none" stroke="#5eead4" stroke-width="2" stroke-linejoin="round"/>
+  <rect width="32" height="32" rx="9" fill="url(#tile)"/>
+  <rect x="0.5" y="0.5" width="31" height="31" rx="8.5" fill="none" stroke="#a78bfa" stroke-opacity="0.34"/>
+  <g transform="translate(16 16) scale(0.7) translate(-16 -16)">
+    <path d="M16 28.6 4.1 14.6 7.1 3.2 12.6 12.3 16 9.2 19.4 12.3 24.9 3.2 27.9 14.6Z" fill="#a78bfa"/>
+  </g>
 </svg>

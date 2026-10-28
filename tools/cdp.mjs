@@ -1,4 +1,4 @@
-/* LightOps headless Chrome 辅助（无第三方依赖：原生 WebSocket + CDP）
+/* FoxOps headless Chrome 辅助（无第三方依赖：原生 WebSocket + CDP）
    供 tools/verify-theme.mjs 与 tools/capture-readme.mjs 共用。 */
 import { spawn } from "node:child_process";
 import { writeFileSync } from "node:fs";

@@ -83,6 +83,14 @@ CREATE TABLE IF NOT EXISTS sessions (
 );
 CREATE INDEX IF NOT EXISTS idx_sessions_username
     ON sessions(username, expires_at);
+
+-- 运行期可变配置（目前放「后台管理」里的限流策略）。环境变量负责首次默认值，
+-- 这里存管理员的在线修改，重启后由 defense.load_saved_policy() 重新应用。
+CREATE TABLE IF NOT EXISTS app_settings (
+    key TEXT PRIMARY KEY,
+    value TEXT NOT NULL,
+    updated_at TEXT NOT NULL
+);
 """
 
 # 会话存活时间：7 天，超过后需要重新登录。
@@ -493,6 +501,34 @@ def audit_logs(limit: int = 100) -> list[dict[str, Any]]:
     return [dict(row) for row in rows]
 
 
+def get_setting(key: str) -> dict[str, str] | None:
+    """读取运行期配置；不存在返回 None。"""
+    with connect() as conn:
+        row = conn.execute(
+            "SELECT value, updated_at FROM app_settings WHERE key = ?", (key,)
+        ).fetchone()
+    return dict(row) if row else None
+
+
+def set_setting(key: str, value: str) -> None:
+    with connect() as conn:
+        conn.execute(
+            """
+            INSERT INTO app_settings (key, value, updated_at)
+            VALUES (?, ?, ?)
+            ON CONFLICT(key) DO UPDATE SET
+                value = excluded.value,
+                updated_at = excluded.updated_at
+            """,
+            (key, value, utc_now()),
+        )
+
+
+def delete_setting(key: str) -> None:
+    with connect() as conn:
+        conn.execute("DELETE FROM app_settings WHERE key = ?", (key,))
+
+
 def cleanup_old_data() -> dict[str, int]:
     cutoff = (
         datetime.now(timezone.utc) - timedelta(days=settings.retention_days)
@@ -533,7 +569,7 @@ def run_maintenance() -> dict[str, int | str]:
 def backup_database() -> str:
     settings.backup_dir.mkdir(parents=True, exist_ok=True)
     stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S.%fZ")
-    destination = settings.backup_dir / f"lightops-{stamp}.db"
+    destination = settings.backup_dir / f"foxops-{stamp}.db"
     with connect() as source:
         target = sqlite3.connect(destination)
         try:
@@ -542,7 +578,7 @@ def backup_database() -> str:
             target.close()
 
     cutoff = datetime.now(timezone.utc) - timedelta(days=settings.retention_days)
-    for item in settings.backup_dir.glob("lightops-*.db"):
+    for item in settings.backup_dir.glob("foxops-*.db"):
         modified = datetime.fromtimestamp(item.stat().st_mtime, timezone.utc)
         if modified < cutoff:
             item.unlink()

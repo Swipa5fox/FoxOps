@@ -26,7 +26,7 @@ from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
-from . import __version__, collector, db, ownership, weather
+from . import __version__, collector, db, defense, ownership, sysops, weather
 from .settings import settings
 
 
@@ -34,9 +34,14 @@ logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s %(levelname)s %(name)s %(message)s",
 )
-logger = logging.getLogger("lightops")
+logger = logging.getLogger("foxops")
 STARTED_AT = time.time()
-# LightOps only schedules 2 jobs (collect + maintenance). The default
+
+# 容器部署：psutil 默认只看得到容器自己的 /proc。FOXOPS_PROCFS_PATH 指到挂载进来的
+# 宿主机 proc（如 /host/proc），CPU / 内存 / 负载 / 网卡统计才反映真实宿主机。
+if settings.procs_path:
+    psutil.PROCFS_PATH = settings.procs_path
+# FoxOps only schedules 2 jobs (collect + maintenance). The default
 # ThreadPoolExecutor spins up 10 workers; 3 is more than enough and trims
 # idle thread stacks on small-memory hosts.
 scheduler = BackgroundScheduler(
@@ -122,6 +127,8 @@ def scheduled_maintenance() -> None:
 async def lifespan(_: FastAPI):
     settings.validate()
     db.init_db()
+    # 后台管理里保存的策略优先于环境变量；损坏时忽略并沿用默认值。
+    defense.load_saved_policy()
     try:
         collector.collect_once()
     except Exception:
@@ -146,17 +153,35 @@ async def lifespan(_: FastAPI):
         max_instances=1,
     )
     scheduler.start()
+    # 秒级实时采样（系统运维页）单独一条线程，不占 APScheduler 的分钟级节奏。
+    sysops.start()
     yield
+    sysops.stop()
     scheduler.shutdown(wait=False)
 
 
 app = FastAPI(
-    title="LightOps",
+    title="FoxOps",
     version=__version__,
     docs_url=None,
     redoc_url=None,
     lifespan=lifespan,
 )
+# 最外层先过限速与封禁：被拦的请求不再进入路由、数据库与静态文件处理。
+app.add_middleware(defense.RequestDefenseMiddleware)
+
+# 图标沿用固定文件名（浏览器还会自己来要 /favicon.ico），内容却随版本变。浏览器对
+# favicon 的启发式缓存非常顽固，不显式声明就得等缓存过期才肯重新拉取——换图标后
+# 标签页长期是旧图。这里统一要求回源校验（有 ETag/Last-Modified，没改就 304）。
+_NO_CACHE_PATHS = frozenset({"/favicon.ico", "/icons/favicon.svg"})
+
+
+@app.middleware("http")
+async def no_cache_icons(request: Request, call_next):
+    response = await call_next(request)
+    if request.url.path in _NO_CACHE_PATHS:
+        response.headers["Cache-Control"] = "no-cache"
+    return response
 
 
 @app.get("/api/auth/me")
@@ -360,6 +385,18 @@ def services() -> dict:
     return {"services": _visible_services(), "whitelist": list(settings.services)}
 
 
+@app.get("/api/sysops/realtime")
+def sysops_realtime() -> dict:
+    """秒级实时快照（CPU / 内存 / 磁盘 + 最近 90s 序列）。只读，访客可见。"""
+    return sysops.realtime()
+
+
+@app.get("/api/sysops/docker")
+def sysops_docker() -> dict:
+    """docker 容器清单。docker 不可用时返回 available=False 与修复提示。"""
+    return sysops.containers()
+
+
 @app.get("/api/alerts")
 def alerts() -> dict:
     return {"alerts": db.active_alerts()}
@@ -368,6 +405,109 @@ def alerts() -> dict:
 @app.get("/api/audit", dependencies=[Depends(require_admin_access)])
 def audit(limit: Annotated[int, Query(ge=1, le=500)] = 100) -> dict:
     return {"entries": db.audit_logs(limit)}
+
+
+# ---------------------------------------------------------------------------
+# 安全防护（DDoS 限速 / 封禁）
+# ---------------------------------------------------------------------------
+
+class UnbanRequest(BaseModel):
+    ip: str = Field(min_length=1, max_length=64)
+
+
+@app.get("/api/security/status", dependencies=[Depends(require_admin_access)])
+def security_status() -> dict:
+    """限流参数、最近一分钟流量、当前封禁与高频来源。
+
+    封禁名单属于攻击面情报，只给管理员看；访客进不到这里（403）。
+    """
+    return defense.guard.status()
+
+
+@app.post("/api/security/unban", dependencies=[Depends(require_admin_access)])
+def security_unban(
+    payload: UnbanRequest,
+    request: Request,
+    authorization: Annotated[Optional[str], Header()] = None,
+) -> dict:
+    """手工解封；误封（例如 NAT 后的共用出口）靠它恢复访问。"""
+    remote_addr = request.client.host if request.client else "unknown"
+    token = _bearer_token(authorization)
+    operator = db.get_session_username(token) if token else None
+    removed = defense.guard.unban(payload.ip)
+    db.write_audit(
+        "unban_ip",
+        payload.ip,
+        removed,
+        f"operator={operator or 'unknown'}; "
+        + ("ban removed" if removed else "ip was not banned"),
+        remote_addr,
+    )
+    return {"ok": True, "ip": payload.ip, "removed": removed}
+
+
+class SecurityPolicyRequest(BaseModel):
+    enabled: bool
+    burst_limit: int
+    burst_window_seconds: float
+    sustained_limit: int
+    sustained_window_seconds: float
+    max_concurrent: int
+    max_global_concurrent: int
+    max_body_bytes: int
+    strike_limit: int
+    strike_window_seconds: float
+    ban_seconds: float
+    max_ban_seconds: float
+
+
+@app.get("/api/security/policy", dependencies=[Depends(require_admin_access)])
+def security_policy() -> dict:
+    """当前生效策略 + 环境变量默认值 + 可调边界（后台管理页用）。"""
+    return defense.policy_state()
+
+
+@app.put("/api/security/policy", dependencies=[Depends(require_admin_access)])
+def update_security_policy(
+    payload: SecurityPolicyRequest,
+    request: Request,
+) -> dict:
+    """保存并立即生效；持久化在数据卷 SQLite，重启后仍沿用。"""
+    remote_addr = request.client.host if request.client else "unknown"
+    try:
+        policy = defense.save_policy(payload.model_dump())
+    except defense.PolicyError as exc:
+        db.write_audit(
+            "update_security_policy", "security", False, str(exc), remote_addr
+        )
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    db.write_audit(
+        "update_security_policy",
+        "security",
+        True,
+        f"enabled={policy['enabled']}; "
+        f"burst={policy['burst_limit']}/{policy['burst_window_seconds']}s; "
+        f"sustained={policy['sustained_limit']}/{policy['sustained_window_seconds']}s; "
+        f"concurrent={policy['max_concurrent']}/{policy['max_global_concurrent']}; "
+        f"ban={policy['ban_seconds']}s",
+        remote_addr,
+    )
+    return defense.policy_state()
+
+
+@app.delete("/api/security/policy", dependencies=[Depends(require_admin_access)])
+def reset_security_policy(request: Request) -> dict:
+    """删除自定义策略，回到环境变量默认值。"""
+    remote_addr = request.client.host if request.client else "unknown"
+    defense.reset_policy()
+    db.write_audit(
+        "reset_security_policy",
+        "security",
+        True,
+        "policy reset to environment defaults",
+        remote_addr,
+    )
+    return defense.policy_state()
 
 
 @app.post(

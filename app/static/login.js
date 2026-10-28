@@ -1,7 +1,7 @@
 (function () {
   "use strict";
 
-  var session = window.LightOpsSession;
+  var session = window.FoxOpsSession;
 
   // 已持有有效会话时直接进入控制台。
   (async function () {
@@ -27,10 +27,27 @@
   var usernameInput = document.getElementById("username");
   var passwordInput = document.getElementById("password");
 
+  function clearError() {
+    errorBox.textContent = "";
+  }
+
+  // 提示行始终占位，失败时只让表单摇一次（纯 transform），不再搅动布局。
   function showError(message) {
     errorBox.textContent = message;
-    errorBox.hidden = false;
+    form.classList.remove("is-shaking");
+    void form.offsetWidth;
+    form.classList.add("is-shaking");
   }
+
+  form.addEventListener("animationend", function (event) {
+    if (event.target === form) {
+      form.classList.remove("is-shaking");
+    }
+  });
+
+  [usernameInput, passwordInput].forEach(function (input) {
+    input.addEventListener("input", clearError);
+  });
 
   form.addEventListener("submit", async function (event) {
     event.preventDefault();
@@ -40,7 +57,7 @@
       showError("请输入账号和密码");
       return;
     }
-    errorBox.hidden = true;
+    // 提交时不抹掉上一条提示：请求回来前先清空会让提示“闪一帧变没”。
     submit.disabled = true;
     submit.textContent = "登录中…";
     try {
@@ -61,6 +78,8 @@
       showError(error.message || "登录失败，请稍后重试");
       submit.disabled = false;
       submit.textContent = "进入控制台";
+      // 聚焦密码框方便重输；不做 select()：程序化选中密码框会多一次重绘，偶发闪一帧空白。
+      passwordInput.focus();
     }
   });
 })();

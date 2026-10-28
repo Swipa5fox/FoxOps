@@ -1,0 +1,115 @@
+# FoxOps · Docker Compose 单机部署
+#
+# 用法：
+#   docker compose up -d --build                 # 只跑面板（web + app）
+#   docker compose --profile docker-panel up -d  # 额外启用容器总览探针
+#   FOXOPS_PUBLIC_PORT=1225 docker compose up -d # 换对外端口
+#
+# 宿主机指标：app 只读挂载宿主机根到 /host，并用 FOXOPS_PROCFS_PATH 让 psutil 读
+# 宿主机的 /proc（否则面板统计的是容器自己）。不想要这份权限，就删掉 app 的
+# /:/host 挂载和两个 FOXOPS_PROCFS_PATH / FOXOPS_HOST_ROOT 变量，退化为容器自检。
+#
+# 容器内没有 systemd：服务状态列表为空、重启按钮不可用（systemctl 指向 /bin/false
+# 静默降级），其余功能（指标、趋势、告警、天气、备份、Docker 总览）都可用。
+name: foxops
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    image: foxops:${FOXOPS_IMAGE_TAG:-0.2.2}
+    restart: unless-stopped
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    cap_add:
+      # 仅为启动时做两件事：修正卷属主（CHOWN）+ setpriv 降权（SETUID/SETGID）。
+      # 降权后能力自动清空，业务进程以 10001 无特权运行。
+      - CHOWN
+      - SETUID
+      - SETGID
+    environment:
+      TZ: ${TZ:-Asia/Shanghai}
+      FOXOPS_DB_PATH: /var/lib/foxops/foxops.db
+      FOXOPS_BACKUP_DIR: /var/lib/foxops/backups
+      # 容器模式：读宿主机 /proc，并把宿主机挂载点映射到 /host 下
+      FOXOPS_PROCFS_PATH: /host/proc
+      FOXOPS_HOST_ROOT: /host
+      FOXOPS_CLOUD_PROVIDER: ${FOXOPS_CLOUD_PROVIDER:-云服务器}
+      FOXOPS_COLLECT_INTERVAL: ${FOXOPS_COLLECT_INTERVAL:-60}
+      FOXOPS_RETENTION_DAYS: ${FOXOPS_RETENTION_DAYS:-7}
+      FOXOPS_ALERT_COOLDOWN_MINUTES: ${FOXOPS_ALERT_COOLDOWN_MINUTES:-15}
+      FOXOPS_CPU_THRESHOLD: ${FOXOPS_CPU_THRESHOLD:-85}
+      FOXOPS_MEMORY_THRESHOLD: ${FOXOPS_MEMORY_THRESHOLD:-85}
+      FOXOPS_DISK_THRESHOLD: ${FOXOPS_DISK_THRESHOLD:-80}
+      # DDoS 防护：每 IP 突发/持续限速与封禁时长，默认值见 README「可配置项」。
+      FOXOPS_SECURITY_ENABLED: ${FOXOPS_SECURITY_ENABLED:-1}
+      FOXOPS_SECURITY_BURST_LIMIT: ${FOXOPS_SECURITY_BURST_LIMIT:-60}
+      FOXOPS_SECURITY_SUSTAINED_LIMIT: ${FOXOPS_SECURITY_SUSTAINED_LIMIT:-300}
+      FOXOPS_SECURITY_BAN_SECONDS: ${FOXOPS_SECURITY_BAN_SECONDS:-600}
+      FOXOPS_SERVICES: ${FOXOPS_SERVICES:-nginx}
+      FOXOPS_SERVICE_IGNORE: ${FOXOPS_SERVICE_IGNORE:-}
+      FOXOPS_SERVICE_LABELS: ${FOXOPS_SERVICE_LABELS:-}
+      # 镜像里没有 systemd，指向 /bin/false：调用直接返回非零，不再刷系统调用异常
+      FOXOPS_SYSTEMCTL_PATH: /bin/false
+    volumes:
+      - foxops-data:/var/lib/foxops
+      - /:/host:ro,rslave
+      - /etc/os-release:/etc/os-release:ro
+    expose:
+      - "8000"
+    networks:
+      - internal
+
+  web:
+    image: nginx:1.27-alpine
+    restart: unless-stopped
+    depends_on:
+      app:
+        condition: service_healthy
+    ports:
+      - "${FOXOPS_PUBLIC_PORT:-8080}:8080"
+    volumes:
+      - ./docker/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./app/static:/usr/share/nginx/foxops-static:ro
+    read_only: true
+    tmpfs:
+      - /var/cache/nginx
+      - /var/run
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      - internal
+
+  # 可选：容器总览探针。root 身份读 docker.sock，把快照写进共享卷给 app 只读。
+  # 不启用这个 profile 时，面板 Docker 一栏显示"读取不到容器"，属预期。
+  docker-probe:
+    profiles: ["docker-panel"]
+    image: foxops:${FOXOPS_IMAGE_TAG:-0.2.2}
+    restart: unless-stopped
+    user: "0:0"
+    entrypoint:
+      - /bin/sh
+      - -c
+      - while :; do python -m app.docker_probe || true; sleep 10; done
+    environment:
+      PYTHONPATH: /opt/foxops
+    healthcheck:
+      # 镜像自带的应用健康检查探的是 127.0.0.1:8000，这里没跑 web，必须关掉
+      disable: true
+    volumes:
+      - foxops-data:/var/lib/foxops
+      - /var/run/docker.sock:/var/run/docker.sock
+      # 镜像里不带 docker CLI，直接把宿主机的二进制只读挂进来（静态二进制，够用）
+      - /usr/bin/docker:/usr/bin/docker:ro
+
+volumes:
+  foxops-data:
+
+networks:
+  internal:

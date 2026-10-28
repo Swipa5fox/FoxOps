@@ -175,7 +175,7 @@ def _first(values: Any) -> Any:
 def _get_json(url: str, params: dict[str, Any], limit: int, what: str) -> dict[str, Any]:
     request = Request(
         f"{url}?{urlencode(params)}",
-        headers={"User-Agent": f"LightOps/{__version__} weather-widget"},
+        headers={"User-Agent": f"FoxOps/{__version__} weather-widget"},
     )
     with urlopen(request, timeout=settings.weather_request_timeout_seconds) as response:
         if response.status != 200:

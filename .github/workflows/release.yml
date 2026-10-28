@@ -36,7 +36,7 @@ jobs:
           fi
           echo "tag=$tag" >> "$GITHUB_OUTPUT"
           echo "version=$version" >> "$GITHUB_OUTPUT"
-          echo "archive=releases/LightOps-${version}-integrated.tar.gz" >> "$GITHUB_OUTPUT"
+          echo "archive=releases/FoxOps-${version}-integrated.tar.gz" >> "$GITHUB_OUTPUT"
 
       - name: 设置 Python
         uses: actions/setup-python@v7
@@ -49,7 +49,7 @@ jobs:
           set -Eeuo pipefail
           python tools/build-release.py --output "${{ steps.release.outputs.archive }}"
           cd releases
-          sha256sum "LightOps-${{ steps.release.outputs.version }}-integrated.tar.gz" > SHA256SUMS
+          sha256sum "FoxOps-${{ steps.release.outputs.version }}-integrated.tar.gz" > SHA256SUMS
 
       - name: 校验发布包 SHA-256
         working-directory: releases
@@ -74,6 +74,6 @@ jobs:
             "${{ steps.release.outputs.archive }}" \
             releases/SHA256SUMS \
             $verify_flag \
-            --title "LightOps ${{ steps.release.outputs.version }}" \
+            --title "FoxOps ${{ steps.release.outputs.version }}" \
             --notes-file release-notes.md \
             --latest

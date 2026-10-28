@@ -5,7 +5,7 @@ PACKAGE_ROOT=$(cd -- "$(dirname -- "$0")/.." && pwd)
 # shellcheck source=deploy/lib/platform.sh
 . "$PACKAGE_ROOT/deploy/lib/platform.sh"
 
-if ! lightops_detect_platform; then
+if ! foxops_detect_platform; then
     cat >&2 <<'EOF'
 
 PRECHECK_FAILED
@@ -16,17 +16,17 @@ EOF
     exit 1
 fi
 
-lightops_print_platform
-printf 'cloud_provider=%s\n' "$(lightops_detect_cloud_provider)"
+foxops_print_platform
+printf 'cloud_provider=%s\n' "$(foxops_detect_cloud_provider)"
 
-nginx_unit=$(lightops_first_installed_service nginx || true)
-mysql_unit=$(lightops_first_installed_service mysqld mysql mariadb || true)
-redis_unit=$(lightops_first_installed_service redis redis-server || true)
+nginx_unit=$(foxops_first_installed_service nginx || true)
+mysql_unit=$(foxops_first_installed_service mysqld mysql mariadb || true)
+redis_unit=$(foxops_first_installed_service redis redis-server || true)
 printf 'installed_nginx_service=%s\n' "${nginx_unit:-not-installed-yet}"
 printf 'installed_mysql_service=%s\n' "${mysql_unit:-not-installed}"
 printf 'installed_redis_service=%s\n' "${redis_unit:-not-installed}"
 
-if python_path=$(lightops_find_python); then
+if python_path=$(foxops_find_python); then
     printf 'python=%s\n' "$python_path"
     printf 'python_status=ready\n'
 else

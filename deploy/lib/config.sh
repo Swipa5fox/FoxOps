@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 
-lightops_write_env_setting() {
+foxops_write_env_setting() {
     target_file=$1
     setting_name=$2
     setting_value=$3
     target_dir=$(dirname -- "$target_file")
-    temporary_file=$(mktemp "$target_dir/.lightops-env.XXXXXX")
+    temporary_file=$(mktemp "$target_dir/.foxops-env.XXXXXX")
     awk -v key="$setting_name" -v value="$setting_value" '
         BEGIN { written = 0 }
         index($0, key "=") == 1 {
@@ -23,21 +23,21 @@ lightops_write_env_setting() {
     mv -f "$temporary_file" "$target_file"
 }
 
-lightops_ensure_env_setting() {
+foxops_ensure_env_setting() {
     target_file=$1
     setting_name=$2
     setting_value=$3
     if ! grep -q "^$setting_name=" "$target_file"; then
-        lightops_write_env_setting "$target_file" "$setting_name" "$setting_value"
+        foxops_write_env_setting "$target_file" "$setting_name" "$setting_value"
     fi
 }
 
-lightops_render_sudoers() {
+foxops_render_sudoers() {
     target_file=$1
     systemctl_path=$2
     service_csv=$3
     {
-        printf 'Cmnd_Alias LIGHTOPS_RESTART = '
+        printf 'Cmnd_Alias FOXOPS_RESTART = '
         first_service=1
         old_ifs=$IFS
         IFS=,
@@ -49,22 +49,22 @@ lightops_render_sudoers() {
             first_service=0
         done
         IFS=$old_ifs
-        printf '\nlightops ALL=(root) NOPASSWD: LIGHTOPS_RESTART\n'
+        printf '\nfoxops ALL=(root) NOPASSWD: FOXOPS_RESTART\n'
     } > "$target_file"
 }
 
-lightops_render_polkit() {
+foxops_render_polkit() {
     target_file=$1
     service_csv=$2
     {
-        printf '// Rendered by LightOps install.sh - do not edit by hand.\n'
-        printf '// Authorizes the lightops service to restart monitored units; sudo is\n'
+        printf '// Rendered by FoxOps install.sh - do not edit by hand.\n'
+        printf '// Authorizes the foxops service to restart monitored units; sudo is\n'
         printf '// unusable inside the service (NoNewPrivileges implied by hardening).\n'
         printf 'polkit.addRule(function(action, subject) {\n'
         printf '    if (action.id !== "org.freedesktop.systemd1.manage-units") {\n'
         printf '        return;\n'
         printf '    }\n'
-        printf '    if (subject.user !== "lightops") {\n'
+        printf '    if (subject.user !== "foxops") {\n'
         printf '        return;\n'
         printf '    }\n'
         printf '    var allowed = ['

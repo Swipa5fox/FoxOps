@@ -21,7 +21,7 @@ const lastScript = html.lastIndexOf('<script src=');
 const end = lastScript >= 0 ? html.lastIndexOf("</div>", lastScript) : -1;
 
 if (start < 0 || end < 0 || end <= start) {
-  throw new Error("Unable to locate the LightOps Vue template in index.html");
+  throw new Error("Unable to locate the FoxOps Vue template in index.html");
 }
 
 const template = html.slice(start + opening.length, end);
@@ -40,7 +40,7 @@ if (errors.length) {
 
 const output = [
   "/* Generated from index.html by @vue/compiler-dom 3.5.17. */",
-  "window.LightOpsRender = (function (Vue) {",
+  "window.FoxOpsRender = (function (Vue) {",
   compiled.code,
   "})(window.Vue);",
   ""

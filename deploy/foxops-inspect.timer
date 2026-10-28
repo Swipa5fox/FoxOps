@@ -1,5 +1,5 @@
 [Unit]
-Description=Refresh LightOps socket ownership data
+Description=Refresh FoxOps socket ownership data
 
 [Timer]
 OnBootSec=20s

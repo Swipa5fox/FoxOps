@@ -1,33 +1,35 @@
-/* LightOps 登录页独立样式 —— 与运维面板区分的新界面 */
+/* FoxOps 登录页独立样式 —— 紫灰配色（与面板共用同一套色板思路） */
 :root {
   color-scheme: dark;
-  --bg: #04090f;
+  --bg: #12101a;
   --bg-image:
-    radial-gradient(circle at 50% -20%, rgba(30, 184, 166, 0.22), transparent 34rem),
-    radial-gradient(circle at 85% 90%, rgba(91, 54, 183, 0.18), transparent 28rem),
-    linear-gradient(180deg, #060d15 0%, #04090f 100%);
-  --panel: rgba(13, 24, 37, 0.9);
-  --border: rgba(137, 167, 201, 0.16);
-  --text: #e7eef7;
-  --muted: #8292a8;
+    radial-gradient(circle at 50% -20%, rgba(139, 92, 246, 0.26), transparent 34rem),
+    radial-gradient(circle at 85% 90%, rgba(120, 116, 140, 0.26), transparent 28rem),
+    linear-gradient(180deg, #17141f 0%, #100e17 100%);
+  --panel: rgba(26, 23, 36, 0.9);
+  --border: rgba(163, 154, 186, 0.18);
+  --text: #ece9f5;
+  --muted: #9b93ad;
   --teal: #5eead4;
+  --violet: #a78bfa;
   --danger: #fb7185;
   --on-accent: #06201d;
-  --input-bg: rgba(255, 255, 255, 0.035);
+  --input-bg: rgba(236, 233, 245, 0.04);
 }
 
 :root[data-theme="light"] {
   color-scheme: light;
-  --bg: #eef3f9;
+  --bg: #f2eff8;
   --bg-image:
-    radial-gradient(circle at 50% -20%, rgba(251, 191, 36, 0.32), transparent 32rem),
-    radial-gradient(circle at 85% 90%, rgba(125, 211, 252, 0.4), transparent 30rem),
-    linear-gradient(180deg, #f8fafc 0%, #e9f0f7 100%);
+    radial-gradient(circle at 50% -20%, rgba(167, 139, 250, 0.32), transparent 32rem),
+    radial-gradient(circle at 85% 90%, rgba(146, 143, 166, 0.26), transparent 30rem),
+    linear-gradient(180deg, #f8f6fc 0%, #eae6f2 100%);
   --panel: rgba(255, 255, 255, 0.92);
-  --border: rgba(15, 42, 74, 0.12);
-  --text: #16283c;
-  --muted: #5b6b80;
+  --border: rgba(72, 62, 100, 0.14);
+  --text: #241f33;
+  --muted: #665e7c;
   --teal: #0e9384;
+  --violet: #7c3aed;
   --danger: #dc2626;
   --on-accent: #ffffff;
   --input-bg: #ffffff;
@@ -73,7 +75,7 @@ button {
   border: 1px solid var(--border);
   border-radius: 16px;
   background: var(--panel);
-  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 24px 64px rgba(6, 4, 12, 0.55);
   backdrop-filter: blur(12px);
   animation: login-rise 0.45s ease-out both;
   transition: background-color 0.35s ease, border-color 0.35s ease;
@@ -102,18 +104,16 @@ button {
   height: 44px;
   flex: none;
   place-items: center;
-  border: 1px solid rgba(94, 234, 212, 0.4);
+  border: 1px solid rgba(167, 139, 250, 0.38);
   border-radius: 13px;
-  background: rgba(94, 234, 212, 0.09);
-  box-shadow: inset 0 0 22px rgba(94, 234, 212, 0.1);
+  background: rgba(167, 139, 250, 0.1);
+  box-shadow: inset 0 0 22px rgba(167, 139, 250, 0.12);
 }
 
-.login-mark span {
-  width: 15px;
-  height: 15px;
-  transform: rotate(45deg);
-  border: 2px solid var(--teal);
-  border-radius: 3px;
+.login-fox {
+  width: 24px;
+  height: 24px;
+  fill: var(--violet);
 }
 
 .login-brand h1 {
@@ -170,10 +170,47 @@ button {
 }
 
 .login-error {
+  display: flex;
+  min-height: 18px; /* 预留一行：提示出现/消失不再挤动按钮，整张卡片保持原位 */
+  align-items: center;
   margin: 0;
   color: var(--danger);
   font-size: 12px;
   line-height: 1.5;
+}
+
+.login-error[hidden] {
+  display: flex; /* 单行高度恒定：就算有代码给它加了 hidden，卡片也不会跳 */
+}
+
+/* 登录失败：只摇表单（transform），不参与布局 */
+.login-form.is-shaking {
+  animation: login-shake 0.42s ease-in-out;
+}
+
+@keyframes login-shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  18% {
+    transform: translateX(-5px);
+  }
+  38% {
+    transform: translateX(4px);
+  }
+  58% {
+    transform: translateX(-3px);
+  }
+  78% {
+    transform: translateX(2px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .login-form.is-shaking {
+    animation: none;
+  }
 }
 
 .login-button {

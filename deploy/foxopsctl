@@ -1,39 +1,39 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
-DEPLOYMENT_FILE=/etc/lightops/deployment.env
+DEPLOYMENT_FILE=/etc/foxops/deployment.env
 if [ -r "$DEPLOYMENT_FILE" ]; then
     # shellcheck disable=SC1090,SC1091
     . "$DEPLOYMENT_FILE"
 fi
 
-SERVICE=lightops
+SERVICE=foxops
 HEALTH_URL=http://127.0.0.1:8000/api/health
-PUBLIC_PORT=${LIGHTOPS_PUBLIC_PORT:-8080}
-PUBLIC_HOST=${LIGHTOPS_PUBLIC_HOST:-SERVER_IP}
-NGINX_SERVICE=${LIGHTOPS_NGINX_SERVICE:-nginx}
-SYSTEMCTL=${LIGHTOPS_SYSTEMCTL_PATH:-$(command -v systemctl)}
-SUDO=${LIGHTOPS_SUDO_PATH:-$(command -v sudo || true)}
-NGINX=${LIGHTOPS_NGINX_PATH:-$(command -v nginx)}
+PUBLIC_PORT=${FOXOPS_PUBLIC_PORT:-8080}
+PUBLIC_HOST=${FOXOPS_PUBLIC_HOST:-SERVER_IP}
+NGINX_SERVICE=${FOXOPS_NGINX_SERVICE:-nginx}
+SYSTEMCTL=${FOXOPS_SYSTEMCTL_PATH:-$(command -v systemctl)}
+SUDO=${FOXOPS_SUDO_PATH:-$(command -v sudo || true)}
+NGINX=${FOXOPS_NGINX_PATH:-$(command -v nginx)}
 PUBLIC_URL=http://$PUBLIC_HOST:$PUBLIC_PORT/
 
 usage() {
     cat <<'EOF'
-LightOps 管理脚本
+FoxOps 管理脚本
 
 用法：
-  lightopsctl start             启动并检查 LightOps
-  lightopsctl stop              停止 LightOps
-  lightopsctl restart           重启并检查 LightOps
-  lightopsctl status            查看服务状态
-  lightopsctl health            调用健康检查接口
-  lightopsctl logs [行数]       查看最近日志，默认 100 行
-  lightopsctl follow            持续查看日志，Ctrl+C 退出
-  lightopsctl enable            设置开机自启
-  lightopsctl nginx-reload      验证并重载 Nginx
-  lightopsctl backup            执行数据库备份和过期清理
-  lightopsctl url               显示面板地址
-  lightopsctl help              显示本帮助
+  foxopsctl start             启动并检查 FoxOps
+  foxopsctl stop              停止 FoxOps
+  foxopsctl restart           重启并检查 FoxOps
+  foxopsctl status            查看服务状态
+  foxopsctl health            调用健康检查接口
+  foxopsctl logs [行数]       查看最近日志，默认 100 行
+  foxopsctl follow            持续查看日志，Ctrl+C 退出
+  foxopsctl enable            设置开机自启
+  foxopsctl nginx-reload      验证并重载 Nginx
+  foxopsctl backup            执行数据库备份和过期清理
+  foxopsctl url               显示面板地址
+  foxopsctl help              显示本帮助
 EOF
 }
 
@@ -52,14 +52,14 @@ wait_for_health() {
     # shellcheck disable=SC2034
     for attempt in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15; do
         if curl --fail --silent --show-error "$HEALTH_URL" >/dev/null 2>&1; then
-            echo "LightOps 健康检查通过。"
+            echo "FoxOps 健康检查通过。"
             curl --fail --silent --show-error "$HEALTH_URL"
             echo
             return 0
         fi
         sleep 1
     done
-    echo "LightOps 在 15 秒内没有通过健康检查。" >&2
+    echo "FoxOps 在 15 秒内没有通过健康检查。" >&2
     as_root "$SYSTEMCTL" --no-pager --full status "$SERVICE" || true
     return 1
 }
@@ -75,7 +75,7 @@ run_backup() {
     fi
     # 管理令牌已在 0.1.4.2 下线；备份改走本地 Python 直连 SQLite，不再走 API。
     # sudo 默认 env_reset，PYTHONPATH 必须经 env 显式传入。
-    "$SUDO" -u lightops env PYTHONPATH=/opt/lightops /opt/lightops/.venv/bin/python - <<'PY'
+    "$SUDO" -u foxops env PYTHONPATH=/opt/foxops /opt/foxops/.venv/bin/python - <<'PY'
 from app import db
 
 result = db.run_maintenance()
@@ -92,7 +92,7 @@ case "$command_name" in
         ;;
     stop)
         as_root "$SYSTEMCTL" stop "$SERVICE"
-        echo "LightOps 已停止。"
+        echo "FoxOps 已停止。"
         ;;
     restart)
         as_root "$SYSTEMCTL" restart "$SERVICE"
@@ -117,7 +117,7 @@ case "$command_name" in
         ;;
     enable)
         as_root "$SYSTEMCTL" enable "$SERVICE"
-        echo "LightOps 已设置为开机自启。"
+        echo "FoxOps 已设置为开机自启。"
         ;;
     nginx-reload)
         as_root "$NGINX" -t

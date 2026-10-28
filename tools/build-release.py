@@ -65,7 +65,7 @@ def normalized_info(path: Path, arcname: str) -> tarfile.TarInfo:
     else:
         info.type = tarfile.REGTYPE
         relative = path.relative_to(ROOT).as_posix()
-        info.mode = 0o755 if relative.endswith(".sh") or relative == "deploy/lightopsctl" else 0o644
+        info.mode = 0o755 if relative.endswith(".sh") or relative == "deploy/foxopsctl" else 0o644
         info.size = stat.st_size
     return info
 
@@ -98,10 +98,10 @@ def normalized_file_content(path: Path) -> bytes:
     data = path.read_bytes()
     relative = path.relative_to(ROOT).as_posix()
     
-    if path.suffix == ".sh" or relative == "deploy/lightopsctl" or path.name == "config.env.example":
+    if path.suffix == ".sh" or relative == "deploy/foxopsctl" or path.name == "config.env.example":
         return data.replace(b"\r\n", b"\n")
     if relative.startswith("deploy/") and (
-        path.suffix in {".conf", ".service", ".sudoers"}
+        path.suffix in {".conf", ".service", ".timer", ".sudoers"}
         or relative.endswith(".nginx.conf")
     ):
         return data.replace(b"\r\n", b"\n")
@@ -120,7 +120,7 @@ def build(output: Path) -> str:
             with tarfile.open(fileobj=compressed, mode="w", format=tarfile.PAX_FORMAT) as archive:
                 for path in sorted(paths, key=lambda item: item.as_posix()):
                     relative = path.relative_to(ROOT)
-                    arcname = "lightops" if not relative.parts else f"lightops/{relative.as_posix()}"
+                    arcname = "foxops" if not relative.parts else f"foxops/{relative.as_posix()}"
                     info = normalized_info(path, arcname)
                     if path.is_file():
                         content = normalized_file_content(path)
@@ -135,11 +135,11 @@ def build(output: Path) -> str:
 
 def main() -> None:
     version = release_version()
-    parser = argparse.ArgumentParser(description="Build a deterministic LightOps source release")
+    parser = argparse.ArgumentParser(description="Build a deterministic FoxOps source release")
     parser.add_argument(
         "--output",
         type=Path,
-        default=ROOT.parent / "releases" / f"LightOps-{version}-integrated.tar.gz",
+        default=ROOT.parent / "releases" / f"FoxOps-{version}-integrated.tar.gz",
     )
     args = parser.parse_args()
     output = args.output.resolve()

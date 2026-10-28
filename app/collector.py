@@ -8,11 +8,11 @@ from typing import Any
 
 import psutil
 
-from . import db
-from .settings import settings
+from . import db, defense
+from .settings import host_path, settings
 
 
-logger = logging.getLogger("lightops.collector")
+logger = logging.getLogger("foxops.collector")
 _consecutive: dict[str, int] = {}
 # systemctl/sudo must run against the server's own binaries, never a
 # cross-compiled venv PATH; LANG=C keeps subprocess output byte-stable.
@@ -150,7 +150,7 @@ def _is_hidden(name: str) -> bool:
 
 
 def discovered_services() -> list[str]:
-    """本机真实存在的受管服务 = 扫描结果 ∪ LIGHTOPS_SERVICES。
+    """本机真实存在的受管服务 = 扫描结果 ∪ FOXOPS_SERVICES。
 
     配置清单里的名字永远排在前面，卸载掉的会被 service_states 标记成
     not-found 而不是"挂了"，前端据此隐藏。
@@ -226,6 +226,18 @@ def service_states() -> list[dict[str, Any]]:
     return values
 
 
+def _system_disk_percent() -> float:
+    """系统盘使用率。
+
+    容器部署时 FOXOPS_HOST_ROOT 把宿主机的 "/" 映射成 /host 之类的路径；没挂
+    宿主机根时退回容器自身的 /，保证采样不因为一个 OSError 整体中断。
+    """
+    try:
+        return round(psutil.disk_usage(host_path("/")).percent, 2)
+    except OSError:
+        return round(psutil.disk_usage("/").percent, 2)
+
+
 def read_metrics() -> dict[str, Any]:
     load = psutil.getloadavg()
     network = psutil.net_io_counters()
@@ -233,7 +245,7 @@ def read_metrics() -> dict[str, Any]:
         "ts": db.utc_now(),
         "cpu_percent": round(psutil.cpu_percent(interval=0.2), 2),
         "memory_percent": round(psutil.virtual_memory().percent, 2),
-        "disk_percent": round(psutil.disk_usage("/").percent, 2),
+        "disk_percent": _system_disk_percent(),
         "load_1": round(load[0], 2),
         "load_5": round(load[1], 2),
         "load_15": round(load[2], 2),
@@ -301,11 +313,33 @@ def evaluate_alerts(
     db.resolve_stale_service_alerts(sorted(monitored))
 
 
+def evaluate_security() -> None:
+    """把 defense 的拦截计数折成一条告警。
+
+    限速中间件在请求路径上，不能每次都写库；这里跟着 60 秒采集节奏取一次
+    内存快照，攻击在面板的"活动告警"里可见，恢复后自动解除。
+    """
+    snapshot = defense.guard.recent()
+    if snapshot["blocked"] <= 0:
+        db.resolve_alert("security", "ddos")
+        return
+    db.create_alert(
+        "security",
+        "ddos",
+        "warning",
+        f"过去 {snapshot['window_seconds']} 秒拦截 {snapshot['blocked']} 次异常请求，"
+        f"当前封禁 {snapshot['banned']} 个来源 IP",
+        float(snapshot["blocked"]),
+        None,
+    )
+
+
 def collect_once() -> dict[str, Any]:
     metric = read_metrics()
     services = service_states()
     db.insert_sample(metric, services)
     evaluate_alerts(metric, services)
+    evaluate_security()
     logger.info("metrics collected at %s", metric["ts"])
     return {"metric": metric, "services": services}
 
@@ -315,7 +349,7 @@ def restart_service(service: str) -> tuple[bool, str]:
         return False, "service is not in the restart whitelist"
     # No sudo here: the service unit runs with NoNewPrivileges (implicit from
     # its systemd hardening options), which blocks sudo entirely. polkit
-    # authorizes this systemctl call instead (50-lightops.rules, rendered by
+    # authorizes this systemctl call instead (50-foxops.rules, rendered by
     # install.sh from the monitored service list).
     try:
         result = _systemctl("restart", service, timeout=30)

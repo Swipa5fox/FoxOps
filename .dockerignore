@@ -1,0 +1,20 @@
+# 构建镜像只需要 app/ + requirements.txt + docker/，其余一律不进构建上下文
+.git
+.github
+.venv
+.npm-cache
+.workbuddy
+node_modules
+__pycache__
+*.pyc
+*.pyo
+*.db
+*.db-wal
+*.db-shm
+*.tar.gz
+docs
+tests
+tools
+deploy
+config.env
+.env

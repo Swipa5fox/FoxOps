@@ -1,4 +1,4 @@
-# LightOps 最小 CI
+# FoxOps 最小 CI
 #
 # 目的：把"靠人记得跑测试"变成"机器强制跑"。每次 push / PR 自动执行：
 #   1. Python 编译 + 冒烟/API/前端安全测试
@@ -6,6 +6,7 @@
 #   3. shellcheck 全量部署脚本
 #   4. 部署脚本夹具测试（平台识别 / 安装辅助函数 / Nginx 模板）
 #   5. 发布包构建 + SHA-256 输出
+#   6. Docker 镜像构建 + 容器内 /api/health 冒烟
 #
 # 拦截目标：类似 load_15 取错数组索引、clampPercent 缺参导致白屏这类回归，
 # 在合并前就被拦下，而不是等上线后才发现。
@@ -70,10 +71,11 @@ jobs:
       - name: Python 编译检查
         run: python -m compileall -q app tests
 
-      - name: Python 冒烟测试（smoke / API / 前端安全）
+      - name: Python 冒烟测试（smoke / API / 防护 / 前端安全）
         run: |
           python tests/smoke.py
           python tests/api_smoke.py
+          python tests/defense_smoke.py
           python tests/frontend_smoke.py
 
       - name: 前端渲染构建与语法检查
@@ -95,7 +97,7 @@ jobs:
             deploy/preflight.sh \
             deploy/install.sh \
             deploy/verify-server.sh \
-            deploy/lightopsctl \
+            deploy/foxopsctl \
             deploy/lib/config.sh \
             deploy/lib/platform.sh \
             tests/install_helpers.sh \
@@ -104,9 +106,45 @@ jobs:
 
       - name: 构建发布包并输出 SHA-256
         run: |
-          python tools/build-release.py --output releases/lightops.tar.gz
+          python tools/build-release.py --output releases/foxops.tar.gz
           echo "--- 发布包 SHA-256 ---"
-          sha256sum releases/lightops.tar.gz
+          sha256sum releases/foxops.tar.gz
+
+  docker:
+    name: Docker 镜像构建与冒烟
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v7
+
+      - name: 校验 docker-compose.yml
+        run: docker compose config -q
+
+      - name: 构建镜像
+        run: docker build -f docker/Dockerfile -t foxops:ci .
+
+      - name: 容器内 /api/health 冒烟
+        run: |
+          set -Eeuo pipefail
+          docker run -d --name foxops-ci -p 18000:8000 foxops:ci
+          # 数据目录写在容器可写层，不依赖命名卷；最多等 30s
+          for i in $(seq 1 30); do
+            if body=$(curl -fsS http://127.0.0.1:18000/api/health 2>/dev/null); then
+              echo "health: $body"
+              if printf '%s' "$body" | grep -q '"status":"ok"'; then
+                exit 0
+              fi
+            fi
+            sleep 1
+          done
+          echo "health check failed; container logs:" >&2
+          docker logs foxops-ci >&2 || true
+          exit 1
+
+      - name: 清理容器
+        if: always()
+        run: docker rm -f foxops-ci || true
 
   fixture:
     name: 夹具测试 / ${{ matrix.fixture }}

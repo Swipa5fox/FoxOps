@@ -1,4 +1,4 @@
-/* LightOps README 截图脚本（无第三方依赖）
+/* FoxOps README 截图脚本（无第三方依赖）
    目标：拉真实线上数据，从 http://119.91.47.89:1224 取实现截图。
    用法：node tools/capture-readme.mjs
    输出：outputs/screenshots/ */
@@ -11,7 +11,10 @@ const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const OUT = resolve(ROOT, "..", "outputs", "screenshots");
 mkdirSync(OUT, { recursive: true });
 
-const BASE = "http://119.91.47.89:1224";
+const BASE = process.env.FOXOPS_CAPTURE_BASE || "http://119.91.47.89:1224";
+// 账号密码只用环境变量传入，绝不写进仓库。
+const CAPTURE_USER = process.env.FOXOPS_CAPTURE_USER || "Admin";
+const CAPTURE_PASS = process.env.FOXOPS_CAPTURE_PASS || "";
 const PROFILE = resolve(OUT, ".chrome-profile");
 const PORT = 9223; // 避开 verify-theme.mjs 的 9222
 
@@ -42,7 +45,15 @@ async function waitForTrend(cdp) {
   return false;
 }
 
-withChrome({ port: PORT, profile: PROFILE, windowSize: "1440,1700" }, async (cdp) => {
+withChrome({ port: PORT, profile: PROFILE, windowSize: "1440,1080" }, async (cdp) => {
+  // 视口固定成 1440x1500：headless 窗口尺寸会被物理屏幕高度限制，只靠 windowSize
+  // 会把页面底部（服务状态/footer）裁掉。整页内容约 1450 CSS px 高。
+  await cdp.send("Emulation.setDeviceMetricsOverride", {
+    width: 1440,
+    height: 1500,
+    deviceScaleFactor: 1,
+    mobile: false
+  });
   // ============== 1. 登录页（日间） ==============
   // 先去登录页让 theme.js 跟随系统偏好（headless 无系统偏好 → 落夜间）
   await cdp.send("Page.navigate", { url: BASE + "/login.html" });
@@ -50,7 +61,7 @@ withChrome({ port: PORT, profile: PROFILE, windowSize: "1440,1700" }, async (cdp
   // 切到日间
   await cdp.evaluate(`(async () => {
     document.documentElement.dataset.theme = "light";
-    window.localStorage.setItem("lightops_theme", "light");
+    window.localStorage.setItem("foxops_theme", "light");
     return true;
   })()`);
   await sleep(700);
@@ -59,7 +70,7 @@ withChrome({ port: PORT, profile: PROFILE, windowSize: "1440,1700" }, async (cdp
   // ============== 2. 登录页（夜间） ==============
   await cdp.evaluate(`(async () => {
     document.documentElement.dataset.theme = "dark";
-    window.localStorage.setItem("lightops_theme", "dark");
+    window.localStorage.setItem("foxops_theme", "dark");
     return true;
   })()`);
   await sleep(700);
@@ -70,12 +81,12 @@ withChrome({ port: PORT, profile: PROFILE, windowSize: "1440,1700" }, async (cdp
     const res = await fetch("${BASE}/api/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ username: "Admin", password: "123456" })
+      body: JSON.stringify({ username: ${JSON.stringify(CAPTURE_USER)}, password: ${JSON.stringify(CAPTURE_PASS)} })
     });
     const body = await res.json();
     if (!body || !body.token) return { ok: false, status: res.status, body };
-    window.sessionStorage.setItem("lightops_session", body.token);
-    window.localStorage.setItem("lightops_theme", "dark");
+    window.sessionStorage.setItem("foxops_session", body.token);
+    window.localStorage.setItem("foxops_theme", "dark");
     document.documentElement.dataset.theme = "dark";
     return { ok: true, user: body.username || null };
   })()`);

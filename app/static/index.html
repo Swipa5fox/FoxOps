@@ -3,119 +3,204 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="icon" type="image/svg+xml" href="/icons/favicon.svg" />
+    <link rel="icon" href="/favicon.ico?v=2" sizes="any" />
+    <link rel="icon" type="image/svg+xml" href="/icons/favicon.svg?v=2" />
     <script src="/theme.js"></script>
     <script src="/session.js"></script>
-    <title>LightOps · 轻量运维控制台</title>
+    <title>FoxOps · 轻量运维控制台</title>
     <link rel="stylesheet" href="/style.css" />
   </head>
   <body>
     <div id="app" v-cloak>
-      <header class="topbar">
-        <div class="brand">
-          <div class="brand-mark" aria-hidden="true"><span></span></div>
-          <div>
-            <div class="brand-title">LightOps</div>
-            <div class="brand-subtitle">轻量运维控制台</div>
+      <aside class="sidebar" aria-label="模块导航">
+        <div class="sidebar-brand">
+          <div class="brand">
+            <div class="brand-mark" aria-hidden="true">
+              <svg class="brand-fox" viewBox="0 0 32 32" aria-hidden="true" focusable="false">
+                <path d="M16 28.6 4.1 14.6 7.1 3.2 12.6 12.3 16 9.2 19.4 12.3 24.9 3.2 27.9 14.6Z"></path>
+              </svg>
+            </div>
+            <div class="brand-text">
+              <div class="brand-title">FoxOps</div>
+              <div class="brand-subtitle">轻量运维控制台</div>
+            </div>
           </div>
         </div>
-        <div class="header-actions">
+        <nav class="sidebar-nav">
           <button
             type="button"
-            class="theme-toggle"
-            :class="{ 'is-light': theme === 'light' }"
-            :aria-label="themeLabel"
-            :title="themeLabel"
-            @click="toggleTheme"
+            class="sidebar-item"
+            :class="{ active: view === 'overview' }"
+            :aria-current="view === 'overview' ? 'page' : null"
+            @click="setView('overview')"
           >
-            <svg class="theme-toggle-sun" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-              <circle cx="12" cy="12" r="4.2"></circle>
-              <path d="M12 2.6v2.5M12 18.9v2.5M2.6 12h2.5M18.9 12h2.5M5.4 5.4l1.8 1.8M16.8 16.8l1.8 1.8M18.6 5.4l-1.8 1.8M7.2 16.8l-1.8 1.8"></path>
+            <svg class="sidebar-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <rect x="3.2" y="3.2" width="7.6" height="7.6" rx="2"></rect>
+              <rect x="13.2" y="3.2" width="7.6" height="4.8" rx="2"></rect>
+              <rect x="13.2" y="10.4" width="7.6" height="10.4" rx="2"></rect>
+              <rect x="3.2" y="13.2" width="7.6" height="7.6" rx="2"></rect>
             </svg>
-            <svg class="theme-toggle-moon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-              <path d="M20.3 14.4A8.5 8.5 0 0 1 9.6 3.7a8.5 8.5 0 1 0 10.7 10.7Z"></path>
-            </svg>
+            <span>总览</span>
           </button>
-          <span class="live-dot" aria-hidden="true"></span>
-          <span class="muted" aria-live="polite">最后更新 {{ updatedAt || "等待数据" }}</span>
-          <div class="user-menu">
-            <button type="button" class="ghost-button user-menu-trigger" @click="handleUserClick">
-              {{ currentUser ? currentUser : "登录" }}
-              <span v-if="currentUser" class="user-menu-caret" aria-hidden="true">▾</span>
+          <button
+            type="button"
+            class="sidebar-item"
+            :class="{ active: view === 'sysops' }"
+            :aria-current="view === 'sysops' ? 'page' : null"
+            @click="setView('sysops')"
+          >
+            <svg class="sidebar-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path d="M12 3.1 4.6 6.4v5.2c0 4.4 3.1 7.8 7.4 9.3 4.3-1.5 7.4-4.9 7.4-9.3V6.4Z"></path>
+              <path d="M8.9 8.4h6.2M8.9 12h6.2M8.9 15.6h3.6"></path>
+            </svg>
+            <span>系统运维</span>
+          </button>
+          <div v-if="isAdmin" class="sidebar-group" :class="{ open: securityOpen }">
+            <button
+              type="button"
+              class="sidebar-item sidebar-parent"
+              :class="{ active: view === 'security' }"
+              :aria-current="view === 'security' ? 'page' : null"
+              @click="openSecurityGroup"
+            >
+              <svg class="sidebar-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <path d="M12 3.1 4.6 6.4v5.2c0 4.4 3.1 7.8 7.4 9.3 4.3-1.5 7.4-4.9 7.4-9.3V6.4Z"></path>
+                <path d="M8.7 11.9 11 14.2l4.3-4.4"></path>
+              </svg>
+              <span>安全防护</span>
             </button>
-            <div v-if="currentUser" class="user-menu-dropdown" role="menu" aria-label="账户菜单">
-              <div class="user-menu-account">
-                <span>我的账户</span>
-                <strong>{{ currentUser }}</strong>
-                <em class="user-menu-role" :class="isAdmin ? 'role-admin' : 'role-guest'">
-                  {{ isAdmin ? "管理员" : "访客（只读）" }}
-                </em>
+            <button
+              type="button"
+              class="sidebar-caret-button"
+              :aria-expanded="securityOpen ? 'true' : 'false'"
+              aria-controls="security-submenu"
+              aria-label="展开或收起安全防护菜单"
+              @click.stop="toggleSecurityGroup"
+            >
+              <svg class="sidebar-caret" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <path d="M8 10l4 4 4-4"></path>
+              </svg>
+            </button>
+          </div>
+          <div v-if="isAdmin" v-show="securityOpen" id="security-submenu" class="sidebar-submenu">
+            <button
+              type="button"
+              class="sidebar-subitem"
+              :class="{ active: view === 'admin' }"
+              :aria-current="view === 'admin' ? 'page' : null"
+              @click="setView('admin')"
+            >
+              <span class="sidebar-subdot" aria-hidden="true"></span>
+              <span>后台管理</span>
+            </button>
+          </div>
+        </nav>
+        <div class="sidebar-foot">
+          <span class="sidebar-dot" aria-hidden="true"></span>
+          <small>{{ summary.version ? "v" + summary.version : "连接中" }}</small>
+        </div>
+      </aside>
+
+      <div class="workspace">
+        <header class="topbar">
+          <div class="header-actions">
+            <span class="live-dot" aria-hidden="true"></span>
+            <span class="muted" aria-live="polite">最后更新 {{ updatedAt || "等待数据" }}</span>
+            <div class="user-menu">
+              <button type="button" class="ghost-button user-menu-trigger" @click="handleUserClick">
+                {{ currentUser ? currentUser : "登录" }}
+                <span v-if="currentUser" class="user-menu-caret" aria-hidden="true">▾</span>
+              </button>
+              <div v-if="currentUser" class="user-menu-dropdown" role="menu" aria-label="账户菜单">
+                <div class="user-menu-account">
+                  <span>我的账户</span>
+                  <strong>{{ currentUser }}</strong>
+                  <em class="user-menu-role" :class="isAdmin ? 'role-admin' : 'role-guest'">
+                    {{ isAdmin ? "管理员" : "访客（只读）" }}
+                  </em>
+                </div>
+                <button type="button" class="user-menu-item" role="menuitem" @click="openPasswordModal">
+                  修改密码
+                </button>
+                <button
+                  type="button"
+                  class="user-menu-item user-menu-item-danger"
+                  role="menuitem"
+                  :disabled="logoutBusy"
+                  @click="logout"
+                >
+                  {{ logoutBusy ? "退出中…" : "退出登录" }}
+                </button>
               </div>
-              <button type="button" class="user-menu-item" role="menuitem" @click="openPasswordModal">
-                修改密码
-              </button>
-              <button
-                type="button"
-                class="user-menu-item user-menu-item-danger"
-                role="menuitem"
-                :disabled="logoutBusy"
-                @click="logout"
-              >
-                {{ logoutBusy ? "退出中…" : "退出登录" }}
-              </button>
             </div>
+            <button
+              type="button"
+              class="theme-toggle"
+              :class="{ 'is-light': theme === 'light' }"
+              :aria-label="themeLabel"
+              :title="themeLabel"
+              @click="toggleTheme"
+            >
+              <svg class="theme-toggle-sun" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <circle cx="12" cy="12" r="4.2"></circle>
+                <path d="M12 2.6v2.5M12 18.9v2.5M2.6 12h2.5M18.9 12h2.5M5.4 5.4l1.8 1.8M16.8 16.8l1.8 1.8M18.6 5.4l-1.8 1.8M7.2 16.8l-1.8 1.8"></path>
+              </svg>
+              <svg class="theme-toggle-moon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <path d="M20.3 14.4A8.5 8.5 0 0 1 9.6 3.7a8.5 8.5 0 1 0 10.7 10.7Z"></path>
+              </svg>
+            </button>
+            <button
+              type="button"
+              class="primary-button"
+              :disabled="loading"
+              :aria-busy="loading"
+              @click="refresh"
+            >
+              {{ loading ? "刷新中" : "刷新" }}
+            </button>
           </div>
-          <button
-            type="button"
-            class="primary-button"
-            :disabled="loading"
-            :aria-busy="loading"
-            @click="refresh"
-          >
-            {{ loading ? "刷新中" : "刷新" }}
-          </button>
-        </div>
-      </header>
+        </header>
 
-      <!-- 修改密码弹窗 -->
-      <div v-if="showPasswordModal" class="modal-mask" @click.self="closePasswordModal">
-        <div class="modal" role="dialog" aria-modal="true" aria-labelledby="password-title">
-          <div class="modal-head">
-            <h2 id="password-title">修改密码</h2>
-            <button type="button" class="modal-close" aria-label="关闭" @click="closePasswordModal">×</button>
-          </div>
-          <form class="modal-body" @submit.prevent="submitChangePassword">
-            <label class="modal-field">
-              <span>原密码</span>
-              <input v-model="passwordForm.oldPassword" type="password" autocomplete="current-password" required />
-            </label>
-            <label class="modal-field">
-              <span>新密码（至少 6 位）</span>
-              <input v-model="passwordForm.newPassword" type="password" autocomplete="new-password" minlength="6" required />
-            </label>
-            <label class="modal-field">
-              <span>确认新密码</span>
-              <input v-model="passwordForm.confirmPassword" type="password" autocomplete="new-password" minlength="6" required />
-            </label>
-            <p v-if="passwordError" class="modal-error" role="alert">{{ passwordError }}</p>
-            <p v-if="passwordSuccess" class="modal-success" role="status">{{ passwordSuccess }}</p>
-            <div class="modal-actions">
-              <button type="button" class="ghost-button" @click="closePasswordModal">取消</button>
-              <button type="submit" class="primary-button" :disabled="passwordBusy">
-                {{ passwordBusy ? "保存中…" : "更改密码" }}
-              </button>
+
+        <!-- 修改密码弹窗 -->
+        <div v-if="showPasswordModal" class="modal-mask" @click.self="closePasswordModal">
+          <div class="modal" role="dialog" aria-modal="true" aria-labelledby="password-title">
+            <div class="modal-head">
+              <h2 id="password-title">修改密码</h2>
+              <button type="button" class="modal-close" aria-label="关闭" @click="closePasswordModal">×</button>
             </div>
-          </form>
+            <form class="modal-body" @submit.prevent="submitChangePassword">
+              <label class="modal-field">
+                <span>原密码</span>
+                <input v-model="passwordForm.oldPassword" type="password" autocomplete="current-password" required />
+              </label>
+              <label class="modal-field">
+                <span>新密码（至少 6 位）</span>
+                <input v-model="passwordForm.newPassword" type="password" autocomplete="new-password" minlength="6" required />
+              </label>
+              <label class="modal-field">
+                <span>确认新密码</span>
+                <input v-model="passwordForm.confirmPassword" type="password" autocomplete="new-password" minlength="6" required />
+              </label>
+              <p v-if="passwordError" class="modal-error" role="alert">{{ passwordError }}</p>
+              <p v-if="passwordSuccess" class="modal-success" role="status">{{ passwordSuccess }}</p>
+              <div class="modal-actions">
+                <button type="button" class="ghost-button" @click="closePasswordModal">取消</button>
+                <button type="submit" class="primary-button" :disabled="passwordBusy">
+                  {{ passwordBusy ? "保存中…" : "更改密码" }}
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
-      </div>
 
-      <main class="page-shell">
+        <main class="page-shell">
+        <template v-if="view === 'overview'">
         <section class="hero" aria-labelledby="page-title">
           <div>
             <div class="eyebrow">SYSTEM OVERVIEW</div>
             <div class="hero-heading">
-              <h1 id="page-title">轻量服务器监控系统</h1>
-              <span class="environment-badge">LIGHTOPS</span>
+              <h1 id="page-title" class="hero-title">FoxOps</h1>
             </div>
             <p class="host-summary">
               <span>{{ host.cloud_provider || "云服务器" }}</span>
@@ -467,16 +552,589 @@
           </article>
         </section>
 
+        </template>
+
+        <template v-else-if="view === 'sysops'">
+          <section class="hero sysops-hero" aria-labelledby="sysops-title">
+            <div>
+              <div class="eyebrow">SYSTEM OPERATIONS</div>
+              <div class="hero-heading">
+                <h1 id="sysops-title">系统运维</h1>
+              </div>
+              <p class="host-summary">
+                <span>{{ host.hostname || "--" }}</span>
+                <span>{{ host.os_name || "Linux" }}</span>
+              </p>
+            </div>
+            <div class="hero-status">
+              <div class="hero-status-row">
+                <span
+                  class="status-badge"
+                  :class="{ error: !!sysopsError, pending: !realtime.ready && !sysopsError }"
+                  role="status"
+                  aria-live="polite"
+                >
+                  {{ sysopsError ? "采集异常" : (realtime.ready ? "实时采集中" : "正在连接") }}
+                </span>
+                <span class="muted" aria-live="polite">{{ sysopsUpdatedAt || "等待数据" }}</span>
+              </div>
+              <span class="hero-status-uptime muted" aria-label="服务器运行时间">
+                <svg class="uptime-glyph" width="12" height="12" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                  <circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.4"></circle>
+                  <path d="M8 4.5 V8 L10.4 9.6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"></path>
+                </svg>
+                已运行 {{ formatUptime(realtime.uptime_seconds) || "加载中" }}
+              </span>
+            </div>
+          </section>
+
+          <div v-if="sysopsError" class="error-banner" role="alert">{{ sysopsError }}</div>
+
+          <section class="metric-grid sysops-grid" aria-label="实时资源概览">
+            <article class="metric-card">
+              <div class="metric-card-head">
+                <div class="metric-label">CPU 实时占用</div>
+                <span class="processor-spec">{{ realtime.cpu.count || host.cpu_count || "--" }} 核</span>
+                <span class="metric-state" :class="statusClass(realtime.cpu.percent)">{{ statusLabel(realtime.cpu.percent) }}</span>
+              </div>
+              <div class="metric-body">
+                <div class="metric-value">{{ formatPercent(realtime.cpu.percent) }}</div>
+                <div class="load-average" aria-label="平均负载（1 分钟 / 5 分钟 / 15 分钟）">
+                  <div class="load-average-item">
+                    <strong>{{ formatLoad(cpuLoadValues[0]) }}</strong>
+                    <small>1分</small>
+                  </div>
+                  <span class="load-average-sep" aria-hidden="true">·</span>
+                  <div class="load-average-item">
+                    <strong>{{ formatLoad(cpuLoadValues[1]) }}</strong>
+                    <small>5分</small>
+                  </div>
+                  <span class="load-average-sep" aria-hidden="true">·</span>
+                  <div class="load-average-item">
+                    <strong>{{ formatLoad(cpuLoadValues[2]) }}</strong>
+                    <small>15分</small>
+                  </div>
+                </div>
+              </div>
+              <div class="core-bars" aria-label="各核心占用">
+                <span
+                  v-for="(core, index) in perCoreValues"
+                  :key="index"
+                  class="core-bar"
+                  :style="{ height: coreBarHeight(core) }"
+                  :title="'核心 ' + index + '：' + formatPercent(core)"
+                ></span>
+                <span v-if="!perCoreValues.length" class="core-bars-empty">等待核心采样</span>
+              </div>
+            </article>
+            <article class="metric-card">
+              <div class="metric-card-head">
+                <div class="metric-label">内存实时占用</div>
+                <span class="metric-state" :class="statusClass(realtime.memory.percent)">{{ statusLabel(realtime.memory.percent) }}</span>
+              </div>
+              <div class="metric-body">
+                <div class="metric-value">{{ formatPercent(realtime.memory.percent) }}</div>
+                <div class="capacity-details">
+                  <strong>{{ formatGB(realtime.memory.used, 1) }}</strong>
+                  <span>/ {{ formatGB(realtime.memory.total, 1) }}</span>
+                </div>
+              </div>
+              <div
+                class="progress-track violet"
+                role="progressbar"
+                aria-label="内存使用率"
+                aria-valuemin="0"
+                aria-valuemax="100"
+                :aria-valuenow="clampNumber(realtime.memory.percent)"
+                :aria-valuetext="formatPercent(realtime.memory.percent)"
+              >
+                <span :style="{ width: clampPercent(realtime.memory.percent) }"></span>
+              </div>
+              <div class="metric-foot">可用 {{ formatGB(realtime.memory.available, 1) }} · Swap {{ formatPercent(realtime.memory.swap_percent) }}</div>
+            </article>
+            <article class="metric-card">
+              <div class="metric-card-head">
+                <div class="metric-label">磁盘实时占用</div>
+                <span class="metric-state" :class="statusClass(realtime.disk_percent)">{{ statusLabel(realtime.disk_percent) }}</span>
+              </div>
+              <div class="metric-body">
+                <div class="metric-value">{{ formatPercent(realtime.disk_percent) }}</div>
+                <div class="capacity-details">
+                  <strong>{{ formatRate(realtime.disk_io.read_bps) }}</strong>
+                  <span>读</span>
+                  <strong>{{ formatRate(realtime.disk_io.write_bps) }}</strong>
+                  <span>写</span>
+                </div>
+              </div>
+              <div
+                class="progress-track amber"
+                role="progressbar"
+                aria-label="系统盘使用率"
+                aria-valuemin="0"
+                aria-valuemax="100"
+                :aria-valuenow="clampNumber(realtime.disk_percent)"
+                :aria-valuetext="formatPercent(realtime.disk_percent)"
+              >
+                <span :style="{ width: clampPercent(realtime.disk_percent) }"></span>
+              </div>
+              <div class="metric-foot">{{ rootDiskLabel }}</div>
+            </article>
+          </section>
+
+          <section class="panel pulse-panel" aria-labelledby="pulse-title">
+            <div class="panel-head compact">
+              <div>
+                <div class="eyebrow">REALTIME PULSE</div>
+                <h2 id="pulse-title">最近 90 秒实时走势</h2>
+              </div>
+              <span class="pulse-legend">
+                <i class="cpu"></i>CPU
+                <i class="memory"></i>内存
+                <i class="disk"></i>磁盘
+              </span>
+            </div>
+            <div v-if="realtimeSeries.length" class="svg-chart-shell">
+              <div class="chart-y-axis">
+                <span>100%</span>
+                <span>75%</span>
+                <span>50%</span>
+                <span>25%</span>
+                <span>0%</span>
+              </div>
+              <svg
+                class="trend-svg"
+                viewBox="0 0 1000 260"
+                preserveAspectRatio="none"
+                role="img"
+                aria-label="CPU、内存和磁盘最近 90 秒实时走势"
+              >
+                <g class="trend-grid">
+                  <line x1="0" y1="0" x2="1000" y2="0"></line>
+                  <line x1="0" y1="65" x2="1000" y2="65"></line>
+                  <line x1="0" y1="130" x2="1000" y2="130"></line>
+                  <line x1="0" y1="195" x2="1000" y2="195"></line>
+                  <line x1="0" y1="260" x2="1000" y2="260"></line>
+                </g>
+                <polyline :points="realtimePoints('cpu')" class="trend-line cpu"></polyline>
+                <polyline :points="realtimePoints('memory')" class="trend-line memory"></polyline>
+                <polyline :points="realtimePoints('disk')" class="trend-line disk"></polyline>
+              </svg>
+              <div class="chart-time-axis">
+                <span>90 秒前</span>
+                <span>现在</span>
+              </div>
+            </div>
+            <div v-else class="chart-empty">正在采集实时样本…</div>
+          </section>
+
+          <section class="panel" aria-labelledby="disks-title">
+            <div class="panel-head compact">
+              <div>
+                <div class="eyebrow">FILESYSTEMS</div>
+                <h2 id="disks-title">磁盘分区</h2>
+              </div>
+              <span class="muted">{{ realtimeDisks.length }} 个挂载点 · 每秒刷新</span>
+            </div>
+            <div class="disk-list">
+              <div v-for="disk in realtimeDisks" :key="disk.mount" class="disk-row">
+                <div class="disk-ident">
+                  <strong>{{ disk.mount }}</strong>
+                  <small>{{ disk.device }} · {{ disk.fstype }}</small>
+                </div>
+                <div class="disk-meter">
+                  <div
+                    class="progress-track"
+                    role="progressbar"
+                    :aria-label="disk.mount + ' 使用率'"
+                    aria-valuemin="0"
+                    aria-valuemax="100"
+                    :aria-valuenow="clampNumber(disk.percent)"
+                    :aria-valuetext="formatPercent(disk.percent)"
+                  >
+                    <span :style="{ width: clampPercent(disk.percent) }"></span>
+                  </div>
+                </div>
+                <div class="disk-capacity">
+                  <strong>{{ formatPercent(disk.percent) }}</strong>
+                  <small>{{ formatGB(disk.used, 1) }} / {{ formatGB(disk.total, 1) }} · 剩余 {{ formatGB(disk.free, 1) }}</small>
+                </div>
+              </div>
+              <div v-if="!realtimeDisks.length" class="empty-state">等待磁盘采样</div>
+            </div>
+          </section>
+
+          <section class="panel docker-panel" aria-labelledby="docker-title">
+            <div class="panel-head compact">
+              <div>
+                <div class="eyebrow">CONTAINERS</div>
+                <h2 id="docker-title">Docker 容器</h2>
+              </div>
+              <div class="docker-counts">
+                <span class="docker-pill running">
+                  <i aria-hidden="true"></i>{{ dockerCounts.running }} 运行中
+                </span>
+                <span class="docker-pill">共 {{ dockerCounts.total }} 个</span>
+                <span v-if="docker.stale" class="docker-pill stale" title="root 探针最近一次采集失败或已停止">
+                  数据已过期
+                </span>
+                <button type="button" class="text-button" :disabled="dockerLoading" @click="refreshDocker">
+                  {{ dockerLoading ? "刷新中" : "刷新" }}
+                </button>
+              </div>
+            </div>
+            <div v-if="docker.available" class="docker-list">
+              <div v-for="item in dockerContainers" :key="item.id" class="docker-row">
+                <span class="docker-dot" :class="item.state" :title="item.state"></span>
+                <div class="docker-ident">
+                  <strong>{{ item.name || item.id }}</strong>
+                  <small>{{ item.image }}</small>
+                </div>
+                <div class="docker-cell docker-status">{{ item.status || item.state }}</div>
+                <div class="docker-cell docker-ports" :title="item.ports || ''">{{ item.ports || "未映射端口" }}</div>
+                <div class="docker-cell docker-load">
+                  <span>CPU <strong>{{ formatCpuShare(item.cpu_percent) }}</strong></span>
+                  <span>内存 <strong>{{ item.memory_usage || "--" }}</strong></span>
+                </div>
+              </div>
+              <div v-if="!dockerContainers.length" class="empty-state success">
+                <span>✓</span> 这台服务器上没有 docker 容器
+              </div>
+            </div>
+            <div v-else class="docker-offline">
+              <strong>读取不到 docker 容器</strong>
+              <p>{{ docker.reason || "docker 不可用" }}</p>
+              <code v-if="docker.hint">{{ docker.hint }}</code>
+            </div>
+          </section>
+        </template>
+
+        <template v-else-if="view === 'security'">
+          <section class="hero sysops-hero" aria-labelledby="security-title">
+            <div>
+              <div class="eyebrow">DDOS DEFENSE</div>
+              <div class="hero-heading">
+                <h1 id="security-title">安全防护</h1>
+              </div>
+              <p class="host-summary">
+                <span>{{ security.enabled ? "请求限速已开启" : "请求限速已关闭" }}</span>
+                <span>单 IP 并发 {{ security.limits.max_concurrent || "--" }}</span>
+                <span>{{ security.active.tracked_ips || 0 }} 个来源 IP 在跟踪</span>
+              </p>
+            </div>
+            <div class="hero-status">
+              <div class="hero-status-row">
+                <span
+                  class="status-badge"
+                  :class="{ error: !!securityError, pending: !securityReady && !securityError }"
+                  role="status"
+                  aria-live="polite"
+                >
+                  {{ securityError ? "读取异常" : (securityReady ? (security.recent.blocked ? "正在拦截异常请求" : "防护运行中") : "正在连接") }}
+                </span>
+              </div>
+              <span class="hero-status-uptime muted" title="与服务器时间同步，每秒更新">数据更新于 {{ securityClock || "--" }}</span>
+            </div>
+          </section>
+
+          <div v-if="securityError" class="error-banner" role="alert">{{ securityError }}</div>
+
+          <section class="metric-grid security-grid" aria-label="防护概览">
+            <article class="metric-card">
+              <div class="metric-card-head">
+                <div class="metric-label">最近一分钟请求</div>
+                <span class="metric-state normal">实时</span>
+              </div>
+              <div class="metric-body">
+                <div class="metric-value">{{ security.recent.requests || 0 }}</div>
+                <div class="capacity-details">
+                  <strong>{{ security.recent.allowed || 0 }}</strong>
+                  <span>次放行</span>
+                </div>
+              </div>
+              <div class="metric-foot">累计 {{ security.totals.requests || 0 }} 次请求</div>
+            </article>
+            <article class="metric-card">
+              <div class="metric-card-head">
+                <div class="metric-label">最近一分钟拦截</div>
+                <span class="metric-state" :class="security.recent.blocked ? 'critical' : 'normal'">{{ security.recent.blocked ? "拦截中" : "无异常" }}</span>
+              </div>
+              <div class="metric-body">
+                <div class="metric-value">{{ security.recent.blocked || 0 }}</div>
+                <div class="capacity-details">
+                  <strong>{{ security.totals.blocked || 0 }}</strong>
+                  <span>次累计拦截</span>
+                </div>
+              </div>
+              <div class="metric-foot">限速、超限并发与超大请求都计为拦截</div>
+            </article>
+            <article class="metric-card">
+              <div class="metric-card-head">
+                <div class="metric-label">当前封禁来源</div>
+                <span class="metric-state" :class="securityBans.length ? 'critical' : 'normal'">{{ securityBans.length ? "已封禁" : "无封禁" }}</span>
+              </div>
+              <div class="metric-body">
+                <div class="metric-value">{{ securityBans.length }}</div>
+                <div class="capacity-details">
+                  <strong>{{ security.limits.strike_limit || "--" }}</strong>
+                  <span>次违规触发封禁</span>
+                </div>
+              </div>
+              <div class="metric-foot">首次 {{ formatDuration(security.limits.ban_seconds) }}，逐次翻倍</div>
+            </article>
+            <article class="metric-card">
+              <div class="metric-card-head">
+                <div class="metric-label">在途并发请求</div>
+                <span class="metric-state normal">实时</span>
+              </div>
+              <div class="metric-body">
+                <div class="metric-value">{{ security.active.concurrent || 0 }}</div>
+                <div class="capacity-details">
+                  <strong>{{ security.limits.max_global_concurrent || "--" }}</strong>
+                  <span>进程级上限</span>
+                </div>
+              </div>
+              <div class="metric-foot">单 IP 上限 {{ security.limits.max_concurrent || "--" }} 个</div>
+            </article>
+          </section>
+
+          <section class="panel" aria-labelledby="security-policy-title">
+            <div class="panel-head compact">
+              <div>
+                <div class="eyebrow">POLICY</div>
+                <h2 id="security-policy-title">当前限流策略</h2>
+              </div>
+              <span class="muted">限流参数来自 FOXOPS_SECURITY_* 环境变量，改完重启服务生效</span>
+            </div>
+            <div class="security-policy">
+              <div class="security-policy-item">
+                <span>突发窗口</span>
+                <strong>{{ security.limits.burst || "--" }} 次 / {{ security.limits.burst_window_seconds || "--" }} 秒</strong>
+              </div>
+              <div class="security-policy-item">
+                <span>持续窗口</span>
+                <strong>{{ security.limits.sustained || "--" }} 次 / {{ security.limits.sustained_window_seconds || "--" }} 秒</strong>
+              </div>
+              <div class="security-policy-item">
+                <span>单 IP 并发</span>
+                <strong>{{ security.limits.max_concurrent || "--" }} 个</strong>
+              </div>
+              <div class="security-policy-item">
+                <span>全局并发</span>
+                <strong>{{ security.limits.max_global_concurrent || "--" }} 个</strong>
+              </div>
+              <div class="security-policy-item">
+                <span>封禁触发</span>
+                <strong>{{ security.limits.strike_limit || "--" }} 次违规 / {{ security.limits.strike_window_seconds || "--" }} 秒</strong>
+              </div>
+              <div class="security-policy-item">
+                <span>封禁时长</span>
+                <strong>{{ formatDuration(security.limits.ban_seconds) }} 起，最长 {{ formatDuration(security.limits.max_ban_seconds) }}</strong>
+              </div>
+            </div>
+          </section>
+
+          <section class="panel security-panel" aria-labelledby="security-bans-title">
+            <div class="panel-head compact">
+              <div>
+                <div class="eyebrow">BLOCKED SOURCES</div>
+                <h2 id="security-bans-title">当前封禁</h2>
+              </div>
+              <span class="muted">{{ securityBans.length }} 个来源 IP</span>
+            </div>
+            <div class="security-list">
+              <div v-for="item in securityBans" :key="item.ip" class="security-row">
+                <div class="security-ident">
+                  <strong>{{ item.ip }}</strong>
+                  <small>{{ item.reason }} · 第 {{ item.bans }} 次封禁 · {{ formatTime(item.banned_at) }}</small>
+                </div>
+                <div class="security-cell">剩余 {{ formatDuration(item.remaining_seconds) }}</div>
+                <button type="button" class="text-button" @click="unbanIp(item.ip)">解封</button>
+              </div>
+              <div v-if="!securityBans.length" class="empty-state success">
+                <span>✓</span> 当前没有封禁来源，流量正常
+              </div>
+            </div>
+          </section>
+
+          <section class="panel security-panel" aria-labelledby="security-offenders-title">
+            <div class="panel-head compact">
+              <div>
+                <div class="eyebrow">TOP SOURCES</div>
+                <h2 id="security-offenders-title">高频来源</h2>
+              </div>
+              <span class="muted">按拦截次数排序</span>
+            </div>
+            <div class="security-list">
+              <div v-for="item in securityOffenders" :key="item.ip" class="security-row">
+                <div class="security-ident">
+                  <strong>{{ item.ip }}</strong>
+                  <small>最近活跃 {{ formatDuration(item.last_seen_seconds_ago) }}前</small>
+                </div>
+                <div class="security-cell">
+                  请求 {{ item.requests }} 次 · 拦截 {{ item.blocked }} 次
+                  <template v-if="item.banned"> · 已封禁</template>
+                </div>
+                <div class="security-cell security-tally">{{ item.violations }} 次待触发违规</div>
+              </div>
+              <div v-if="!securityOffenders.length" class="empty-state">
+                还没有来源 IP 触发限速
+              </div>
+            </div>
+          </section>
+        </template>
+
+        <template v-else>
+          <section class="hero sysops-hero" aria-labelledby="admin-title">
+            <div>
+              <div class="eyebrow">SECURITY POLICY</div>
+              <div class="hero-heading">
+                <h1 id="admin-title">后台管理</h1>
+                <span class="environment-badge">ADMIN</span>
+              </div>
+              <p class="host-summary">
+                <span>{{ policy.current.enabled ? "防护已启用" : "防护已停用" }}</span>
+                <span>{{ policy.source === "runtime" ? "当前为自定义策略" : "当前为环境默认值" }}</span>
+                <span v-if="policy.updated_at">更新于 {{ formatTime(policy.updated_at) }}</span>
+              </p>
+            </div>
+            <div class="hero-status">
+              <div class="hero-status-row">
+                <span
+                  class="status-badge"
+                  :class="{ error: !!policyError, pending: policyLoading }"
+                  role="status"
+                  aria-live="polite"
+                >
+                  {{ policyError ? "读取异常" : (policyLoading ? "正在读取" : "策略可编辑") }}
+                </span>
+                <button type="button" class="text-button" :disabled="policyLoading" @click="refreshPolicy">
+                  {{ policyLoading ? "刷新中" : "重新读取" }}
+                </button>
+              </div>
+              <span class="hero-status-uptime muted">保存后立即生效，无需重启</span>
+            </div>
+          </section>
+
+          <div v-if="policyError" class="error-banner" role="alert">{{ policyError }}</div>
+          <div v-if="policySuccess" class="policy-success" role="status">{{ policySuccess }}</div>
+
+          <section class="panel" aria-labelledby="policy-toggle-title">
+            <div class="panel-head compact">
+              <div>
+                <div class="eyebrow">SWITCH</div>
+                <h2 id="policy-toggle-title">防护开关</h2>
+              </div>
+              <span class="muted">关闭后所有请求直接放行</span>
+            </div>
+            <label class="policy-toggle" for="policy-enabled">
+              <input id="policy-enabled" type="checkbox" v-model="policyForm.enabled" />
+              <span>启用请求级限速、并发上限与自动封禁</span>
+            </label>
+          </section>
+
+          <section class="panel" aria-labelledby="policy-limit-title">
+            <div class="panel-head compact">
+              <div>
+                <div class="eyebrow">RATE LIMIT</div>
+                <h2 id="policy-limit-title">限速与并发</h2>
+              </div>
+              <span class="muted">按来源 IP 统计</span>
+            </div>
+            <div class="policy-grid">
+              <label class="policy-field" for="policy-burst">
+                <span>突发上限（次）</span>
+                <input id="policy-burst" type="number" v-model.number="policyForm.burst_limit"
+                  :min="policyMin('burst_limit')" :max="policyMax('burst_limit')" step="1" />
+              </label>
+              <label class="policy-field" for="policy-burst-window">
+                <span>突发窗口（秒）</span>
+                <input id="policy-burst-window" type="number" v-model.number="policyForm.burst_window_seconds"
+                  :min="policyMin('burst_window_seconds')" :max="policyMax('burst_window_seconds')" step="any" />
+              </label>
+              <label class="policy-field" for="policy-sustained">
+                <span>持续上限（次）</span>
+                <input id="policy-sustained" type="number" v-model.number="policyForm.sustained_limit"
+                  :min="policyMin('sustained_limit')" :max="policyMax('sustained_limit')" step="1" />
+              </label>
+              <label class="policy-field" for="policy-sustained-window">
+                <span>持续窗口（秒）</span>
+                <input id="policy-sustained-window" type="number" v-model.number="policyForm.sustained_window_seconds"
+                  :min="policyMin('sustained_window_seconds')" :max="policyMax('sustained_window_seconds')" step="any" />
+              </label>
+              <label class="policy-field" for="policy-max-concurrent">
+                <span>单 IP 并发（个）</span>
+                <input id="policy-max-concurrent" type="number" v-model.number="policyForm.max_concurrent"
+                  :min="policyMin('max_concurrent')" :max="policyMax('max_concurrent')" step="1" />
+              </label>
+              <label class="policy-field" for="policy-max-global">
+                <span>全局并发（个）</span>
+                <input id="policy-max-global" type="number" v-model.number="policyForm.max_global_concurrent"
+                  :min="policyMin('max_global_concurrent')" :max="policyMax('max_global_concurrent')" step="1" />
+              </label>
+              <label class="policy-field" for="policy-body-kib">
+                <span>请求体上限（KiB）</span>
+                <input id="policy-body-kib" type="number" v-model.number="policyForm.max_body_kib"
+                  min="1" max="10240" step="1" />
+              </label>
+            </div>
+            <p class="policy-note">持续上限不能低于突发上限；全局并发不能低于单 IP 并发。</p>
+          </section>
+
+          <section class="panel" aria-labelledby="policy-ban-title">
+            <div class="panel-head compact">
+              <div>
+                <div class="eyebrow">AUTO BAN</div>
+                <h2 id="policy-ban-title">封禁策略</h2>
+              </div>
+              <span class="muted">重复违规逐次翻倍</span>
+            </div>
+            <div class="policy-grid">
+              <label class="policy-field" for="policy-strike">
+                <span>触发封禁的违规次数</span>
+                <input id="policy-strike" type="number" v-model.number="policyForm.strike_limit"
+                  :min="policyMin('strike_limit')" :max="policyMax('strike_limit')" step="1" />
+              </label>
+              <label class="policy-field" for="policy-strike-window">
+                <span>违规统计窗口（秒）</span>
+                <input id="policy-strike-window" type="number" v-model.number="policyForm.strike_window_seconds"
+                  :min="policyMin('strike_window_seconds')" :max="policyMax('strike_window_seconds')" step="any" />
+              </label>
+              <label class="policy-field" for="policy-ban">
+                <span>首次封禁时长（秒）</span>
+                <input id="policy-ban" type="number" v-model.number="policyForm.ban_seconds"
+                  :min="policyMin('ban_seconds')" :max="policyMax('ban_seconds')" step="any" />
+              </label>
+              <label class="policy-field" for="policy-max-ban">
+                <span>最长封禁时长（秒）</span>
+                <input id="policy-max-ban" type="number" v-model.number="policyForm.max_ban_seconds"
+                  :min="policyMin('max_ban_seconds')" :max="policyMax('max_ban_seconds')" step="any" />
+              </label>
+            </div>
+            <p class="policy-note">最长封禁时长不能低于首次封禁时长；封禁只会影响单个来源 IP。</p>
+          </section>
+
+          <div class="policy-actions">
+            <button type="button" class="primary-button" :disabled="policySaving" @click="savePolicy">
+              {{ policySaving ? "保存中…" : "保存策略" }}
+            </button>
+            <button type="button" class="ghost-button" :disabled="policySaving" @click="resetPolicy">
+              恢复环境默认
+            </button>
+            <span class="muted">策略保存在数据卷 SQLite，重启后仍生效；恢复默认会删除自定义值。</span>
+          </div>
+        </template>
+
         <footer>
           <a
             class="footer-brand"
-            href="https://github.com/Swipa5fox/LightOps"
+            href="https://github.com/Swipa5fox/FoxOps"
             target="_blank"
             rel="noopener noreferrer"
-          >LightOps {{ summary.version || "?.?" }}</a>
+          >FoxOps {{ summary.version || "?.?" }}</a>
           <span class="footer-copyright"> · © {{ currentYear }}</span>
         </footer>
-      </main>
+        </main>
+      </div>
     </div>
 
     <script src="/vendor/vue.runtime.global.prod.js" defer></script>

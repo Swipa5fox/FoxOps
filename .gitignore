@@ -6,6 +6,8 @@ __pycache__/
 .env
 .venv/
 .npm-cache/
+.workbuddy/
 tools/node_modules/
 *.tar.gz
 releases/
+/data/

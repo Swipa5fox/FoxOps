@@ -1,4 +1,4 @@
-/* LightOps 主题视觉验证脚本（本地开发用，无第三方依赖）
+/* FoxOps 主题视觉验证脚本（本地开发用，无第三方依赖）
    用法：先启动本地 uvicorn（127.0.0.1:8765），再运行：
    node tools/verify-theme.mjs
    流程：登录页夜间/日间各一张 → 登录进面板 → 截图夜间 → 点击主题切换按钮 → 截图日间 */
@@ -37,7 +37,7 @@ withChrome({ port: PORT, profile: PROFILE, windowSize: "1440,1000" }, async (cdp
       body: JSON.stringify({ username: "Admin", password: "123456" })
     });
     const body = await res.json();
-    window.sessionStorage.setItem("lightops_session", body.token || "");
+    window.sessionStorage.setItem("foxops_session", body.token || "");
     window.location.href = "/";
     return true;
   })()`);
@@ -68,7 +68,7 @@ withChrome({ port: PORT, profile: PROFILE, windowSize: "1440,1000" }, async (cdp
   // 5. 验证状态：data-theme 与 localStorage
   const state = await cdp.evaluate(`(async () => ({
     theme: document.documentElement.dataset.theme,
-    stored: window.localStorage.getItem("lightops_theme"),
+    stored: window.localStorage.getItem("foxops_theme"),
     label: document.querySelector(".theme-toggle") && document.querySelector(".theme-toggle").getAttribute("aria-label")
   }))()`);
   console.log("theme state:", JSON.stringify(state));

@@ -1,8 +1,8 @@
 """Who-uses-what labels for monitored services.
 
-A root-owned timer (lightops-inspect.timer -> app/ownership_probe.py)
+A root-owned timer (foxops-inspect.timer -> app/ownership_probe.py)
 builds the provider -> consumers graph from the host's socket tables every
-collect interval and drops it at /var/lib/lightops/ownership.json; the app
+collect interval and drops it at /var/lib/foxops/ownership.json; the app
 only reads that file. It never needs sudo or elevated capabilities: the
 unit's hardening options imply kernel NoNewPrivs (sudo impossible from
 inside), and kernel.yama.ptrace_scope=2 on RHEL 9 defeats CAP_SYS_PTRACE
@@ -22,10 +22,10 @@ from typing import Any
 
 from .settings import settings
 
-logger = logging.getLogger("lightops.ownership")
+logger = logging.getLogger("foxops.ownership")
 
-_OWNERSHIP_FILE = Path("/var/lib/lightops/ownership.json")
-# 探针由 lightops-inspect.timer 按采集间隔驱动，陈旧窗口跟着间隔走。
+_OWNERSHIP_FILE = Path("/var/lib/foxops/ownership.json")
+# 探针由 foxops-inspect.timer 按采集间隔驱动，陈旧窗口跟着间隔走。
 _MAX_AGE_SECONDS = settings.collect_interval_seconds * 3
 _INPROCESS_TTL_SECONDS = 30
 
@@ -58,7 +58,7 @@ def used_by(service: str) -> str:
     """Human label of who uses `service`; empty when nothing is known.
 
     优先级：探针识别到的调用方（运行时真实关系）→ 管理员在
-    LIGHTOPS_SERVICE_LABELS 里写的语义标注 → 对外监听信息（端口 + 入站连接数）。
+    FOXOPS_SERVICE_LABELS 里写的语义标注 → 对外监听信息（端口 + 入站连接数）。
     """
     data = _load()
     consumers = sorted(data.get("consumers", {}).get(service, ()))

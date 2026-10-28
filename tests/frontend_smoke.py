@@ -76,7 +76,7 @@ version_source = (ROOT / "app" / "__init__.py").read_text(encoding="utf-8")
 version_match = re.search(r'^__version__\s*=\s*"([0-9]+\.[0-9]+\.[0-9]+(?:\.[0-9]+)?)"$', version_source, re.MULTILINE)
 assert version_match, "application version source is missing"
 current_version = version_match.group(1)
-nginx = (ROOT / "deploy" / "lightops.nginx.conf").read_text(encoding="utf-8")
+nginx = (ROOT / "deploy" / "foxops.nginx.conf").read_text(encoding="utf-8")
 installer = (ROOT / "deploy" / "install.sh").read_text(encoding="utf-8")
 
 parser = FrontendParser()
@@ -116,7 +116,7 @@ for reference in login_parser.references:
 assert "/api/login" in login_script
 assert "/api/auth/me" in login_script
 # 会话存储由 session.js 独占，登录页与面板都走它，避免两份实现漂移。
-assert "lightops_session" in session_script
+assert "foxops_session" in session_script
 # 只有 session.js 触碰 sessionStorage，登录页与面板都经它读写，避免两份实现漂移。
 assert "sessionStorage" in session_script
 assert "sessionStorage" not in script, "app.js must read storage through session.js"
@@ -139,7 +139,7 @@ for label, pattern in dangerous_patterns.items():
     assert not re.search(pattern, script), f"dangerous DOM/code operation found: {label}"
 
 assert "localStorage" not in script, "app.js must not touch localStorage; only theme.js owns it"
-assert "lightops_session" not in script, "the session token must be read through session.js"
+assert "foxops_session" not in script, "the session token must be read through session.js"
 assert 'class="user-menu"' in index, "user menu dropdown must exist in the topbar"
 assert 'window.location.replace("/login.html")' in script, "unauthenticated visits must redirect to the login page"
 assert 'v-if="isAdmin"' in index, "admin-only controls must be hidden for guest users"
@@ -148,10 +148,31 @@ assert "AbortController" in script, "requests must be abortable so the 10s timeo
 assert 'class="weather-emblem"' in index
 assert 'aria-label="每日天气"' in index
 assert "/icons/weather-" in index, "weather icons must be referenced from /icons/weather-<code>.svg"
-assert 'href="/icons/favicon.svg"' in index, "favicon must be referenced from /icons/favicon.svg"
+assert 'href="/icons/favicon.svg' in index, "favicon must be referenced from /icons/favicon.svg"
+assert 'href="/favicon.ico' in index, "favicon.ico must be offered as the legacy fallback"
 assert (STATIC / "icons" / "favicon.svg").is_file(), "icons/favicon.svg must exist"
+assert (STATIC / "favicon.ico").is_file(), "favicon.ico must exist for browsers without SVG icon support"
 assert (STATIC / "icons" / "weather-150.svg").is_file(), "icons/weather-150.svg must exist"
 assert "/api/weather" in script
+# 安全防护页：仅管理员入口，数据来自后端限速器。
+assert "安全防护" in index, "the admin security view must be reachable from the sidebar"
+assert 'id="security-title"' in index
+assert "/api/security/status" in script, "the security view must read the guard status API"
+assert "/api/security/unban" in script, "the security view must be able to unban a source"
+assert "security" in render, "render.js must be regenerated after adding the security view"
+assert "securityClock" in script, "the security page clock must tick every second"
+assert "后台管理" in index, "the admin policy page must be reachable from the sidebar"
+assert 'id="admin-title"' in index
+assert 'id="security-submenu"' in index, "admin must be nested under the security group"
+assert "sidebar-subitem" in index
+assert "securityOpen" in script, "the security group must expand and collapse"
+assert "/api/security/policy" in script, "the admin page must read and save the policy API"
+assert "policyForm" in script
+assert "policy-grid" in index
+assert (STATIC / "429.html").is_file(), "429.html must exist for nginx rate limiting"
+assert "limit_req_zone" in nginx and "limit_conn_zone" in nginx
+assert "error_page 429 /429.html;" in nginx
+assert "limit_req zone=foxops_api" in nginx, "the API location must be rate limited"
 assert 'role="progressbar"' in index
 assert 'aria-live="polite"' in index
 assert 'id="trend-description"' in index
@@ -187,4 +208,4 @@ assert "echarts" not in installer.lower()
 assert "app/static/render.js" in installer
 assert "app/static/vendor/vue.runtime.global.prod.js" in installer
 
-print("LightOps frontend smoke test passed")
+print("FoxOps frontend smoke test passed")

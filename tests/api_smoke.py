@@ -3,18 +3,19 @@ from __future__ import annotations
 import os
 import sys
 import tempfile
+import time
 from pathlib import Path
 
 
 temp_dir = tempfile.TemporaryDirectory()
 root = Path(temp_dir.name)
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-os.environ["LIGHTOPS_DB_PATH"] = str(root / "lightops.db")
-os.environ["LIGHTOPS_BACKUP_DIR"] = str(root / "backups")
-os.environ["LIGHTOPS_SERVICES"] = "nginx,mysqld,redis"
+os.environ["FOXOPS_DB_PATH"] = str(root / "foxops.db")
+os.environ["FOXOPS_BACKUP_DIR"] = str(root / "backups")
+os.environ["FOXOPS_SERVICES"] = "nginx,mysqld,redis"
 if os.name == "nt":
     harmless_command = Path(os.environ.get("SystemRoot", r"C:\Windows")) / "System32" / "where.exe"
-    os.environ["LIGHTOPS_SYSTEMCTL_PATH"] = str(harmless_command)
+    os.environ["FOXOPS_SYSTEMCTL_PATH"] = str(harmless_command)
 
 from fastapi.testclient import TestClient  # noqa: E402
 
@@ -86,6 +87,26 @@ with TestClient(app) as client:
     assert len(short_metrics.json()["points"]) >= 1
     assert client.get("/api/metrics", params={"range": "30d"}).status_code == 422
 
+    # 系统运维实时接口：采样线程 1s 一点，等它至少采到一次再断言。
+    time.sleep(1.5)
+    realtime = client.get("/api/sysops/realtime")
+    assert realtime.status_code == 200, realtime.text
+    realtime_payload = realtime.json()
+    assert realtime_payload["ready"] is True
+    assert 0 <= realtime_payload["cpu"]["percent"] <= 100
+    assert len(realtime_payload["cpu"]["per_core"]) >= 1
+    assert realtime_payload["memory"]["total"] > 0
+    assert realtime_payload["interval_seconds"] >= 1
+    assert len(realtime_payload["series"]) >= 1
+    assert realtime_payload["series"][-1]["memory"] is not None
+
+    docker = client.get("/api/sysops/docker")
+    assert docker.status_code == 200, docker.text
+    docker_payload = docker.json()
+    assert isinstance(docker_payload["available"], bool)
+    assert isinstance(docker_payload["containers"], list)
+    assert docker_payload["counts"]["total"] == len(docker_payload["containers"])
+
     assert client.get("/api/audit").status_code == 401
     assert client.post("/api/maintenance/run").status_code == 401
     assert client.post("/api/services/nginx/restart").status_code == 401
@@ -127,10 +148,20 @@ with TestClient(app) as client:
     assert maintenance.status_code == 200, maintenance.text
     assert Path(maintenance.json()["backup"]).is_file()
 
+    # 图标：SVG 与 ico 都要能取到，并且带 no-cache——浏览器对 favicon 的启发式
+    # 缓存很顽固，不这样就换不掉标签页里的旧图标。
+    favicon_ico = client.get("/favicon.ico")
+    assert favicon_ico.status_code == 200, favicon_ico.text
+    assert favicon_ico.content[:4] == b"\x00\x00\x01\x00", "favicon.ico is not a valid ICO"
+    assert favicon_ico.headers["cache-control"] == "no-cache"
+    favicon_svg = client.get("/icons/favicon.svg")
+    assert favicon_svg.status_code == 200, favicon_svg.text
+    assert favicon_svg.headers["cache-control"] == "no-cache"
+
     with db.connect() as connection:
         connection.execute("UPDATE metrics SET ts = '2000-01-01T00:00:00+00:00'")
     stale_health = client.get("/api/health")
     assert stale_health.status_code == 503, stale_health.text
     assert stale_health.json()["collector"] == "stale"
 
-print("LightOps API smoke test passed")
+print("FoxOps API smoke test passed")

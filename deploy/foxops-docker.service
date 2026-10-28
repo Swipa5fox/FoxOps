@@ -1,0 +1,7 @@
+[Unit]
+Description=FoxOps docker container probe (root-side data for the panel)
+
+[Service]
+Type=oneshot
+Environment=PYTHONPATH=/opt/foxops
+ExecStart=/opt/foxops/.venv/bin/python -m app.docker_probe

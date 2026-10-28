@@ -12,15 +12,15 @@ fixture_root=$(mktemp -d)
 trap 'rm -rf "$fixture_root"' EXIT
 
 render_http() {
-    local rendered=$fixture_root/lightops-http.conf
+    local rendered=$fixture_root/foxops-http.conf
     sed \
-        -e 's|__LIGHTOPS_PUBLIC_PORT__|18080|g' \
-        -e 's|__LIGHTOPS_SERVER_NAME__|_|g' \
-        -e '/^__LIGHTOPS_HTTPS_BLOCK__$/d' \
-        -e "s|/var/log/nginx/lightops_access.log|$fixture_root/lightops_access.log|g" \
-        -e "s|/var/log/nginx/lightops_error.log|$fixture_root/lightops_error.log|g" \
-        "$PROJECT_ROOT/deploy/lightops.nginx.conf" > "$rendered"
-    if grep -q '__LIGHTOPS_' "$rendered"; then
+        -e 's|__FOXOPS_PUBLIC_PORT__|18080|g' \
+        -e 's|__FOXOPS_SERVER_NAME__|_|g' \
+        -e '/^__FOXOPS_HTTPS_BLOCK__$/d' \
+        -e "s|/var/log/nginx/foxops_access.log|$fixture_root/foxops_access.log|g" \
+        -e "s|/var/log/nginx/foxops_error.log|$fixture_root/foxops_error.log|g" \
+        "$PROJECT_ROOT/deploy/foxops.nginx.conf" > "$rendered"
+    if grep -q '__FOXOPS_' "$rendered"; then
         echo "unresolved Nginx template placeholder" >&2
         exit 1
     fi
@@ -73,4 +73,4 @@ if ! "$nginx_path" -t -c "$fixture_root/http.conf" 2>"$fixture_root/nginx-t.err"
     cat "$fixture_root/nginx-t.err" >&2
     exit 1
 fi
-echo "LightOps Nginx template test passed"
+echo "FoxOps Nginx template test passed"

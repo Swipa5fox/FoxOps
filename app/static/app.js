@@ -6,11 +6,21 @@
   var REQUEST_TIMEOUT_MS = 10000;
   var WEATHER_REFRESH_MS = 30 * 60 * 1000;
   var CLOCK_REFRESH_MS = 60 * 1000;
+  // 系统运维页：实时快照 2s 一拉，docker 列表 6s 一拉（stats 本身有成本，
+  // 服务端还有 5s 缓存兜底）。
+  var SYSOPS_REFRESH_MS = 2000;
+  var DOCKER_REFRESH_MS = 6000;
+  // 安全防护页 5s 一拉：封禁与拦截是"刚刚发生"的事，和实时页同样的节奏。
+  var SECURITY_REFRESH_MS = 5000;
   // Timers are plain closures: nothing renders off their ids.
   var refreshTimer = null;
   var weatherTimer = null;
   var clockTimer = null;
-  var session = window.LightOpsSession;
+  var sysopsTimer = null;
+  var dockerTimer = null;
+  var securityTimer = null;
+  var securityClockTimer = null;
+  var session = window.FoxOpsSession;
   var weatherPlaceStore = session.weatherPlace;
 
   // WMO 天气码 -> 和风图标码（日间档）。
@@ -33,8 +43,27 @@
     return 260 - safe * 2.6;
   }
 
+  // 轮询回来的数据没变就别替换响应式对象：替换会让整块模板重渲染一次，
+  // 视觉上就是"闪一下"。传入 ignoreKeys 可以放过每次都变的字段（如 server_time）。
+  function payloadChanged(previous, next, ignoreKeys) {
+    if (!previous) {
+      return true;
+    }
+    var ignored = ignoreKeys || [];
+    var normalize = function (payload) {
+      var copy = {};
+      for (var key in payload) {
+        if (ignored.indexOf(key) === -1) {
+          copy[key] = payload[key];
+        }
+      }
+      return JSON.stringify(copy);
+    };
+    return normalize(previous) !== normalize(next);
+  }
+
   createApp({
-    render: window.LightOpsRender,
+    render: window.FoxOpsRender,
     data: function () {
       return {
         summary: { metric: {}, services: [], alerts: [], host: {} },
@@ -65,7 +94,64 @@
         passwordSuccess: "",
         passwordForm: { oldPassword: "", newPassword: "", confirmPassword: "" },
         logoutBusy: false,
-        theme: "dark"
+        theme: "dark",
+        view: "overview",
+        realtime: {
+          ready: false,
+          cpu: {},
+          memory: {},
+          disks: [],
+          disk_io: {},
+          series: []
+        },
+        docker: {
+          available: true,
+          reason: "",
+          hint: null,
+          containers: [],
+          counts: { total: 0, running: 0 }
+        },
+        sysopsError: "",
+        sysopsUpdatedAt: "",
+        dockerLoading: false,
+        // 安全防护页（仅管理员）：默认值是页面首次加载前的占位，不是业务假设。
+        security: {
+          enabled: true,
+          limits: {},
+          recent: { window_seconds: 60, requests: 0, allowed: 0, blocked: 0 },
+          totals: { requests: 0, allowed: 0, blocked: 0 },
+          active: { tracked_ips: 0, concurrent: 0, banned: 0 },
+          banned: [],
+          offenders: []
+        },
+        securityReady: false,
+        securityError: "",
+        securityBusy: false,
+        // 数据更新时间：按服务器时间校正后的本地读数，每秒走一格。
+        securityClock: "",
+        securityServerOffsetMs: 0,
+        // 侧栏「安全防护」分组展开状态；进入 security/admin 时自动展开。
+        securityOpen: false,
+        // 后台管理：限流策略（current 是生效值，defaults 是环境变量默认值）
+        policy: { current: { enabled: true }, defaults: {}, bounds: {}, source: "", updated_at: "" },
+        policyForm: {
+          enabled: true,
+          burst_limit: 60,
+          burst_window_seconds: 10,
+          sustained_limit: 300,
+          sustained_window_seconds: 60,
+          max_concurrent: 24,
+          max_global_concurrent: 200,
+          max_body_kib: 1024,
+          strike_limit: 3,
+          strike_window_seconds: 300,
+          ban_seconds: 600,
+          max_ban_seconds: 86400
+        },
+        policyLoading: false,
+        policySaving: false,
+        policyError: "",
+        policySuccess: ""
       };
     },
     computed: {
@@ -89,6 +175,56 @@
       },
       host: function () {
         return this.summary.host || {};
+      },
+      cpuLoadValues: function () {
+        var load = this.realtime.cpu && this.realtime.cpu.load;
+        return Array.isArray(load) ? load : [];
+      },
+      perCoreValues: function () {
+        var cores = this.realtime.cpu && this.realtime.cpu.per_core;
+        return Array.isArray(cores) ? cores : [];
+      },
+      realtimeSeries: function () {
+        var series = this.realtime.series;
+        return Array.isArray(series) ? series : [];
+      },
+      realtimeDisks: function () {
+        var disks = this.realtime.disks;
+        return Array.isArray(disks) ? disks : [];
+      },
+      dockerContainers: function () {
+        var containers = this.docker && this.docker.containers;
+        return Array.isArray(containers) ? containers : [];
+      },
+      dockerCounts: function () {
+        var counts = (this.docker && this.docker.counts) || {};
+        return {
+          total: Number(counts.total) || 0,
+          running: Number(counts.running) || 0
+        };
+      },
+      securityBans: function () {
+        var bans = this.security && this.security.banned;
+        return Array.isArray(bans) ? bans : [];
+      },
+      securityOffenders: function () {
+        var offenders = this.security && this.security.offenders;
+        return Array.isArray(offenders) ? offenders : [];
+      },
+      rootDiskLabel: function () {
+        var disks = this.realtimeDisks;
+        if (!disks.length) {
+          return "等待磁盘数据";
+        }
+        // "/" 是 Linux 的系统盘；没有就退到第一个分区。
+        var target = disks[0];
+        for (var index = 0; index < disks.length; index += 1) {
+          if (disks[index].mount === "/") {
+            target = disks[index];
+            break;
+          }
+        }
+        return "系统盘 " + target.device + " · 剩余 " + this.formatGB(target.free, 1);
       },
       servicesUp: function () {
         return this.services.filter(function (item) {
@@ -214,24 +350,11 @@
         if (!Number.isFinite(boot) || boot <= 0) {
           return "";
         }
-        var seconds = Math.max(0, Math.floor(Date.now() / 1000 - boot));
-        if (seconds < 60) {
-          return seconds + " 秒";
-        }
-        var days = Math.floor(seconds / 86400);
-        var hours = Math.floor((seconds % 86400) / 3600);
-        var minutes = Math.floor((seconds % 3600) / 60);
-        if (days > 0) {
-          return days + " 天 " + hours + " 小时 " + minutes + " 分";
-        }
-        if (hours > 0) {
-          return hours + " 小时 " + minutes + " 分";
-        }
-        return minutes + " 分";
+        return this.formatUptime(Math.max(0, Math.floor(Date.now() / 1000 - boot)));
       }
     },
       mounted: async function () {
-        var themeApi = window.LightOpsTheme || {};
+        var themeApi = window.FoxOpsTheme || {};
         var savedTheme = themeApi.read ? themeApi.read() : "";
         var initialTheme =
           savedTheme === "light" || savedTheme === "dark"
@@ -267,6 +390,14 @@
         }
         this.refresh();
         this.initializeWeather();
+        // 带 #sysops / #security / #admin 直接进来时落在对应页面；管理页只认管理员。
+        var initialView = window.location.hash.replace("#", "");
+        var adminViews = initialView === "security" || initialView === "admin";
+        if (initialView === "sysops" || (adminViews && this.isAdmin)) {
+          this.view = initialView;
+        }
+        this.securityOpen = this.view === "security" || this.view === "admin";
+        this.syncViewTimers();
         refreshTimer = window.setInterval(this.refresh, 30000);
         weatherTimer = window.setInterval(this.refreshWeather, WEATHER_REFRESH_MS);
         clockTimer = window.setInterval(function () {
@@ -277,6 +408,10 @@
         window.clearInterval(refreshTimer);
         window.clearInterval(weatherTimer);
         window.clearInterval(clockTimer);
+        window.clearInterval(sysopsTimer);
+        window.clearInterval(dockerTimer);
+        window.clearInterval(securityTimer);
+        window.clearTimeout(securityClockTimer);
       },
     methods: {
       authHeaders: function () {
@@ -311,15 +446,24 @@
           window.location.replace("/login.html");
         }
       },
-      toggleTheme: function () {
+      toggleTheme: function (event) {
         var next = this.theme === "light" ? "dark" : "light";
-        this.theme = next;
-        var themeApi = window.LightOpsTheme || {};
-        if (themeApi.apply) {
-          themeApi.apply(next);
-        }
+        var themeApi = window.FoxOpsTheme || {};
+        var origin = event && event.currentTarget ? event.currentTarget : null;
+        var self = this;
         if (themeApi.save) {
           themeApi.save(next);
+        }
+        // 扩散切换：快照提交时再改响应式状态，避免图标先于动画跳变。
+        if (themeApi.reveal) {
+          themeApi.reveal(next, origin, function () {
+            self.theme = next;
+          });
+          return;
+        }
+        this.theme = next;
+        if (themeApi.apply) {
+          themeApi.apply(next);
         }
       },
       openPasswordModal: function () {
@@ -553,6 +697,355 @@
         this.trendHover = null;
         this.refresh();
       },
+      setView: function (next) {
+        if (this.view === next) {
+          return;
+        }
+        // 安全防护 / 后台管理只对管理员开放；访客即便手改 hash 也留在原页。
+        if ((next === "security" || next === "admin") && !this.isAdmin) {
+          return;
+        }
+        this.view = next;
+        if (next === "security" || next === "admin") {
+          this.securityOpen = true;
+        }
+        if ("#" + next !== window.location.hash) {
+          window.history.replaceState(null, "", "#" + next);
+        }
+        this.syncViewTimers();
+      },
+      openSecurityGroup: function () {
+        this.securityOpen = true;
+        this.setView("security");
+      },
+      toggleSecurityGroup: function () {
+        this.securityOpen = !this.securityOpen;
+      },
+      syncViewTimers: function () {
+        // 切走就停表：看不见的页面不该继续定时敲服务器。
+        window.clearInterval(sysopsTimer);
+        window.clearInterval(dockerTimer);
+        window.clearInterval(securityTimer);
+        window.clearTimeout(securityClockTimer);
+        sysopsTimer = null;
+        dockerTimer = null;
+        securityTimer = null;
+        securityClockTimer = null;
+        if (this.view === "sysops") {
+          this.refreshSysops();
+          this.refreshDocker();
+          sysopsTimer = window.setInterval(this.refreshSysops, SYSOPS_REFRESH_MS);
+          dockerTimer = window.setInterval(this.refreshDocker, DOCKER_REFRESH_MS);
+          return;
+        }
+        if (this.view === "security" && this.isAdmin) {
+          this.tickSecurityClock();
+          this.refreshSecurity();
+          securityTimer = window.setInterval(
+            this.refreshSecurity,
+            SECURITY_REFRESH_MS
+          );
+          this.scheduleSecurityClockTick();
+        }
+        if (this.view === "admin" && this.isAdmin) {
+          this.refreshPolicy();
+        }
+      },
+      // 每秒只排下一次整秒，而不是用 setInterval(1000)：定时器的回调会被 5 秒
+      // 刷新、图表重绘推迟，固定间隔一旦累计到跨过整秒，秒表就会"两秒跳一格"。
+      scheduleSecurityClockTick: function () {
+        var vm = this;
+        // 按服务器时间算到下一个整秒的间隔，跳秒点才和显示值对齐。
+        var corrected = Date.now() + this.securityServerOffsetMs;
+        var toNextSecond = 1000 - (((corrected % 1000) + 1000) % 1000) + 20;
+        securityClockTimer = window.setTimeout(function () {
+          if (vm.view !== "security") {
+            securityClockTimer = null;
+            return;
+          }
+          vm.tickSecurityClock();
+          vm.scheduleSecurityClockTick();
+        }, toNextSecond);
+      },
+      tickSecurityClock: function () {
+        this.securityClock = this.formatClock(
+          new Date(Date.now() + this.securityServerOffsetMs)
+        );
+      },
+      refreshSysops: async function () {
+        if (this.view !== "sysops") {
+          return;
+        }
+        try {
+          var realtime = await this.fetchJson("/api/sysops/realtime");
+          if (payloadChanged(this.realtime, realtime)) {
+            this.realtime = realtime;
+          }
+          this.sysopsError = "";
+          this.sysopsUpdatedAt = this.formatClock();
+        } catch (error) {
+          this.sysopsError = error.message || "无法加载实时监控数据";
+        }
+      },
+      refreshDocker: async function () {
+        if (this.dockerLoading) {
+          return;
+        }
+        this.dockerLoading = true;
+        try {
+          var docker = await this.fetchJson("/api/sysops/docker");
+          if (payloadChanged(this.docker, docker)) {
+            this.docker = docker;
+          }
+        } catch (error) {
+          this.docker = {
+            available: false,
+            reason: error.message || "docker 数据加载失败",
+            hint: null,
+            containers: [],
+            counts: { total: 0, running: 0 }
+          };
+        } finally {
+          this.dockerLoading = false;
+        }
+      },
+      refreshSecurity: async function () {
+        if (this.view !== "security" || !this.isAdmin || this.securityBusy) {
+          return;
+        }
+        this.securityBusy = true;
+        try {
+          var next = await this.fetchJson("/api/security/status", {
+            headers: this.authHeaders()
+          });
+          // 每次拿到状态就校正一次客户端时钟偏移，数据更新时间跟服务器对齐。
+          var serverTime = Date.parse(next.server_time || "");
+          this.securityServerOffsetMs = Number.isFinite(serverTime)
+            ? serverTime - Date.now()
+            : 0;
+          this.tickSecurityClock();
+          // server_time 每次都变，比对时忽略；其余字段一样就不重渲染。
+          if (payloadChanged(this.security, next, ["server_time"])) {
+            this.security = next;
+          }
+          this.securityReady = true;
+          this.securityError = "";
+        } catch (error) {
+          this.securityError = error.message || "无法读取安全防护数据";
+        } finally {
+          this.securityBusy = false;
+        }
+      },
+      unbanIp: async function (ip) {
+        if (!window.confirm("确认解封 " + ip + "？解封后该来源可以立即继续访问。")) {
+          return;
+        }
+        try {
+          await this.fetchJson("/api/security/unban", {
+            method: "POST",
+            headers: Object.assign(
+              { "Content-Type": "application/json" },
+              this.authHeaders()
+            ),
+            body: JSON.stringify({ ip: ip })
+          });
+          await this.refreshSecurity();
+        } catch (error) {
+          window.alert("解封失败：" + error.message);
+        }
+      },
+      refreshPolicy: async function () {
+        if (this.view !== "admin" || !this.isAdmin || this.policyLoading) {
+          return;
+        }
+        this.policyLoading = true;
+        try {
+          this.policy = await this.fetchJson("/api/security/policy", {
+            headers: this.authHeaders()
+          });
+          this.fillPolicyForm(this.policy.current || {});
+          this.policyError = "";
+        } catch (error) {
+          this.policyError = error.message || "无法读取限流策略";
+        } finally {
+          this.policyLoading = false;
+        }
+      },
+      fillPolicyForm: function (current) {
+        this.policyForm = {
+          enabled: current.enabled !== false,
+          burst_limit: Number(current.burst_limit) || 60,
+          burst_window_seconds: Number(current.burst_window_seconds) || 10,
+          sustained_limit: Number(current.sustained_limit) || 300,
+          sustained_window_seconds: Number(current.sustained_window_seconds) || 60,
+          max_concurrent: Number(current.max_concurrent) || 24,
+          max_global_concurrent: Number(current.max_global_concurrent) || 200,
+          max_body_kib: Math.max(
+            1,
+            Math.round((Number(current.max_body_bytes) || 1048576) / 1024)
+          ),
+          strike_limit: Number(current.strike_limit) || 3,
+          strike_window_seconds: Number(current.strike_window_seconds) || 300,
+          ban_seconds: Number(current.ban_seconds) || 600,
+          max_ban_seconds: Number(current.max_ban_seconds) || 86400
+        };
+      },
+      policyMin: function (name) {
+        var bound = (this.policy.bounds || {})[name];
+        return bound && bound.min !== undefined ? bound.min : null;
+      },
+      policyMax: function (name) {
+        var bound = (this.policy.bounds || {})[name];
+        return bound && bound.max !== undefined ? bound.max : null;
+      },
+      policyRequestPayload: function () {
+        var form = this.policyForm;
+        return {
+          enabled: !!form.enabled,
+          burst_limit: Number(form.burst_limit),
+          burst_window_seconds: Number(form.burst_window_seconds),
+          sustained_limit: Number(form.sustained_limit),
+          sustained_window_seconds: Number(form.sustained_window_seconds),
+          max_concurrent: Number(form.max_concurrent),
+          max_global_concurrent: Number(form.max_global_concurrent),
+          max_body_bytes: Math.max(1024, Math.round(Number(form.max_body_kib) * 1024)),
+          strike_limit: Number(form.strike_limit),
+          strike_window_seconds: Number(form.strike_window_seconds),
+          ban_seconds: Number(form.ban_seconds),
+          max_ban_seconds: Number(form.max_ban_seconds)
+        };
+      },
+      flashPolicySuccess: function (message) {
+        this.policySuccess = message;
+        var self = this;
+        window.setTimeout(function () {
+          self.policySuccess = "";
+        }, 4000);
+      },
+      savePolicy: async function () {
+        if (this.policySaving) {
+          return;
+        }
+        this.policySaving = true;
+        this.policyError = "";
+        this.policySuccess = "";
+        try {
+          this.policy = await this.fetchJson("/api/security/policy", {
+            method: "PUT",
+            headers: Object.assign(
+              { "Content-Type": "application/json" },
+              this.authHeaders()
+            ),
+            body: JSON.stringify(this.policyRequestPayload())
+          });
+          this.fillPolicyForm(this.policy.current || {});
+          this.flashPolicySuccess("策略已保存并立即生效");
+        } catch (error) {
+          this.policyError = error.message || "保存策略失败";
+        } finally {
+          this.policySaving = false;
+        }
+      },
+      resetPolicy: async function () {
+        if (!window.confirm("恢复环境变量中的默认限流策略？当前自定义值会被删除。")) {
+          return;
+        }
+        if (this.policySaving) {
+          return;
+        }
+        this.policySaving = true;
+        this.policyError = "";
+        this.policySuccess = "";
+        try {
+          this.policy = await this.fetchJson("/api/security/policy", {
+            method: "DELETE",
+            headers: this.authHeaders()
+          });
+          this.fillPolicyForm(this.policy.current || {});
+          this.flashPolicySuccess("已恢复环境默认策略");
+        } catch (error) {
+          this.policyError = error.message || "恢复默认策略失败";
+        } finally {
+          this.policySaving = false;
+        }
+      },
+      realtimePoints: function (key) {
+        var series = this.realtimeSeries;
+        if (!series.length) {
+          return "";
+        }
+        var lastIndex = Math.max(1, series.length - 1);
+        return series.map(function (point, index) {
+          return (index / lastIndex * 1000).toFixed(2) + "," + chartY(point[key]).toFixed(2);
+        }).join(" ");
+      },
+      coreBarHeight: function (value) {
+        return Math.max(6, this.clampNumber(value)) + "%";
+      },
+      formatUptime: function (seconds) {
+        var total = Number(seconds);
+        if (!Number.isFinite(total) || total <= 0) {
+          return "";
+        }
+        total = Math.floor(total);
+        if (total < 60) {
+          return total + " 秒";
+        }
+        var days = Math.floor(total / 86400);
+        var hours = Math.floor((total % 86400) / 3600);
+        var minutes = Math.floor((total % 3600) / 60);
+        if (days > 0) {
+          return days + " 天 " + hours + " 小时 " + minutes + " 分";
+        }
+        if (hours > 0) {
+          return hours + " 小时 " + minutes + " 分";
+        }
+        return minutes + " 分";
+      },
+      // 安全防护页的时长一律走这里：前端展示精度到秒/分/时/天，后端只给秒数。
+      formatDuration: function (seconds) {
+        var total = Math.round(Number(seconds));
+        if (!Number.isFinite(total) || total <= 0) {
+          return "0 秒";
+        }
+        if (total < 60) {
+          return total + " 秒";
+        }
+        var minutes = Math.floor(total / 60);
+        if (minutes < 60) {
+          return minutes + " 分钟";
+        }
+        var hours = Math.floor(minutes / 60);
+        var restMinutes = minutes % 60;
+        if (hours < 24) {
+          return restMinutes
+            ? hours + " 小时 " + restMinutes + " 分"
+            : hours + " 小时";
+        }
+        var days = Math.floor(hours / 24);
+        var restHours = hours % 24;
+        return restHours ? days + " 天 " + restHours + " 小时" : days + " 天";
+      },
+      formatRate: function (value) {
+        var bytes = Number(value);
+        if (!Number.isFinite(bytes) || bytes <= 0) {
+          return "0 B/s";
+        }
+        var units = ["B/s", "KB/s", "MB/s", "GB/s"];
+        var index = 0;
+        var size = bytes;
+        while (size >= 1024 && index < units.length - 1) {
+          size = size / 1024;
+          index += 1;
+        }
+        return (index === 0 ? size.toFixed(0) : size.toFixed(1)) + " " + units[index];
+      },
+      formatClock: function (value) {
+        var now = value instanceof Date ? value : new Date();
+        return [now.getHours(), now.getMinutes(), now.getSeconds()].map(function (part) {
+          return String(part).padStart(2, "0");
+        }).join(":");
+      },
       chartPoints: function (key) {
         if (!this.history.length) {
           return "";
@@ -651,6 +1144,14 @@
       },
       formatPercent: function (value) {
         return typeof value === "number" ? value.toFixed(1) + "%" : "--";
+      },
+      // 容器 CPU 常在 0.0x% 量级，1 位小数会全变成 0.0%。
+      formatCpuShare: function (value) {
+        if (value === null || value === undefined || value === "") {
+          return "--";
+        }
+        var number = Number(value);
+        return Number.isFinite(number) ? number.toFixed(2) + "%" : "--";
       },
       formatLoad: function (value) {
         var n = Number(value);
