@@ -46,14 +46,30 @@ async function waitForTrend(cdp) {
 }
 
 withChrome({ port: PORT, profile: PROFILE, windowSize: "1440,1080" }, async (cdp) => {
-  // 视口固定成 1440x1500：headless 窗口尺寸会被物理屏幕高度限制，只靠 windowSize
-  // 会把页面底部（服务状态/footer）裁掉。整页内容约 1450 CSS px 高。
-  await cdp.send("Emulation.setDeviceMetricsOverride", {
-    width: 1440,
-    height: 1500,
-    deviceScaleFactor: 1,
-    mobile: false
-  });
+  // headless 的窗口尺寸会被物理屏幕高度限制，光靠 windowSize 会把页面底部裁掉，
+  // 所以统一用 Emulation 精确指定视口。登录页固定 900 高（卡片居中，留白不夸张），
+  // 面板页在渲染完成后按实际内容高度再调一次。
+  const setViewport = async (width, height) => {
+    await cdp.send("Emulation.setDeviceMetricsOverride", {
+      width,
+      height,
+      deviceScaleFactor: 1,
+      mobile: false
+    });
+    await sleep(350);
+  };
+  // 面板页内容比视口高时会被裁，量一次 scrollHeight 再撑开；撑开后内容可能略微变高，取两次最大值。
+  const fitViewportToContent = async () => {
+    let h = 0;
+    for (let i = 0; i < 3; i++) {
+      const next = await cdp.evaluate(`Math.ceil(document.documentElement.scrollHeight || 0)`);
+      if (!next || next <= h) break;
+      h = next;
+      await setViewport(1440, h);
+    }
+    return h;
+  };
+  await setViewport(1440, 900);
   // ============== 1. 登录页（日间） ==============
   // 先去登录页让 theme.js 跟随系统偏好（headless 无系统偏好 → 落夜间）
   await cdp.send("Page.navigate", { url: BASE + "/login.html" });
@@ -106,6 +122,8 @@ withChrome({ port: PORT, profile: PROFILE, windowSize: "1440,1080" }, async (cdp
   await sleep(500);
 
   // ============== 4. Dashboard 主视图（夜间，完整） ==============
+  const fitted = await fitViewportToContent();
+  console.log("viewport fitted to", fitted);
   await screenshot(cdp, resolve(OUT, "03-dashboard-dark.png"));
 
   // ============== 5. Dashboard 主视图（日间） ==============

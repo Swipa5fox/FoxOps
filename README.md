@@ -1,6 +1,7 @@
 # FoxOps
 
 ![version](https://img.shields.io/badge/version-0.2.2-blue?style=flat-square)
+![release](https://img.shields.io/github/v/release/Swipa5fox/FoxOps?style=flat-square&label=release&color=8b5cf6)
 ![platform](https://img.shields.io/badge/platform-Linux-lightgrey?style=flat-square&logo=linux&logoColor=black)
 ![python](https://img.shields.io/badge/Python-3.9+-3776AB?style=flat-square&logo=python&logoColor=white)
 ![fastapi](https://img.shields.io/badge/FastAPI-009688?style=flat-square&logo=fastapi&logoColor=white)
