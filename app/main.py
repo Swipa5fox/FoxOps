@@ -26,7 +26,7 @@ from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
-from . import __version__, collector, db, defense, ownership, sysops, weather
+from . import __version__, collector, db, defense, docker_ops, ownership, sysops, weather
 from .settings import settings
 
 
@@ -395,6 +395,56 @@ def sysops_realtime() -> dict:
 def sysops_docker() -> dict:
     """docker 容器清单。docker 不可用时返回 available=False 与修复提示。"""
     return sysops.containers()
+
+
+@app.get(
+    "/api/docker/containers/{container_id}/logs",
+    dependencies=[Depends(require_admin_access)],
+)
+def docker_container_logs(
+    container_id: str,
+    tail: Annotated[int, Query(ge=1, le=2000)] = 200,
+) -> dict:
+    """按需抓容器日志尾部。
+
+    app 没有 docker 权限，请求转给 root 探针执行（见 app/docker_ops.py）。
+    """
+    try:
+        answer = docker_ops.container_logs(container_id, tail)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    except docker_ops.QueueError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail=str(exc)
+        ) from exc
+    if not answer.get("ok"):
+        raise HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            detail=str(answer.get("error") or "docker logs 执行失败")[:300],
+        )
+    return answer.get("data") or {}
+
+
+@app.get(
+    "/api/docker/containers/{container_id}/inspect",
+    dependencies=[Depends(require_admin_access)],
+)
+def docker_container_inspect(container_id: str) -> dict:
+    """容器详情摘要；环境变量里名字像密钥的项已打码。"""
+    try:
+        answer = docker_ops.container_inspect(container_id)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    except docker_ops.QueueError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail=str(exc)
+        ) from exc
+    if not answer.get("ok"):
+        raise HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            detail=str(answer.get("error") or "docker inspect 执行失败")[:300],
+        )
+    return answer.get("data") or {}
 
 
 @app.get("/api/alerts")

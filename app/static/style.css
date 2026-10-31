@@ -1923,11 +1923,38 @@ footer {
   display: flex;
   align-items: center;
   gap: 2px;
+  border: 1px solid transparent;
+  border-radius: 9px;
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease;
 }
 
 .sidebar-group .sidebar-parent {
   width: auto;
   flex: 1;
+  border-color: transparent;
+}
+
+/* 选中态由整组承载，右侧折叠按钮一起高亮，底色铺满整行 */
+.sidebar-group.active {
+  border-color: rgba(94, 234, 212, 0.22);
+  background: rgba(94, 234, 212, 0.08);
+}
+
+.sidebar-group.active .sidebar-caret-button {
+  color: var(--teal);
+}
+
+.sidebar-group:not(.active):hover {
+  background: var(--hover-bg);
+}
+
+.sidebar-group .sidebar-parent:hover,
+.sidebar-group .sidebar-parent.active,
+.sidebar-group .sidebar-parent.active:hover {
+  border-color: transparent;
+  background: transparent;
 }
 
 .sidebar-caret-button {
@@ -1965,12 +1992,13 @@ footer {
   transform: rotate(180deg);
 }
 
+/* 子菜单用缩进表达层级，不再加圆点前缀 */
 .sidebar-submenu {
   display: flex;
   flex-direction: column;
   gap: 2px;
   margin: 2px 0;
-  padding-left: 14px;
+  padding-left: 26px;
 }
 
 .sidebar-subitem {
@@ -1978,7 +2006,7 @@ footer {
   width: 100%;
   align-items: center;
   gap: 8px;
-  padding: 8px 10px;
+  padding: 8px 10px 8px 13px;
   border: 1px solid transparent;
   border-radius: 8px;
   color: var(--muted);
@@ -1998,15 +2026,6 @@ footer {
   border-color: rgba(94, 234, 212, 0.18);
   color: var(--teal);
   background: rgba(94, 234, 212, 0.06);
-}
-
-.sidebar-subdot {
-  width: 4px;
-  height: 4px;
-  flex: none;
-  border-radius: 50%;
-  background: currentColor;
-  opacity: 0.75;
 }
 
 .sidebar-icon {
@@ -2207,7 +2226,7 @@ footer {
   display: grid;
   grid-template-columns:
     10px minmax(150px, 1.2fr) minmax(120px, 1fr)
-    minmax(120px, 1fr) minmax(180px, auto);
+    minmax(120px, 1fr) minmax(180px, auto) 14px;
   align-items: center;
   gap: 14px;
   min-height: 60px;
@@ -2315,6 +2334,354 @@ footer {
 
 :root[data-theme="light"] .docker-offline code {
   background: rgba(72, 62, 100, 0.06);
+}
+
+/* 容器行：整行可点击，右端箭头指示展开状态 */
+.docker-entry {
+  display: flex;
+  flex-direction: column;
+}
+
+.docker-row-button {
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.docker-row-button:hover,
+.docker-row-button.expanded {
+  background: var(--hover-bg);
+}
+
+.docker-chevron {
+  width: 7px;
+  height: 7px;
+  border-right: 1.5px solid var(--muted);
+  border-bottom: 1.5px solid var(--muted);
+  transform: rotate(-45deg);
+  transition: transform 0.18s ease, border-color 0.18s ease;
+}
+
+.docker-row-button.expanded .docker-chevron {
+  border-color: var(--teal);
+  transform: rotate(45deg);
+}
+
+/* 展开区：概览 / 日志 */
+.docker-detail {
+  padding: 14px 16px 18px;
+  border-top: 1px solid rgba(163, 154, 186, 0.09);
+  background: rgba(0, 0, 0, 0.12);
+}
+
+.docker-tabs {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.docker-tab {
+  padding: 5px 12px;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  color: var(--muted);
+  background: transparent;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.docker-tab:hover {
+  color: var(--text);
+  background: var(--hover-bg);
+}
+
+.docker-tab.active {
+  border-color: rgba(94, 234, 212, 0.22);
+  color: var(--teal);
+  background: rgba(94, 234, 212, 0.08);
+}
+
+.docker-detail-id {
+  margin-left: auto;
+  color: var(--muted);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 10px;
+  opacity: 0.7;
+}
+
+.docker-tabpanel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.docker-note {
+  margin: 0;
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.docker-note.error {
+  color: #fda4af;
+}
+
+.docker-kv {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px 20px;
+  margin: 0;
+}
+
+.docker-kv > div {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  min-width: 0;
+}
+
+.docker-kv dt {
+  flex: none;
+  width: 66px;
+  color: var(--muted);
+  font-size: 10px;
+}
+
+.docker-kv dd {
+  overflow: hidden;
+  margin: 0;
+  color: var(--text);
+  font-size: 11px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.docker-kv code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 10px;
+}
+
+.docker-subtable {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.docker-subtable h4 {
+  margin: 0;
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+}
+
+.docker-subrow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  color: var(--text);
+  font-size: 11px;
+}
+
+.docker-subrow > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.docker-badge {
+  flex: none;
+  padding: 1px 6px;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  color: var(--muted);
+  font-size: 9px;
+}
+
+.docker-env summary {
+  color: var(--muted);
+  font-size: 10px;
+  cursor: pointer;
+}
+
+.docker-env .docker-subrow {
+  margin-top: 4px;
+}
+
+.mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 10px;
+}
+
+.docker-log-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.docker-seg {
+  display: inline-flex;
+  padding: 2px;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  background: var(--chip-bg);
+}
+
+.docker-seg-btn {
+  padding: 3px 9px;
+  border: 0;
+  border-radius: 5px;
+  color: var(--muted);
+  background: transparent;
+  font-size: 10px;
+  cursor: pointer;
+}
+
+.docker-seg-btn.active {
+  color: var(--teal);
+  background: rgba(94, 234, 212, 0.12);
+}
+
+.docker-auto {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--muted);
+  font-size: 10px;
+  cursor: pointer;
+}
+
+.docker-log-meta {
+  margin-left: auto;
+  color: var(--muted);
+  font-size: 10px;
+}
+
+.docker-log-body {
+  overflow: auto;
+  max-height: 340px;
+  margin: 0;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  background: rgba(0, 0, 0, 0.32);
+  color: #cfc9dd;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 10.5px;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+/* 镜像 / 数据卷 / 网络 */
+.docker-blocks {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.docker-block {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.012);
+}
+
+.docker-block summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 11px 14px;
+  color: var(--text);
+  font-size: 12px;
+  cursor: pointer;
+  list-style: none;
+}
+
+.docker-block summary::-webkit-details-marker {
+  display: none;
+}
+
+.docker-block summary::before {
+  content: "›";
+  color: var(--muted);
+  transition: transform 0.18s ease, color 0.18s ease;
+}
+
+.docker-block[open] summary::before {
+  color: var(--teal);
+  transform: rotate(90deg);
+}
+
+.docker-block summary small {
+  margin-left: auto;
+  color: var(--muted);
+  font-size: 10px;
+}
+
+.docker-table {
+  padding: 0 14px 12px;
+}
+
+.docker-table-head,
+.docker-table-row {
+  display: grid;
+  grid-template-columns:
+    minmax(140px, 1.6fr) minmax(70px, 0.8fr)
+    minmax(70px, 0.6fr) minmax(80px, 0.8fr);
+  gap: 10px;
+  padding: 6px 0;
+  font-size: 11px;
+}
+
+.docker-table-head {
+  border-bottom: 1px solid rgba(163, 154, 186, 0.09);
+  color: var(--muted);
+  font-size: 9.5px;
+  letter-spacing: 0.05em;
+}
+
+/* 数据卷只有三列，别让它套四列栅格留一大块空白 */
+.docker-table-head.three,
+.docker-table-row.three {
+  grid-template-columns: minmax(180px, 2fr) minmax(70px, 0.8fr) minmax(70px, 0.6fr);
+}
+
+.docker-table-row {
+  border-bottom: 1px solid rgba(163, 154, 186, 0.05);
+  color: var(--text);
+}
+
+.docker-table-row > span,
+.docker-table-head > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+:root[data-theme="light"] .docker-detail {
+  background: rgba(72, 62, 100, 0.03);
+}
+
+:root[data-theme="light"] .docker-log-body {
+  border-color: rgba(72, 62, 100, 0.12);
+  background: rgba(72, 62, 100, 0.05);
+  color: var(--text);
+}
+
+:root[data-theme="light"] .docker-block {
+  background: rgba(72, 62, 100, 0.02);
+}
+
+:root[data-theme="light"] .docker-note.error {
+  color: var(--danger);
 }
 
 /* 安全防护 */
@@ -2599,9 +2966,18 @@ footer {
   }
 
   .docker-row {
-    grid-template-columns: 10px minmax(0, 1fr);
+    grid-template-columns: 10px minmax(0, 1fr) 14px;
     gap: 6px 12px;
     padding: 14px 0;
+  }
+
+  .docker-chevron {
+    grid-column: 3;
+    grid-row: 1;
+  }
+
+  .docker-kv {
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .docker-dot {

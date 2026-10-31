@@ -18,6 +18,8 @@
   var clockTimer = null;
   var sysopsTimer = null;
   var dockerTimer = null;
+  // 日志自动刷新单独一个表：跟着视图切走就停，不跟 docker 列表轮询绑在一起。
+  var dockerLogTimer = null;
   var securityTimer = null;
   var securityClockTimer = null;
   var session = window.FoxOpsSession;
@@ -109,11 +111,25 @@
           reason: "",
           hint: null,
           containers: [],
-          counts: { total: 0, running: 0 }
+          counts: { total: 0, running: 0 },
+          images: [],
+          volumes: [],
+          networks: []
         },
         sysopsError: "",
         sysopsUpdatedAt: "",
         dockerLoading: false,
+        // 容器详情：一次只展开一个，日志按需走 root 探针队列拉取。
+        dockerExpanded: "",
+        dockerTab: "overview",
+        dockerDetail: null,
+        dockerDetailLoading: false,
+        dockerDetailError: "",
+        dockerLogs: null,
+        dockerLogsLoading: false,
+        dockerLogsError: "",
+        dockerLogTail: 200,
+        dockerLogAuto: false,
         // 安全防护页（仅管理员）：默认值是页面首次加载前的占位，不是业务假设。
         security: {
           enabled: true,
@@ -202,6 +218,18 @@
           total: Number(counts.total) || 0,
           running: Number(counts.running) || 0
         };
+      },
+      dockerImages: function () {
+        var images = this.docker && this.docker.images;
+        return Array.isArray(images) ? images : [];
+      },
+      dockerVolumes: function () {
+        var volumes = this.docker && this.docker.volumes;
+        return Array.isArray(volumes) ? volumes : [];
+      },
+      dockerNetworks: function () {
+        var networks = this.docker && this.docker.networks;
+        return Array.isArray(networks) ? networks : [];
       },
       securityBans: function () {
         var bans = this.security && this.security.banned;
@@ -410,6 +438,7 @@
         window.clearInterval(clockTimer);
         window.clearInterval(sysopsTimer);
         window.clearInterval(dockerTimer);
+        window.clearInterval(dockerLogTimer);
         window.clearInterval(securityTimer);
         window.clearTimeout(securityClockTimer);
       },
@@ -725,6 +754,8 @@
         // 切走就停表：看不见的页面不该继续定时敲服务器。
         window.clearInterval(sysopsTimer);
         window.clearInterval(dockerTimer);
+        // 日志自动刷新只在展开容器的那一屏有意义，切视图立刻收掉。
+        this.stopDockerLogTimer();
         window.clearInterval(securityTimer);
         window.clearTimeout(securityClockTimer);
         sysopsTimer = null;
@@ -803,11 +834,160 @@
             reason: error.message || "docker 数据加载失败",
             hint: null,
             containers: [],
-            counts: { total: 0, running: 0 }
+            counts: { total: 0, running: 0 },
+            images: [],
+            volumes: [],
+            networks: []
           };
         } finally {
           this.dockerLoading = false;
         }
+      },
+      toggleDockerDetail: function (item) {
+        if (!item || !item.id) {
+          return;
+        }
+        if (this.dockerExpanded === item.id) {
+          this.closeDockerDetail();
+          return;
+        }
+        this.stopDockerLogTimer();
+        this.dockerExpanded = item.id;
+        this.dockerTab = "overview";
+        this.dockerDetail = null;
+        this.dockerDetailError = "";
+        this.dockerLogs = null;
+        this.dockerLogsError = "";
+        this.loadDockerDetail();
+      },
+      closeDockerDetail: function () {
+        this.stopDockerLogTimer();
+        this.dockerExpanded = "";
+        this.dockerDetail = null;
+        this.dockerDetailError = "";
+        this.dockerLogs = null;
+        this.dockerLogsError = "";
+      },
+      setDockerTab: function (tab) {
+        if (this.dockerTab === tab) {
+          return;
+        }
+        this.dockerTab = tab;
+        if (tab === "logs") {
+          if (!this.dockerLogs && !this.dockerLogsLoading) {
+            this.loadDockerLogs();
+          }
+        } else {
+          this.stopDockerLogTimer();
+        }
+      },
+      loadDockerDetail: async function () {
+        var containerId = this.dockerExpanded;
+        if (!containerId) {
+          return;
+        }
+        this.dockerDetailLoading = true;
+        this.dockerDetailError = "";
+        try {
+          var detail = await this.fetchJson(
+            "/api/docker/containers/" + encodeURIComponent(containerId) + "/inspect",
+            { headers: this.authHeaders() }
+          );
+          // 等待期间可能已经切到别的容器，回填前再确认一次。
+          if (this.dockerExpanded === containerId) {
+            this.dockerDetail = detail;
+          }
+        } catch (error) {
+          if (this.dockerExpanded === containerId) {
+            this.dockerDetailError = error.message || "读取容器详情失败";
+          }
+        } finally {
+          this.dockerDetailLoading = false;
+        }
+      },
+      loadDockerLogs: async function () {
+        var containerId = this.dockerExpanded;
+        if (!containerId || this.dockerLogsLoading) {
+          return;
+        }
+        this.dockerLogsLoading = true;
+        this.dockerLogsError = "";
+        try {
+          var logs = await this.fetchJson(
+            "/api/docker/containers/" +
+              encodeURIComponent(containerId) +
+              "/logs?tail=" +
+              this.dockerLogTail,
+            { headers: this.authHeaders() }
+          );
+          if (this.dockerExpanded === containerId) {
+            this.dockerLogs = logs;
+            this.scrollDockerLog();
+          }
+        } catch (error) {
+          if (this.dockerExpanded === containerId) {
+            this.dockerLogsError = error.message || "读取容器日志失败";
+          }
+        } finally {
+          this.dockerLogsLoading = false;
+        }
+      },
+      setDockerLogTail: function (tail) {
+        var next = Number(tail) || 200;
+        if (this.dockerLogTail === next) {
+          return;
+        }
+        this.dockerLogTail = next;
+        this.dockerLogs = null;
+        this.loadDockerLogs();
+      },
+      toggleDockerLogAuto: function (event) {
+        this.stopDockerLogTimer();
+        var checked = !!(event && event.target && event.target.checked);
+        this.dockerLogAuto = checked;
+        if (!checked) {
+          return;
+        }
+        var self = this;
+        dockerLogTimer = window.setInterval(function () {
+          self.loadDockerLogs();
+        }, 3000);
+      },
+      stopDockerLogTimer: function () {
+        if (dockerLogTimer) {
+          window.clearInterval(dockerLogTimer);
+          dockerLogTimer = null;
+        }
+        this.dockerLogAuto = false;
+      },
+      scrollDockerLog: function () {
+        this.$nextTick(function () {
+          var body = document.querySelector(".docker-log-body");
+          if (body) {
+            body.scrollTop = body.scrollHeight;
+          }
+        });
+      },
+      dockerStateLabel: function (detail) {
+        var state = (detail && detail.state) || {};
+        var parts = [state.status || "unknown"];
+        if (state.health) {
+          parts.push("健康检查 " + state.health);
+        }
+        if (state.oom_killed) {
+          parts.push("曾因 OOM 被杀");
+        }
+        return parts.join(" · ");
+      },
+      formatDockerTime: function (value) {
+        if (!value || String(value).indexOf("0001-01-01") === 0) {
+          return "--";
+        }
+        var date = new Date(value);
+        if (!Number.isFinite(date.getTime())) {
+          return String(value);
+        }
+        return date.toLocaleString();
       },
       refreshSecurity: async function () {
         if (this.view !== "security" || !this.isAdmin || this.securityBusy) {

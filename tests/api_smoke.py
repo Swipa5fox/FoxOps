@@ -110,6 +110,9 @@ with TestClient(app) as client:
     assert client.get("/api/audit").status_code == 401
     assert client.post("/api/maintenance/run").status_code == 401
     assert client.post("/api/services/nginx/restart").status_code == 401
+    # 容器详情与日志可能带出挂载路径、环境变量，必须走管理员门禁。
+    assert client.get("/api/docker/containers/0123456789ab/logs").status_code == 401
+    assert client.get("/api/docker/containers/0123456789ab/inspect").status_code == 401
 
     # 角色权限：Guest 只读，管理操作一律 403；Admin 会话拥有管理权限。
     guest_login = client.post(

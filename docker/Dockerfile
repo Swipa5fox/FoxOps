@@ -15,6 +15,11 @@ COPY app ./app
 COPY docker/entrypoint.sh /usr/local/bin/foxops-entrypoint
 COPY docker/healthcheck.py /usr/local/bin/foxops-healthcheck
 
+# 强制代码目录全员可读：业务进程以 uid 10001 运行，若某个文件权限是 600/640
+# （Windows 上打包或单文件上传时容易残留），容器会以 PermissionError 崩溃循环。
+# 2026-10-30 线上 docker_ops.py 权限 640 导致 app 起不来、web 容器卡在 Created。
+RUN chmod -R a+rX /opt/foxops/app
+
 # 固定 uid/gid：命名卷首次创建时由 entrypoint 修正属主，业务进程永不跑 root。
 RUN groupadd --system --gid 10001 foxops \
  && useradd --system --uid 10001 --gid 10001 --home-dir /var/lib/foxops \

@@ -55,7 +55,11 @@
             </svg>
             <span>系统运维</span>
           </button>
-          <div v-if="isAdmin" class="sidebar-group" :class="{ open: securityOpen }">
+          <div
+            v-if="isAdmin"
+            class="sidebar-group"
+            :class="{ open: securityOpen, active: view === 'security' }"
+          >
             <button
               type="button"
               class="sidebar-item sidebar-parent"
@@ -90,7 +94,6 @@
               :aria-current="view === 'admin' ? 'page' : null"
               @click="setView('admin')"
             >
-              <span class="sidebar-subdot" aria-hidden="true"></span>
               <span>后台管理</span>
             </button>
           </div>
@@ -783,17 +786,126 @@
               </div>
             </div>
             <div v-if="docker.available" class="docker-list">
-              <div v-for="item in dockerContainers" :key="item.id" class="docker-row">
-                <span class="docker-dot" :class="item.state" :title="item.state"></span>
-                <div class="docker-ident">
-                  <strong>{{ item.name || item.id }}</strong>
-                  <small>{{ item.image }}</small>
-                </div>
-                <div class="docker-cell docker-status">{{ item.status || item.state }}</div>
-                <div class="docker-cell docker-ports" :title="item.ports || ''">{{ item.ports || "未映射端口" }}</div>
-                <div class="docker-cell docker-load">
-                  <span>CPU <strong>{{ formatCpuShare(item.cpu_percent) }}</strong></span>
-                  <span>内存 <strong>{{ item.memory_usage || "--" }}</strong></span>
+              <div v-for="item in dockerContainers" :key="item.id" class="docker-entry">
+                <button
+                  type="button"
+                  class="docker-row docker-row-button"
+                  :class="{ expanded: dockerExpanded === item.id }"
+                  :aria-expanded="dockerExpanded === item.id ? 'true' : 'false'"
+                  @click="toggleDockerDetail(item)"
+                >
+                  <span class="docker-dot" :class="item.state" :title="item.state"></span>
+                  <span class="docker-ident">
+                    <strong>{{ item.name || item.id }}</strong>
+                    <small>{{ item.image }}</small>
+                  </span>
+                  <span class="docker-cell docker-status">{{ item.status || item.state }}</span>
+                  <span class="docker-cell docker-ports" :title="item.ports || ''">{{ item.ports || "未映射端口" }}</span>
+                  <span class="docker-cell docker-load">
+                    <span>CPU <strong>{{ formatCpuShare(item.cpu_percent) }}</strong></span>
+                    <span>内存 <strong>{{ item.memory_usage || "--" }}</strong></span>
+                  </span>
+                  <span class="docker-chevron" aria-hidden="true"></span>
+                </button>
+
+                <div v-if="dockerExpanded === item.id" class="docker-detail">
+                  <div class="docker-tabs" role="tablist">
+                    <button
+                      type="button"
+                      class="docker-tab"
+                      :class="{ active: dockerTab === 'overview' }"
+                      role="tab"
+                      :aria-selected="dockerTab === 'overview' ? 'true' : 'false'"
+                      @click="setDockerTab('overview')"
+                    >概览</button>
+                    <button
+                      type="button"
+                      class="docker-tab"
+                      :class="{ active: dockerTab === 'logs' }"
+                      role="tab"
+                      :aria-selected="dockerTab === 'logs' ? 'true' : 'false'"
+                      @click="setDockerTab('logs')"
+                    >日志</button>
+                    <code class="docker-detail-id">{{ item.id }}</code>
+                  </div>
+
+                  <div v-if="dockerTab === 'overview'" class="docker-tabpanel">
+                    <p v-if="dockerDetailLoading" class="docker-note">正在读取容器详情…</p>
+                    <p v-else-if="dockerDetailError" class="docker-note error">{{ dockerDetailError }}</p>
+                    <template v-else-if="dockerDetail">
+                      <dl class="docker-kv">
+                        <div><dt>镜像</dt><dd><code>{{ dockerDetail.image || "--" }}</code></dd></div>
+                        <div><dt>状态</dt><dd>{{ dockerStateLabel(dockerDetail) }}</dd></div>
+                        <div><dt>启动时间</dt><dd>{{ formatDockerTime(dockerDetail.state.started_at) }}</dd></div>
+                        <div><dt>重启次数</dt><dd>{{ dockerDetail.state.restart_count === null ? "--" : dockerDetail.state.restart_count }}</dd></div>
+                        <div><dt>退出码</dt><dd>{{ dockerDetail.state.exit_code === null ? "--" : dockerDetail.state.exit_code }}</dd></div>
+                        <div><dt>重启策略</dt><dd>{{ dockerDetail.restart_policy || "no" }}</dd></div>
+                        <div><dt>日志驱动</dt><dd>{{ dockerDetail.log_driver || "--" }}</dd></div>
+                        <div><dt>运行用户</dt><dd>{{ dockerDetail.user || "镜像默认" }}</dd></div>
+                      </dl>
+
+                      <div v-if="dockerDetail.ports.length" class="docker-subtable">
+                        <h4>端口映射</h4>
+                        <div v-for="(port, index) in dockerDetail.ports" :key="'port' + index" class="docker-subrow">
+                          <span>{{ port.host_ip || "0.0.0.0" }}:{{ port.host_port }}</span>
+                          <span class="muted">映射到</span>
+                          <span>{{ port.container }}</span>
+                        </div>
+                      </div>
+
+                      <div v-if="dockerDetail.mounts.length" class="docker-subtable">
+                        <h4>挂载</h4>
+                        <div v-for="(mount, index) in dockerDetail.mounts" :key="'mount' + index" class="docker-subrow">
+                          <span class="docker-badge">{{ mount.type }}</span>
+                          <span class="mono" :title="mount.source">{{ mount.source }}</span>
+                          <span class="muted">→</span>
+                          <span class="mono">{{ mount.destination }}</span>
+                          <span class="muted">{{ mount.rw ? "读写" : "只读" }}</span>
+                        </div>
+                      </div>
+
+                      <div v-if="dockerDetail.networks.length" class="docker-subtable">
+                        <h4>网络</h4>
+                        <div v-for="(network, index) in dockerDetail.networks" :key="'net' + index" class="docker-subrow">
+                          <span>{{ network.name }}</span>
+                          <span class="mono">{{ network.ip || "无 IP" }}</span>
+                          <span class="muted">{{ network.gateway }}</span>
+                        </div>
+                      </div>
+
+                      <details v-if="dockerDetail.env.length" class="docker-env">
+                        <summary>
+                          环境变量 {{ dockerDetail.env.length }} 项
+                          <span class="muted">（名字像密钥的值已打码）</span>
+                        </summary>
+                        <div v-for="(env, index) in dockerDetail.env" :key="'env' + index" class="docker-subrow">
+                          <span class="mono">{{ env.key }}</span>
+                          <span class="mono muted">{{ env.value || "（空）" }}</span>
+                        </div>
+                      </details>
+                    </template>
+                  </div>
+
+                  <div v-else class="docker-tabpanel">
+                    <div class="docker-log-toolbar">
+                      <div class="docker-seg" role="group" aria-label="日志行数">
+                        <button type="button" class="docker-seg-btn" :class="{ active: dockerLogTail === 200 }" @click="setDockerLogTail(200)">200</button>
+                        <button type="button" class="docker-seg-btn" :class="{ active: dockerLogTail === 500 }" @click="setDockerLogTail(500)">500</button>
+                        <button type="button" class="docker-seg-btn" :class="{ active: dockerLogTail === 1000 }" @click="setDockerLogTail(1000)">1000</button>
+                      </div>
+                      <button type="button" class="text-button" :disabled="dockerLogsLoading" @click="loadDockerLogs">
+                        {{ dockerLogsLoading ? "读取中" : "刷新" }}
+                      </button>
+                      <label class="docker-auto">
+                        <input type="checkbox" :checked="dockerLogAuto" @change="toggleDockerLogAuto" />
+                        <span>自动刷新</span>
+                      </label>
+                      <span v-if="dockerLogs" class="docker-log-meta">{{ dockerLogs.lines }} 行</span>
+                    </div>
+                    <p v-if="dockerLogsError" class="docker-note error">{{ dockerLogsError }}</p>
+                    <pre v-else class="docker-log-body">{{ dockerLogs ? (dockerLogs.text || "（这个容器还没有输出）") : "正在读取日志…" }}</pre>
+                    <p v-if="dockerLogs && dockerLogs.clipped" class="docker-note">日志过长，仅保留最后 400KB</p>
+                  </div>
                 </div>
               </div>
               <div v-if="!dockerContainers.length" class="empty-state success">
@@ -804,6 +916,60 @@
               <strong>读取不到 docker 容器</strong>
               <p>{{ docker.reason || "docker 不可用" }}</p>
               <code v-if="docker.hint">{{ docker.hint }}</code>
+            </div>
+
+            <div v-if="docker.available" class="docker-blocks">
+              <details class="docker-block">
+                <summary>
+                  <span>镜像</span>
+                  <small>{{ dockerImages.length }} 个</small>
+                </summary>
+                <div class="docker-table">
+                  <div class="docker-table-head">
+                    <span>仓库</span><span>标签</span><span>大小</span><span>创建</span>
+                  </div>
+                  <div v-for="image in dockerImages" :key="image.id + image.repository + image.tag" class="docker-table-row">
+                    <span class="mono" :title="image.id">{{ image.repository }}</span>
+                    <span>{{ image.tag }}</span>
+                    <span>{{ image.size }}</span>
+                    <span class="muted">{{ image.created_since }}</span>
+                  </div>
+                  <p v-if="!dockerImages.length" class="docker-note">没有镜像</p>
+                </div>
+              </details>
+
+              <details class="docker-block">
+                <summary>
+                  <span>数据卷</span>
+                  <small>{{ dockerVolumes.length }} 个</small>
+                </summary>
+                <div class="docker-table">
+                  <div class="docker-table-head three"><span>名称</span><span>驱动</span><span>范围</span></div>
+                  <div v-for="volume in dockerVolumes" :key="volume.name" class="docker-table-row three">
+                    <span class="mono">{{ volume.name }}</span>
+                    <span>{{ volume.driver }}</span>
+                    <span class="muted">{{ volume.scope }}</span>
+                  </div>
+                  <p v-if="!dockerVolumes.length" class="docker-note">没有数据卷</p>
+                </div>
+              </details>
+
+              <details class="docker-block">
+                <summary>
+                  <span>网络</span>
+                  <small>{{ dockerNetworks.length }} 个</small>
+                </summary>
+                <div class="docker-table">
+                  <div class="docker-table-head"><span>名称</span><span>驱动</span><span>范围</span><span>内部</span></div>
+                  <div v-for="network in dockerNetworks" :key="network.name" class="docker-table-row">
+                    <span class="mono">{{ network.name }}</span>
+                    <span>{{ network.driver }}</span>
+                    <span class="muted">{{ network.scope }}</span>
+                    <span class="muted">{{ network.internal ? "是" : "否" }}</span>
+                  </div>
+                  <p v-if="!dockerNetworks.length" class="docker-note">没有网络</p>
+                </div>
+              </details>
             </div>
           </section>
         </template>

@@ -335,204 +335,311 @@ const _hoisted_169 = {
   key: 0,
   class: "docker-list"
 }
-const _hoisted_170 = ["title"]
-const _hoisted_171 = { class: "docker-ident" }
-const _hoisted_172 = { class: "docker-cell docker-status" }
-const _hoisted_173 = ["title"]
-const _hoisted_174 = { class: "docker-cell docker-load" }
-const _hoisted_175 = {
+const _hoisted_170 = ["aria-expanded", "onClick"]
+const _hoisted_171 = ["title"]
+const _hoisted_172 = { class: "docker-ident" }
+const _hoisted_173 = { class: "docker-cell docker-status" }
+const _hoisted_174 = ["title"]
+const _hoisted_175 = { class: "docker-cell docker-load" }
+const _hoisted_176 = {
+  key: 0,
+  class: "docker-detail"
+}
+const _hoisted_177 = {
+  class: "docker-tabs",
+  role: "tablist"
+}
+const _hoisted_178 = ["aria-selected"]
+const _hoisted_179 = ["aria-selected"]
+const _hoisted_180 = { class: "docker-detail-id" }
+const _hoisted_181 = {
+  key: 0,
+  class: "docker-tabpanel"
+}
+const _hoisted_182 = {
+  key: 0,
+  class: "docker-note"
+}
+const _hoisted_183 = {
+  key: 1,
+  class: "docker-note error"
+}
+const _hoisted_184 = { class: "docker-kv" }
+const _hoisted_185 = {
+  key: 0,
+  class: "docker-subtable"
+}
+const _hoisted_186 = {
+  key: 1,
+  class: "docker-subtable"
+}
+const _hoisted_187 = { class: "docker-badge" }
+const _hoisted_188 = ["title"]
+const _hoisted_189 = { class: "mono" }
+const _hoisted_190 = { class: "muted" }
+const _hoisted_191 = {
+  key: 2,
+  class: "docker-subtable"
+}
+const _hoisted_192 = { class: "mono" }
+const _hoisted_193 = { class: "muted" }
+const _hoisted_194 = {
+  key: 3,
+  class: "docker-env"
+}
+const _hoisted_195 = { class: "mono" }
+const _hoisted_196 = { class: "mono muted" }
+const _hoisted_197 = {
+  key: 1,
+  class: "docker-tabpanel"
+}
+const _hoisted_198 = { class: "docker-log-toolbar" }
+const _hoisted_199 = {
+  class: "docker-seg",
+  role: "group",
+  "aria-label": "日志行数"
+}
+const _hoisted_200 = ["disabled"]
+const _hoisted_201 = { class: "docker-auto" }
+const _hoisted_202 = ["checked"]
+const _hoisted_203 = {
+  key: 0,
+  class: "docker-log-meta"
+}
+const _hoisted_204 = {
+  key: 0,
+  class: "docker-note error"
+}
+const _hoisted_205 = {
+  key: 1,
+  class: "docker-log-body"
+}
+const _hoisted_206 = {
+  key: 2,
+  class: "docker-note"
+}
+const _hoisted_207 = {
   key: 0,
   class: "empty-state success"
 }
-const _hoisted_176 = {
+const _hoisted_208 = {
   key: 1,
   class: "docker-offline"
 }
-const _hoisted_177 = { key: 0 }
-const _hoisted_178 = {
+const _hoisted_209 = { key: 0 }
+const _hoisted_210 = {
+  key: 2,
+  class: "docker-blocks"
+}
+const _hoisted_211 = { class: "docker-block" }
+const _hoisted_212 = { class: "docker-table" }
+const _hoisted_213 = ["title"]
+const _hoisted_214 = { class: "muted" }
+const _hoisted_215 = {
+  key: 0,
+  class: "docker-note"
+}
+const _hoisted_216 = { class: "docker-block" }
+const _hoisted_217 = { class: "docker-table" }
+const _hoisted_218 = { class: "mono" }
+const _hoisted_219 = { class: "muted" }
+const _hoisted_220 = {
+  key: 0,
+  class: "docker-note"
+}
+const _hoisted_221 = { class: "docker-block" }
+const _hoisted_222 = { class: "docker-table" }
+const _hoisted_223 = { class: "mono" }
+const _hoisted_224 = { class: "muted" }
+const _hoisted_225 = { class: "muted" }
+const _hoisted_226 = {
+  key: 0,
+  class: "docker-note"
+}
+const _hoisted_227 = {
   class: "hero sysops-hero",
   "aria-labelledby": "security-title"
 }
-const _hoisted_179 = { class: "host-summary" }
-const _hoisted_180 = { class: "hero-status" }
-const _hoisted_181 = { class: "hero-status-row" }
-const _hoisted_182 = {
+const _hoisted_228 = { class: "host-summary" }
+const _hoisted_229 = { class: "hero-status" }
+const _hoisted_230 = { class: "hero-status-row" }
+const _hoisted_231 = {
   class: "hero-status-uptime muted",
   title: "与服务器时间同步，每秒更新"
 }
-const _hoisted_183 = {
+const _hoisted_232 = {
   key: 0,
   class: "error-banner",
   role: "alert"
 }
-const _hoisted_184 = {
+const _hoisted_233 = {
   class: "metric-grid security-grid",
   "aria-label": "防护概览"
 }
-const _hoisted_185 = { class: "metric-card" }
-const _hoisted_186 = { class: "metric-body" }
-const _hoisted_187 = { class: "metric-value" }
-const _hoisted_188 = { class: "capacity-details" }
-const _hoisted_189 = { class: "metric-foot" }
-const _hoisted_190 = { class: "metric-card" }
-const _hoisted_191 = { class: "metric-card-head" }
-const _hoisted_192 = { class: "metric-body" }
-const _hoisted_193 = { class: "metric-value" }
-const _hoisted_194 = { class: "capacity-details" }
-const _hoisted_195 = { class: "metric-card" }
-const _hoisted_196 = { class: "metric-card-head" }
-const _hoisted_197 = { class: "metric-body" }
-const _hoisted_198 = { class: "metric-value" }
-const _hoisted_199 = { class: "capacity-details" }
-const _hoisted_200 = { class: "metric-foot" }
-const _hoisted_201 = { class: "metric-card" }
-const _hoisted_202 = { class: "metric-body" }
-const _hoisted_203 = { class: "metric-value" }
-const _hoisted_204 = { class: "capacity-details" }
-const _hoisted_205 = { class: "metric-foot" }
-const _hoisted_206 = {
+const _hoisted_234 = { class: "metric-card" }
+const _hoisted_235 = { class: "metric-body" }
+const _hoisted_236 = { class: "metric-value" }
+const _hoisted_237 = { class: "capacity-details" }
+const _hoisted_238 = { class: "metric-foot" }
+const _hoisted_239 = { class: "metric-card" }
+const _hoisted_240 = { class: "metric-card-head" }
+const _hoisted_241 = { class: "metric-body" }
+const _hoisted_242 = { class: "metric-value" }
+const _hoisted_243 = { class: "capacity-details" }
+const _hoisted_244 = { class: "metric-card" }
+const _hoisted_245 = { class: "metric-card-head" }
+const _hoisted_246 = { class: "metric-body" }
+const _hoisted_247 = { class: "metric-value" }
+const _hoisted_248 = { class: "capacity-details" }
+const _hoisted_249 = { class: "metric-foot" }
+const _hoisted_250 = { class: "metric-card" }
+const _hoisted_251 = { class: "metric-body" }
+const _hoisted_252 = { class: "metric-value" }
+const _hoisted_253 = { class: "capacity-details" }
+const _hoisted_254 = { class: "metric-foot" }
+const _hoisted_255 = {
   class: "panel",
   "aria-labelledby": "security-policy-title"
 }
-const _hoisted_207 = { class: "security-policy" }
-const _hoisted_208 = { class: "security-policy-item" }
-const _hoisted_209 = { class: "security-policy-item" }
-const _hoisted_210 = { class: "security-policy-item" }
-const _hoisted_211 = { class: "security-policy-item" }
-const _hoisted_212 = { class: "security-policy-item" }
-const _hoisted_213 = { class: "security-policy-item" }
-const _hoisted_214 = {
+const _hoisted_256 = { class: "security-policy" }
+const _hoisted_257 = { class: "security-policy-item" }
+const _hoisted_258 = { class: "security-policy-item" }
+const _hoisted_259 = { class: "security-policy-item" }
+const _hoisted_260 = { class: "security-policy-item" }
+const _hoisted_261 = { class: "security-policy-item" }
+const _hoisted_262 = { class: "security-policy-item" }
+const _hoisted_263 = {
   class: "panel security-panel",
   "aria-labelledby": "security-bans-title"
 }
-const _hoisted_215 = { class: "panel-head compact" }
-const _hoisted_216 = { class: "muted" }
-const _hoisted_217 = { class: "security-list" }
-const _hoisted_218 = { class: "security-ident" }
-const _hoisted_219 = { class: "security-cell" }
-const _hoisted_220 = ["onClick"]
-const _hoisted_221 = {
+const _hoisted_264 = { class: "panel-head compact" }
+const _hoisted_265 = { class: "muted" }
+const _hoisted_266 = { class: "security-list" }
+const _hoisted_267 = { class: "security-ident" }
+const _hoisted_268 = { class: "security-cell" }
+const _hoisted_269 = ["onClick"]
+const _hoisted_270 = {
   key: 0,
   class: "empty-state success"
 }
-const _hoisted_222 = {
+const _hoisted_271 = {
   class: "panel security-panel",
   "aria-labelledby": "security-offenders-title"
 }
-const _hoisted_223 = { class: "security-list" }
-const _hoisted_224 = { class: "security-ident" }
-const _hoisted_225 = { class: "security-cell" }
-const _hoisted_226 = { class: "security-cell security-tally" }
-const _hoisted_227 = {
+const _hoisted_272 = { class: "security-list" }
+const _hoisted_273 = { class: "security-ident" }
+const _hoisted_274 = { class: "security-cell" }
+const _hoisted_275 = { class: "security-cell security-tally" }
+const _hoisted_276 = {
   key: 0,
   class: "empty-state"
 }
-const _hoisted_228 = {
+const _hoisted_277 = {
   class: "hero sysops-hero",
   "aria-labelledby": "admin-title"
 }
-const _hoisted_229 = { class: "host-summary" }
-const _hoisted_230 = { key: 0 }
-const _hoisted_231 = { class: "hero-status" }
-const _hoisted_232 = { class: "hero-status-row" }
-const _hoisted_233 = ["disabled"]
-const _hoisted_234 = {
+const _hoisted_278 = { class: "host-summary" }
+const _hoisted_279 = { key: 0 }
+const _hoisted_280 = { class: "hero-status" }
+const _hoisted_281 = { class: "hero-status-row" }
+const _hoisted_282 = ["disabled"]
+const _hoisted_283 = {
   key: 0,
   class: "error-banner",
   role: "alert"
 }
-const _hoisted_235 = {
+const _hoisted_284 = {
   key: 1,
   class: "policy-success",
   role: "status"
 }
-const _hoisted_236 = {
+const _hoisted_285 = {
   class: "panel",
   "aria-labelledby": "policy-toggle-title"
 }
-const _hoisted_237 = {
+const _hoisted_286 = {
   class: "policy-toggle",
   for: "policy-enabled"
 }
-const _hoisted_238 = {
+const _hoisted_287 = {
   class: "panel",
   "aria-labelledby": "policy-limit-title"
 }
-const _hoisted_239 = { class: "policy-grid" }
-const _hoisted_240 = {
+const _hoisted_288 = { class: "policy-grid" }
+const _hoisted_289 = {
   class: "policy-field",
   for: "policy-burst"
 }
-const _hoisted_241 = ["min", "max"]
-const _hoisted_242 = {
+const _hoisted_290 = ["min", "max"]
+const _hoisted_291 = {
   class: "policy-field",
   for: "policy-burst-window"
 }
-const _hoisted_243 = ["min", "max"]
-const _hoisted_244 = {
+const _hoisted_292 = ["min", "max"]
+const _hoisted_293 = {
   class: "policy-field",
   for: "policy-sustained"
 }
-const _hoisted_245 = ["min", "max"]
-const _hoisted_246 = {
+const _hoisted_294 = ["min", "max"]
+const _hoisted_295 = {
   class: "policy-field",
   for: "policy-sustained-window"
 }
-const _hoisted_247 = ["min", "max"]
-const _hoisted_248 = {
+const _hoisted_296 = ["min", "max"]
+const _hoisted_297 = {
   class: "policy-field",
   for: "policy-max-concurrent"
 }
-const _hoisted_249 = ["min", "max"]
-const _hoisted_250 = {
+const _hoisted_298 = ["min", "max"]
+const _hoisted_299 = {
   class: "policy-field",
   for: "policy-max-global"
 }
-const _hoisted_251 = ["min", "max"]
-const _hoisted_252 = {
+const _hoisted_300 = ["min", "max"]
+const _hoisted_301 = {
   class: "policy-field",
   for: "policy-body-kib"
 }
-const _hoisted_253 = {
+const _hoisted_302 = {
   class: "panel",
   "aria-labelledby": "policy-ban-title"
 }
-const _hoisted_254 = { class: "policy-grid" }
-const _hoisted_255 = {
+const _hoisted_303 = { class: "policy-grid" }
+const _hoisted_304 = {
   class: "policy-field",
   for: "policy-strike"
 }
-const _hoisted_256 = ["min", "max"]
-const _hoisted_257 = {
+const _hoisted_305 = ["min", "max"]
+const _hoisted_306 = {
   class: "policy-field",
   for: "policy-strike-window"
 }
-const _hoisted_258 = ["min", "max"]
-const _hoisted_259 = {
+const _hoisted_307 = ["min", "max"]
+const _hoisted_308 = {
   class: "policy-field",
   for: "policy-ban"
 }
-const _hoisted_260 = ["min", "max"]
-const _hoisted_261 = {
+const _hoisted_309 = ["min", "max"]
+const _hoisted_310 = {
   class: "policy-field",
   for: "policy-max-ban"
 }
-const _hoisted_262 = ["min", "max"]
-const _hoisted_263 = { class: "policy-actions" }
-const _hoisted_264 = ["disabled"]
-const _hoisted_265 = ["disabled"]
-const _hoisted_266 = {
+const _hoisted_311 = ["min", "max"]
+const _hoisted_312 = { class: "policy-actions" }
+const _hoisted_313 = ["disabled"]
+const _hoisted_314 = ["disabled"]
+const _hoisted_315 = {
   class: "footer-brand",
   href: "https://github.com/Swipa5fox/FoxOps",
   target: "_blank",
   rel: "noopener noreferrer"
 }
-const _hoisted_267 = { class: "footer-copyright" }
+const _hoisted_316 = { class: "footer-copyright" }
 
 return function render(_ctx, _cache) {
   return (_openBlock(), _createElementBlock(_Fragment, null, [
     _createElementVNode("aside", _hoisted_1, [
-      _cache[45] || (_cache[45] = _createElementVNode("div", { class: "sidebar-brand" }, [
+      _cache[52] || (_cache[52] = _createElementVNode("div", { class: "sidebar-brand" }, [
         _createElementVNode("div", { class: "brand" }, [
           _createElementVNode("div", {
             class: "brand-mark",
@@ -559,7 +666,7 @@ return function render(_ctx, _cache) {
           class: _normalizeClass(["sidebar-item", { active: _ctx.view === 'overview' }]),
           "aria-current": _ctx.view === 'overview' ? 'page' : null,
           onClick: _cache[0] || (_cache[0] = $event => (_ctx.setView('overview')))
-        }, _cache[39] || (_cache[39] = [
+        }, _cache[46] || (_cache[46] = [
           _createElementVNode("svg", {
             class: "sidebar-icon",
             viewBox: "0 0 24 24",
@@ -602,7 +709,7 @@ return function render(_ctx, _cache) {
           class: _normalizeClass(["sidebar-item", { active: _ctx.view === 'sysops' }]),
           "aria-current": _ctx.view === 'sysops' ? 'page' : null,
           onClick: _cache[1] || (_cache[1] = $event => (_ctx.setView('sysops')))
-        }, _cache[40] || (_cache[40] = [
+        }, _cache[47] || (_cache[47] = [
           _createElementVNode("svg", {
             class: "sidebar-icon",
             viewBox: "0 0 24 24",
@@ -617,14 +724,14 @@ return function render(_ctx, _cache) {
         (_ctx.isAdmin)
           ? (_openBlock(), _createElementBlock("div", {
               key: 0,
-              class: _normalizeClass(["sidebar-group", { open: _ctx.securityOpen }])
+              class: _normalizeClass(["sidebar-group", { open: _ctx.securityOpen, active: _ctx.view === 'security' }])
             }, [
               _createElementVNode("button", {
                 type: "button",
                 class: _normalizeClass(["sidebar-item sidebar-parent", { active: _ctx.view === 'security' }]),
                 "aria-current": _ctx.view === 'security' ? 'page' : null,
                 onClick: _cache[2] || (_cache[2] = (...args) => (_ctx.openSecurityGroup && _ctx.openSecurityGroup(...args)))
-              }, _cache[41] || (_cache[41] = [
+              }, _cache[48] || (_cache[48] = [
                 _createElementVNode("svg", {
                   class: "sidebar-icon",
                   viewBox: "0 0 24 24",
@@ -643,7 +750,7 @@ return function render(_ctx, _cache) {
                 "aria-controls": "security-submenu",
                 "aria-label": "展开或收起安全防护菜单",
                 onClick: _cache[3] || (_cache[3] = _withModifiers((...args) => (_ctx.toggleSecurityGroup && _ctx.toggleSecurityGroup(...args)), ["stop"]))
-              }, _cache[42] || (_cache[42] = [
+              }, _cache[49] || (_cache[49] = [
                 _createElementVNode("svg", {
                   class: "sidebar-caret",
                   viewBox: "0 0 24 24",
@@ -662,11 +769,7 @@ return function render(_ctx, _cache) {
                 class: _normalizeClass(["sidebar-subitem", { active: _ctx.view === 'admin' }]),
                 "aria-current": _ctx.view === 'admin' ? 'page' : null,
                 onClick: _cache[4] || (_cache[4] = $event => (_ctx.setView('admin')))
-              }, _cache[43] || (_cache[43] = [
-                _createElementVNode("span", {
-                  class: "sidebar-subdot",
-                  "aria-hidden": "true"
-                }, null, -1 /* CACHED */),
+              }, _cache[50] || (_cache[50] = [
                 _createElementVNode("span", null, "后台管理", -1 /* CACHED */)
               ]), 10 /* CLASS, PROPS */, _hoisted_8)
             ], 512 /* NEED_PATCH */)), [
@@ -675,7 +778,7 @@ return function render(_ctx, _cache) {
           : _createCommentVNode("v-if", true)
       ]),
       _createElementVNode("div", _hoisted_9, [
-        _cache[44] || (_cache[44] = _createElementVNode("span", {
+        _cache[51] || (_cache[51] = _createElementVNode("span", {
           class: "sidebar-dot",
           "aria-hidden": "true"
         }, null, -1 /* CACHED */)),
@@ -685,7 +788,7 @@ return function render(_ctx, _cache) {
     _createElementVNode("div", _hoisted_10, [
       _createElementVNode("header", _hoisted_11, [
         _createElementVNode("div", _hoisted_12, [
-          _cache[48] || (_cache[48] = _createElementVNode("span", {
+          _cache[55] || (_cache[55] = _createElementVNode("span", {
             class: "live-dot",
             "aria-hidden": "true"
           }, null, -1 /* CACHED */)),
@@ -704,7 +807,7 @@ return function render(_ctx, _cache) {
             (_ctx.currentUser)
               ? (_openBlock(), _createElementBlock("div", _hoisted_16, [
                   _createElementVNode("div", _hoisted_17, [
-                    _cache[46] || (_cache[46] = _createElementVNode("span", null, "我的账户", -1 /* CACHED */)),
+                    _cache[53] || (_cache[53] = _createElementVNode("span", null, "我的账户", -1 /* CACHED */)),
                     _createElementVNode("strong", null, _toDisplayString(_ctx.currentUser), 1 /* TEXT */),
                     _createElementVNode("em", {
                       class: _normalizeClass(["user-menu-role", _ctx.isAdmin ? 'role-admin' : 'role-guest'])
@@ -732,7 +835,7 @@ return function render(_ctx, _cache) {
             "aria-label": _ctx.themeLabel,
             title: _ctx.themeLabel,
             onClick: _cache[8] || (_cache[8] = (...args) => (_ctx.toggleTheme && _ctx.toggleTheme(...args)))
-          }, _cache[47] || (_cache[47] = [
+          }, _cache[54] || (_cache[54] = [
             _createElementVNode("svg", {
               class: "theme-toggle-sun",
               viewBox: "0 0 24 24",
@@ -773,7 +876,7 @@ return function render(_ctx, _cache) {
           }, [
             _createElementVNode("div", _hoisted_21, [
               _createElementVNode("div", _hoisted_22, [
-                _cache[49] || (_cache[49] = _createElementVNode("h2", { id: "password-title" }, "修改密码", -1 /* CACHED */)),
+                _cache[56] || (_cache[56] = _createElementVNode("h2", { id: "password-title" }, "修改密码", -1 /* CACHED */)),
                 _createElementVNode("button", {
                   type: "button",
                   class: "modal-close",
@@ -786,7 +889,7 @@ return function render(_ctx, _cache) {
                 onSubmit: _cache[15] || (_cache[15] = _withModifiers((...args) => (_ctx.submitChangePassword && _ctx.submitChangePassword(...args)), ["prevent"]))
               }, [
                 _createElementVNode("label", _hoisted_23, [
-                  _cache[50] || (_cache[50] = _createElementVNode("span", null, "原密码", -1 /* CACHED */)),
+                  _cache[57] || (_cache[57] = _createElementVNode("span", null, "原密码", -1 /* CACHED */)),
                   _withDirectives(_createElementVNode("input", {
                     "onUpdate:modelValue": _cache[11] || (_cache[11] = $event => ((_ctx.passwordForm.oldPassword) = $event)),
                     type: "password",
@@ -797,7 +900,7 @@ return function render(_ctx, _cache) {
                   ])
                 ]),
                 _createElementVNode("label", _hoisted_24, [
-                  _cache[51] || (_cache[51] = _createElementVNode("span", null, "新密码（至少 6 位）", -1 /* CACHED */)),
+                  _cache[58] || (_cache[58] = _createElementVNode("span", null, "新密码（至少 6 位）", -1 /* CACHED */)),
                   _withDirectives(_createElementVNode("input", {
                     "onUpdate:modelValue": _cache[12] || (_cache[12] = $event => ((_ctx.passwordForm.newPassword) = $event)),
                     type: "password",
@@ -809,7 +912,7 @@ return function render(_ctx, _cache) {
                   ])
                 ]),
                 _createElementVNode("label", _hoisted_25, [
-                  _cache[52] || (_cache[52] = _createElementVNode("span", null, "确认新密码", -1 /* CACHED */)),
+                  _cache[59] || (_cache[59] = _createElementVNode("span", null, "确认新密码", -1 /* CACHED */)),
                   _withDirectives(_createElementVNode("input", {
                     "onUpdate:modelValue": _cache[13] || (_cache[13] = $event => ((_ctx.passwordForm.confirmPassword) = $event)),
                     type: "password",
@@ -847,8 +950,8 @@ return function render(_ctx, _cache) {
           ? (_openBlock(), _createElementBlock(_Fragment, { key: 0 }, [
               _createElementVNode("section", _hoisted_31, [
                 _createElementVNode("div", null, [
-                  _cache[53] || (_cache[53] = _createElementVNode("div", { class: "eyebrow" }, "SYSTEM OVERVIEW", -1 /* CACHED */)),
-                  _cache[54] || (_cache[54] = _createElementVNode("div", { class: "hero-heading" }, [
+                  _cache[60] || (_cache[60] = _createElementVNode("div", { class: "eyebrow" }, "SYSTEM OVERVIEW", -1 /* CACHED */)),
+                  _cache[61] || (_cache[61] = _createElementVNode("div", { class: "hero-heading" }, [
                     _createElementVNode("h1", {
                       id: "page-title",
                       class: "hero-title"
@@ -881,7 +984,7 @@ return function render(_ctx, _cache) {
                             : _createCommentVNode("v-if", true)
                         ]))
                       : (_openBlock(), _createElementBlock("div", _hoisted_37, [
-                          _cache[55] || (_cache[55] = _createElementVNode("strong", null, "--°", -1 /* CACHED */)),
+                          _cache[62] || (_cache[62] = _createElementVNode("strong", null, "--°", -1 /* CACHED */)),
                           _createElementVNode("span", null, _toDisplayString(_ctx.weatherLoading ? "查询中" : (_ctx.weatherError || "选择城市查看天气")), 1 /* TEXT */)
                         ])),
                     (_ctx.weather && _ctx.weatherCandidates.length > 1)
@@ -931,7 +1034,7 @@ return function render(_ctx, _cache) {
                     _createElementVNode("span", _hoisted_47, _toDisplayString(_ctx.summary.version ? "v" + _ctx.summary.version : "版本加载中"), 1 /* TEXT */)
                   ]),
                   _createElementVNode("span", _hoisted_48, [
-                    _cache[56] || (_cache[56] = _createElementVNode("svg", {
+                    _cache[63] || (_cache[63] = _createElementVNode("svg", {
                       class: "uptime-glyph",
                       width: "12",
                       height: "12",
@@ -964,7 +1067,7 @@ return function render(_ctx, _cache) {
               _createElementVNode("section", _hoisted_50, [
                 _createElementVNode("article", _hoisted_51, [
                   _createElementVNode("div", _hoisted_52, [
-                    _cache[57] || (_cache[57] = _createElementVNode("div", { class: "metric-label" }, "处理器负载", -1 /* CACHED */)),
+                    _cache[64] || (_cache[64] = _createElementVNode("div", { class: "metric-label" }, "处理器负载", -1 /* CACHED */)),
                     _createElementVNode("span", _hoisted_53, _toDisplayString(_ctx.host.cpu_count || "--") + " 核 CPU", 1 /* TEXT */),
                     _createElementVNode("span", {
                       class: _normalizeClass(["metric-state", _ctx.cpuStatusClass])
@@ -975,23 +1078,23 @@ return function render(_ctx, _cache) {
                     _createElementVNode("div", _hoisted_56, [
                       _createElementVNode("div", _hoisted_57, [
                         _createElementVNode("strong", null, _toDisplayString(_ctx.formatLoad(_ctx.metric.load_1)), 1 /* TEXT */),
-                        _cache[58] || (_cache[58] = _createElementVNode("small", null, "1分", -1 /* CACHED */))
+                        _cache[65] || (_cache[65] = _createElementVNode("small", null, "1分", -1 /* CACHED */))
                       ]),
-                      _cache[61] || (_cache[61] = _createElementVNode("span", {
+                      _cache[68] || (_cache[68] = _createElementVNode("span", {
                         class: "load-average-sep",
                         "aria-hidden": "true"
                       }, "·", -1 /* CACHED */)),
                       _createElementVNode("div", _hoisted_58, [
                         _createElementVNode("strong", null, _toDisplayString(_ctx.formatLoad(_ctx.metric.load_5)), 1 /* TEXT */),
-                        _cache[59] || (_cache[59] = _createElementVNode("small", null, "5分", -1 /* CACHED */))
+                        _cache[66] || (_cache[66] = _createElementVNode("small", null, "5分", -1 /* CACHED */))
                       ]),
-                      _cache[62] || (_cache[62] = _createElementVNode("span", {
+                      _cache[69] || (_cache[69] = _createElementVNode("span", {
                         class: "load-average-sep",
                         "aria-hidden": "true"
                       }, "·", -1 /* CACHED */)),
                       _createElementVNode("div", _hoisted_59, [
                         _createElementVNode("strong", null, _toDisplayString(_ctx.formatLoad(_ctx.metric.load_15)), 1 /* TEXT */),
-                        _cache[60] || (_cache[60] = _createElementVNode("small", null, "15分", -1 /* CACHED */))
+                        _cache[67] || (_cache[67] = _createElementVNode("small", null, "15分", -1 /* CACHED */))
                       ])
                     ])
                   ]),
@@ -1008,11 +1111,11 @@ return function render(_ctx, _cache) {
                       style: _normalizeStyle({ width: _ctx.clampPercent(_ctx.metric.cpu_percent) })
                     }, null, 4 /* STYLE */)
                   ], 8 /* PROPS */, _hoisted_60),
-                  _cache[63] || (_cache[63] = _createElementVNode("div", { class: "metric-foot" }, "当前整体 CPU 占用", -1 /* CACHED */))
+                  _cache[70] || (_cache[70] = _createElementVNode("div", { class: "metric-foot" }, "当前整体 CPU 占用", -1 /* CACHED */))
                 ]),
                 _createElementVNode("article", _hoisted_61, [
                   _createElementVNode("div", _hoisted_62, [
-                    _cache[64] || (_cache[64] = _createElementVNode("div", { class: "metric-label" }, "内存使用情况", -1 /* CACHED */)),
+                    _cache[71] || (_cache[71] = _createElementVNode("div", { class: "metric-label" }, "内存使用情况", -1 /* CACHED */)),
                     _createElementVNode("span", {
                       class: _normalizeClass(["metric-state", _ctx.statusClass(_ctx.metric.memory_percent)])
                     }, _toDisplayString(_ctx.statusLabel(_ctx.metric.memory_percent)), 3 /* TEXT, CLASS */)
@@ -1041,7 +1144,7 @@ return function render(_ctx, _cache) {
                 ]),
                 _createElementVNode("article", _hoisted_68, [
                   _createElementVNode("div", _hoisted_69, [
-                    _cache[65] || (_cache[65] = _createElementVNode("div", { class: "metric-label" }, "系统盘使用情况", -1 /* CACHED */)),
+                    _cache[72] || (_cache[72] = _createElementVNode("div", { class: "metric-label" }, "系统盘使用情况", -1 /* CACHED */)),
                     _createElementVNode("span", {
                       class: _normalizeClass(["metric-state", _ctx.statusClass(_ctx.metric.disk_percent)])
                     }, _toDisplayString(_ctx.statusLabel(_ctx.metric.disk_percent)), 3 /* TEXT, CLASS */)
@@ -1070,7 +1173,7 @@ return function render(_ctx, _cache) {
                 ]),
                 _createElementVNode("article", _hoisted_75, [
                   _createElementVNode("div", _hoisted_76, [
-                    _cache[66] || (_cache[66] = _createElementVNode("div", { class: "metric-label" }, "活动告警", -1 /* CACHED */)),
+                    _cache[73] || (_cache[73] = _createElementVNode("div", { class: "metric-label" }, "活动告警", -1 /* CACHED */)),
                     _createElementVNode("span", {
                       class: _normalizeClass(["alert-summary", { error: _ctx.alerts.length > 0 }])
                     }, _toDisplayString(_ctx.alerts.length ? "需要关注" : "当前无异常"), 3 /* TEXT, CLASS */)
@@ -1096,7 +1199,7 @@ return function render(_ctx, _cache) {
               ]),
               _createElementVNode("section", _hoisted_81, [
                 _createElementVNode("div", _hoisted_82, [
-                  _cache[67] || (_cache[67] = _createElementVNode("div", null, [
+                  _cache[74] || (_cache[74] = _createElementVNode("div", null, [
                     _createElementVNode("div", { class: "eyebrow" }, "RESOURCE TREND"),
                     _createElementVNode("h2", { id: "trend-title" }, "资源趋势")
                   ], -1 /* CACHED */)),
@@ -1115,10 +1218,10 @@ return function render(_ctx, _cache) {
                 _createElementVNode("div", _hoisted_85, [
                   _createElementVNode("span", null, [
                     _createElementVNode("strong", null, _toDisplayString(_ctx.history.length), 1 /* TEXT */),
-                    _cache[68] || (_cache[68] = _createTextVNode(" 个采样点"))
+                    _cache[75] || (_cache[75] = _createTextVNode(" 个采样点"))
                   ]),
-                  _cache[69] || (_cache[69] = _createElementVNode("span", null, "每 60 秒采集一次", -1 /* CACHED */)),
-                  _cache[70] || (_cache[70] = _createElementVNode("span", { class: "trend-legend" }, [
+                  _cache[76] || (_cache[76] = _createElementVNode("span", null, "每 60 秒采集一次", -1 /* CACHED */)),
+                  _cache[77] || (_cache[77] = _createElementVNode("span", { class: "trend-legend" }, [
                     _createElementVNode("i", { class: "cpu" }),
                     _createTextVNode("CPU "),
                     _createElementVNode("i", { class: "memory" }),
@@ -1153,7 +1256,7 @@ return function render(_ctx, _cache) {
                       onMousemove: _cache[20] || (_cache[20] = (...args) => (_ctx.updateTrendHover && _ctx.updateTrendHover(...args))),
                       onMouseleave: _cache[21] || (_cache[21] = (...args) => (_ctx.clearTrendHover && _ctx.clearTrendHover(...args)))
                     }, [
-                      _cache[75] || (_cache[75] = _createElementVNode("div", { class: "chart-y-axis" }, [
+                      _cache[82] || (_cache[82] = _createElementVNode("div", { class: "chart-y-axis" }, [
                         _createElementVNode("span", null, "100%"),
                         _createElementVNode("span", null, "75%"),
                         _createElementVNode("span", null, "50%"),
@@ -1161,7 +1264,7 @@ return function render(_ctx, _cache) {
                         _createElementVNode("span", null, "0%")
                       ], -1 /* CACHED */)),
                       (_openBlock(), _createElementBlock("svg", _hoisted_88, [
-                        _cache[71] || (_cache[71] = _createStaticVNode("<g class=\"trend-grid\"><line x1=\"0\" y1=\"0\" x2=\"1000\" y2=\"0\"></line><line x1=\"0\" y1=\"65\" x2=\"1000\" y2=\"65\"></line><line x1=\"0\" y1=\"130\" x2=\"1000\" y2=\"130\"></line><line x1=\"0\" y1=\"195\" x2=\"1000\" y2=\"195\"></line><line x1=\"0\" y1=\"260\" x2=\"1000\" y2=\"260\"></line></g>", 1)),
+                        _cache[78] || (_cache[78] = _createStaticVNode("<g class=\"trend-grid\"><line x1=\"0\" y1=\"0\" x2=\"1000\" y2=\"0\"></line><line x1=\"0\" y1=\"65\" x2=\"1000\" y2=\"65\"></line><line x1=\"0\" y1=\"130\" x2=\"1000\" y2=\"130\"></line><line x1=\"0\" y1=\"195\" x2=\"1000\" y2=\"195\"></line><line x1=\"0\" y1=\"260\" x2=\"1000\" y2=\"260\"></line></g>", 1)),
                         _createElementVNode("polyline", {
                           points: _ctx.chartPoints('cpu_percent'),
                           class: "trend-line cpu"
@@ -1213,15 +1316,15 @@ return function render(_ctx, _cache) {
                           }, [
                             _createElementVNode("strong", null, _toDisplayString(_ctx.formatHoverTime(_ctx.trendHover.ts)), 1 /* TEXT */),
                             _createElementVNode("span", null, [
-                              _cache[72] || (_cache[72] = _createElementVNode("i", { class: "cpu" }, null, -1 /* CACHED */)),
+                              _cache[79] || (_cache[79] = _createElementVNode("i", { class: "cpu" }, null, -1 /* CACHED */)),
                               _createTextVNode("CPU " + _toDisplayString(_ctx.formatPercent(_ctx.trendHover.cpu)), 1 /* TEXT */)
                             ]),
                             _createElementVNode("span", null, [
-                              _cache[73] || (_cache[73] = _createElementVNode("i", { class: "memory" }, null, -1 /* CACHED */)),
+                              _cache[80] || (_cache[80] = _createElementVNode("i", { class: "memory" }, null, -1 /* CACHED */)),
                               _createTextVNode("内存 " + _toDisplayString(_ctx.formatPercent(_ctx.trendHover.memory)), 1 /* TEXT */)
                             ]),
                             _createElementVNode("span", null, [
-                              _cache[74] || (_cache[74] = _createElementVNode("i", { class: "disk" }, null, -1 /* CACHED */)),
+                              _cache[81] || (_cache[81] = _createElementVNode("i", { class: "disk" }, null, -1 /* CACHED */)),
                               _createTextVNode("磁盘 " + _toDisplayString(_ctx.formatPercent(_ctx.trendHover.disk)), 1 /* TEXT */)
                             ])
                           ], 4 /* STYLE */))
@@ -1236,7 +1339,7 @@ return function render(_ctx, _cache) {
               ]),
               _createElementVNode("section", _hoisted_100, [
                 _createElementVNode("article", _hoisted_101, [
-                  _cache[76] || (_cache[76] = _createElementVNode("div", { class: "panel-head compact" }, [
+                  _cache[83] || (_cache[83] = _createElementVNode("div", { class: "panel-head compact" }, [
                     _createElementVNode("div", null, [
                       _createElementVNode("div", { class: "eyebrow" }, "SERVICE HEALTH"),
                       _createElementVNode("h2", { id: "services-title" }, "服务状态")
@@ -1287,7 +1390,7 @@ return function render(_ctx, _cache) {
                 ]),
                 _createElementVNode("article", _hoisted_108, [
                   _createElementVNode("div", _hoisted_109, [
-                    _cache[77] || (_cache[77] = _createElementVNode("div", null, [
+                    _cache[84] || (_cache[84] = _createElementVNode("div", null, [
                       _createElementVNode("div", { class: "eyebrow" }, "ACTIVE ALERTS"),
                       _createElementVNode("h2", { id: "alerts-title" }, "当前告警")
                     ], -1 /* CACHED */)),
@@ -1306,7 +1409,7 @@ return function render(_ctx, _cache) {
                         key: alert.id,
                         class: "alert-row"
                       }, [
-                        _cache[78] || (_cache[78] = _createElementVNode("span", { class: "alert-icon" }, "!", -1 /* CACHED */)),
+                        _cache[85] || (_cache[85] = _createElementVNode("span", { class: "alert-icon" }, "!", -1 /* CACHED */)),
                         _createElementVNode("div", null, [
                           _createElementVNode("strong", null, _toDisplayString(alert.message), 1 /* TEXT */),
                           _createElementVNode("small", null, _toDisplayString(_ctx.formatTime(alert.created_at)), 1 /* TEXT */)
@@ -1314,7 +1417,7 @@ return function render(_ctx, _cache) {
                       ]))
                     }), 128 /* KEYED_FRAGMENT */)),
                     (!_ctx.alerts.length)
-                      ? (_openBlock(), _createElementBlock("div", _hoisted_111, _cache[79] || (_cache[79] = [
+                      ? (_openBlock(), _createElementBlock("div", _hoisted_111, _cache[86] || (_cache[86] = [
                           _createElementVNode("span", null, "✓", -1 /* CACHED */),
                           _createTextVNode(" 当前没有活动告警 ")
                         ])))
@@ -1327,8 +1430,8 @@ return function render(_ctx, _cache) {
             ? (_openBlock(), _createElementBlock(_Fragment, { key: 1 }, [
                 _createElementVNode("section", _hoisted_112, [
                   _createElementVNode("div", null, [
-                    _cache[80] || (_cache[80] = _createElementVNode("div", { class: "eyebrow" }, "SYSTEM OPERATIONS", -1 /* CACHED */)),
-                    _cache[81] || (_cache[81] = _createElementVNode("div", { class: "hero-heading" }, [
+                    _cache[87] || (_cache[87] = _createElementVNode("div", { class: "eyebrow" }, "SYSTEM OPERATIONS", -1 /* CACHED */)),
+                    _cache[88] || (_cache[88] = _createElementVNode("div", { class: "hero-heading" }, [
                       _createElementVNode("h1", { id: "sysops-title" }, "系统运维")
                     ], -1 /* CACHED */)),
                     _createElementVNode("p", _hoisted_113, [
@@ -1346,7 +1449,7 @@ return function render(_ctx, _cache) {
                       _createElementVNode("span", _hoisted_116, _toDisplayString(_ctx.sysopsUpdatedAt || "等待数据"), 1 /* TEXT */)
                     ]),
                     _createElementVNode("span", _hoisted_117, [
-                      _cache[82] || (_cache[82] = _createElementVNode("svg", {
+                      _cache[89] || (_cache[89] = _createElementVNode("svg", {
                         class: "uptime-glyph",
                         width: "12",
                         height: "12",
@@ -1379,7 +1482,7 @@ return function render(_ctx, _cache) {
                 _createElementVNode("section", _hoisted_119, [
                   _createElementVNode("article", _hoisted_120, [
                     _createElementVNode("div", _hoisted_121, [
-                      _cache[83] || (_cache[83] = _createElementVNode("div", { class: "metric-label" }, "CPU 实时占用", -1 /* CACHED */)),
+                      _cache[90] || (_cache[90] = _createElementVNode("div", { class: "metric-label" }, "CPU 实时占用", -1 /* CACHED */)),
                       _createElementVNode("span", _hoisted_122, _toDisplayString(_ctx.realtime.cpu.count || _ctx.host.cpu_count || "--") + " 核", 1 /* TEXT */),
                       _createElementVNode("span", {
                         class: _normalizeClass(["metric-state", _ctx.statusClass(_ctx.realtime.cpu.percent)])
@@ -1390,23 +1493,23 @@ return function render(_ctx, _cache) {
                       _createElementVNode("div", _hoisted_125, [
                         _createElementVNode("div", _hoisted_126, [
                           _createElementVNode("strong", null, _toDisplayString(_ctx.formatLoad(_ctx.cpuLoadValues[0])), 1 /* TEXT */),
-                          _cache[84] || (_cache[84] = _createElementVNode("small", null, "1分", -1 /* CACHED */))
+                          _cache[91] || (_cache[91] = _createElementVNode("small", null, "1分", -1 /* CACHED */))
                         ]),
-                        _cache[87] || (_cache[87] = _createElementVNode("span", {
+                        _cache[94] || (_cache[94] = _createElementVNode("span", {
                           class: "load-average-sep",
                           "aria-hidden": "true"
                         }, "·", -1 /* CACHED */)),
                         _createElementVNode("div", _hoisted_127, [
                           _createElementVNode("strong", null, _toDisplayString(_ctx.formatLoad(_ctx.cpuLoadValues[1])), 1 /* TEXT */),
-                          _cache[85] || (_cache[85] = _createElementVNode("small", null, "5分", -1 /* CACHED */))
+                          _cache[92] || (_cache[92] = _createElementVNode("small", null, "5分", -1 /* CACHED */))
                         ]),
-                        _cache[88] || (_cache[88] = _createElementVNode("span", {
+                        _cache[95] || (_cache[95] = _createElementVNode("span", {
                           class: "load-average-sep",
                           "aria-hidden": "true"
                         }, "·", -1 /* CACHED */)),
                         _createElementVNode("div", _hoisted_128, [
                           _createElementVNode("strong", null, _toDisplayString(_ctx.formatLoad(_ctx.cpuLoadValues[2])), 1 /* TEXT */),
-                          _cache[86] || (_cache[86] = _createElementVNode("small", null, "15分", -1 /* CACHED */))
+                          _cache[93] || (_cache[93] = _createElementVNode("small", null, "15分", -1 /* CACHED */))
                         ])
                       ])
                     ]),
@@ -1426,7 +1529,7 @@ return function render(_ctx, _cache) {
                   ]),
                   _createElementVNode("article", _hoisted_132, [
                     _createElementVNode("div", _hoisted_133, [
-                      _cache[89] || (_cache[89] = _createElementVNode("div", { class: "metric-label" }, "内存实时占用", -1 /* CACHED */)),
+                      _cache[96] || (_cache[96] = _createElementVNode("div", { class: "metric-label" }, "内存实时占用", -1 /* CACHED */)),
                       _createElementVNode("span", {
                         class: _normalizeClass(["metric-state", _ctx.statusClass(_ctx.realtime.memory.percent)])
                       }, _toDisplayString(_ctx.statusLabel(_ctx.realtime.memory.percent)), 3 /* TEXT, CLASS */)
@@ -1455,7 +1558,7 @@ return function render(_ctx, _cache) {
                   ]),
                   _createElementVNode("article", _hoisted_139, [
                     _createElementVNode("div", _hoisted_140, [
-                      _cache[90] || (_cache[90] = _createElementVNode("div", { class: "metric-label" }, "磁盘实时占用", -1 /* CACHED */)),
+                      _cache[97] || (_cache[97] = _createElementVNode("div", { class: "metric-label" }, "磁盘实时占用", -1 /* CACHED */)),
                       _createElementVNode("span", {
                         class: _normalizeClass(["metric-state", _ctx.statusClass(_ctx.realtime.disk_percent)])
                       }, _toDisplayString(_ctx.statusLabel(_ctx.realtime.disk_percent)), 3 /* TEXT, CLASS */)
@@ -1464,9 +1567,9 @@ return function render(_ctx, _cache) {
                       _createElementVNode("div", _hoisted_142, _toDisplayString(_ctx.formatPercent(_ctx.realtime.disk_percent)), 1 /* TEXT */),
                       _createElementVNode("div", _hoisted_143, [
                         _createElementVNode("strong", null, _toDisplayString(_ctx.formatRate(_ctx.realtime.disk_io.read_bps)), 1 /* TEXT */),
-                        _cache[91] || (_cache[91] = _createElementVNode("span", null, "读", -1 /* CACHED */)),
+                        _cache[98] || (_cache[98] = _createElementVNode("span", null, "读", -1 /* CACHED */)),
                         _createElementVNode("strong", null, _toDisplayString(_ctx.formatRate(_ctx.realtime.disk_io.write_bps)), 1 /* TEXT */),
-                        _cache[92] || (_cache[92] = _createElementVNode("span", null, "写", -1 /* CACHED */))
+                        _cache[99] || (_cache[99] = _createElementVNode("span", null, "写", -1 /* CACHED */))
                       ])
                     ]),
                     _createElementVNode("div", {
@@ -1486,10 +1589,10 @@ return function render(_ctx, _cache) {
                   ])
                 ]),
                 _createElementVNode("section", _hoisted_146, [
-                  _cache[96] || (_cache[96] = _createStaticVNode("<div class=\"panel-head compact\"><div><div class=\"eyebrow\">REALTIME PULSE</div><h2 id=\"pulse-title\">最近 90 秒实时走势</h2></div><span class=\"pulse-legend\"><i class=\"cpu\"></i>CPU <i class=\"memory\"></i>内存 <i class=\"disk\"></i>磁盘 </span></div>", 1)),
+                  _cache[103] || (_cache[103] = _createStaticVNode("<div class=\"panel-head compact\"><div><div class=\"eyebrow\">REALTIME PULSE</div><h2 id=\"pulse-title\">最近 90 秒实时走势</h2></div><span class=\"pulse-legend\"><i class=\"cpu\"></i>CPU <i class=\"memory\"></i>内存 <i class=\"disk\"></i>磁盘 </span></div>", 1)),
                   (_ctx.realtimeSeries.length)
                     ? (_openBlock(), _createElementBlock("div", _hoisted_147, [
-                        _cache[94] || (_cache[94] = _createElementVNode("div", { class: "chart-y-axis" }, [
+                        _cache[101] || (_cache[101] = _createElementVNode("div", { class: "chart-y-axis" }, [
                           _createElementVNode("span", null, "100%"),
                           _createElementVNode("span", null, "75%"),
                           _createElementVNode("span", null, "50%"),
@@ -1497,7 +1600,7 @@ return function render(_ctx, _cache) {
                           _createElementVNode("span", null, "0%")
                         ], -1 /* CACHED */)),
                         (_openBlock(), _createElementBlock("svg", _hoisted_148, [
-                          _cache[93] || (_cache[93] = _createStaticVNode("<g class=\"trend-grid\"><line x1=\"0\" y1=\"0\" x2=\"1000\" y2=\"0\"></line><line x1=\"0\" y1=\"65\" x2=\"1000\" y2=\"65\"></line><line x1=\"0\" y1=\"130\" x2=\"1000\" y2=\"130\"></line><line x1=\"0\" y1=\"195\" x2=\"1000\" y2=\"195\"></line><line x1=\"0\" y1=\"260\" x2=\"1000\" y2=\"260\"></line></g>", 1)),
+                          _cache[100] || (_cache[100] = _createStaticVNode("<g class=\"trend-grid\"><line x1=\"0\" y1=\"0\" x2=\"1000\" y2=\"0\"></line><line x1=\"0\" y1=\"65\" x2=\"1000\" y2=\"65\"></line><line x1=\"0\" y1=\"130\" x2=\"1000\" y2=\"130\"></line><line x1=\"0\" y1=\"195\" x2=\"1000\" y2=\"195\"></line><line x1=\"0\" y1=\"260\" x2=\"1000\" y2=\"260\"></line></g>", 1)),
                           _createElementVNode("polyline", {
                             points: _ctx.realtimePoints('cpu'),
                             class: "trend-line cpu"
@@ -1511,7 +1614,7 @@ return function render(_ctx, _cache) {
                             class: "trend-line disk"
                           }, null, 8 /* PROPS */, _hoisted_151)
                         ])),
-                        _cache[95] || (_cache[95] = _createElementVNode("div", { class: "chart-time-axis" }, [
+                        _cache[102] || (_cache[102] = _createElementVNode("div", { class: "chart-time-axis" }, [
                           _createElementVNode("span", null, "90 秒前"),
                           _createElementVNode("span", null, "现在")
                         ], -1 /* CACHED */))
@@ -1520,7 +1623,7 @@ return function render(_ctx, _cache) {
                 ]),
                 _createElementVNode("section", _hoisted_153, [
                   _createElementVNode("div", _hoisted_154, [
-                    _cache[97] || (_cache[97] = _createElementVNode("div", null, [
+                    _cache[104] || (_cache[104] = _createElementVNode("div", null, [
                       _createElementVNode("div", { class: "eyebrow" }, "FILESYSTEMS"),
                       _createElementVNode("h2", { id: "disks-title" }, "磁盘分区")
                     ], -1 /* CACHED */)),
@@ -1564,13 +1667,13 @@ return function render(_ctx, _cache) {
                 ]),
                 _createElementVNode("section", _hoisted_162, [
                   _createElementVNode("div", _hoisted_163, [
-                    _cache[99] || (_cache[99] = _createElementVNode("div", null, [
+                    _cache[106] || (_cache[106] = _createElementVNode("div", null, [
                       _createElementVNode("div", { class: "eyebrow" }, "CONTAINERS"),
                       _createElementVNode("h2", { id: "docker-title" }, "Docker 容器")
                     ], -1 /* CACHED */)),
                     _createElementVNode("div", _hoisted_164, [
                       _createElementVNode("span", _hoisted_165, [
-                        _cache[98] || (_cache[98] = _createElementVNode("i", { "aria-hidden": "true" }, null, -1 /* CACHED */)),
+                        _cache[105] || (_cache[105] = _createElementVNode("i", { "aria-hidden": "true" }, null, -1 /* CACHED */)),
                         _createTextVNode(_toDisplayString(_ctx.dockerCounts.running) + " 运行中 ", 1 /* TEXT */)
                       ]),
                       _createElementVNode("span", _hoisted_166, "共 " + _toDisplayString(_ctx.dockerCounts.total) + " 个", 1 /* TEXT */),
@@ -1590,227 +1693,506 @@ return function render(_ctx, _cache) {
                         (_openBlock(true), _createElementBlock(_Fragment, null, _renderList(_ctx.dockerContainers, (item) => {
                           return (_openBlock(), _createElementBlock("div", {
                             key: item.id,
-                            class: "docker-row"
+                            class: "docker-entry"
                           }, [
-                            _createElementVNode("span", {
-                              class: _normalizeClass(["docker-dot", item.state]),
-                              title: item.state
-                            }, null, 10 /* CLASS, PROPS */, _hoisted_170),
-                            _createElementVNode("div", _hoisted_171, [
-                              _createElementVNode("strong", null, _toDisplayString(item.name || item.id), 1 /* TEXT */),
-                              _createElementVNode("small", null, _toDisplayString(item.image), 1 /* TEXT */)
-                            ]),
-                            _createElementVNode("div", _hoisted_172, _toDisplayString(item.status || item.state), 1 /* TEXT */),
-                            _createElementVNode("div", {
-                              class: "docker-cell docker-ports",
-                              title: item.ports || ''
-                            }, _toDisplayString(item.ports || "未映射端口"), 9 /* TEXT, PROPS */, _hoisted_173),
-                            _createElementVNode("div", _hoisted_174, [
-                              _createElementVNode("span", null, [
-                                _cache[100] || (_cache[100] = _createTextVNode("CPU ")),
-                                _createElementVNode("strong", null, _toDisplayString(_ctx.formatCpuShare(item.cpu_percent)), 1 /* TEXT */)
+                            _createElementVNode("button", {
+                              type: "button",
+                              class: _normalizeClass(["docker-row docker-row-button", { expanded: _ctx.dockerExpanded === item.id }]),
+                              "aria-expanded": _ctx.dockerExpanded === item.id ? 'true' : 'false',
+                              onClick: $event => (_ctx.toggleDockerDetail(item))
+                            }, [
+                              _createElementVNode("span", {
+                                class: _normalizeClass(["docker-dot", item.state]),
+                                title: item.state
+                              }, null, 10 /* CLASS, PROPS */, _hoisted_171),
+                              _createElementVNode("span", _hoisted_172, [
+                                _createElementVNode("strong", null, _toDisplayString(item.name || item.id), 1 /* TEXT */),
+                                _createElementVNode("small", null, _toDisplayString(item.image), 1 /* TEXT */)
                               ]),
-                              _createElementVNode("span", null, [
-                                _cache[101] || (_cache[101] = _createTextVNode("内存 ")),
-                                _createElementVNode("strong", null, _toDisplayString(item.memory_usage || "--"), 1 /* TEXT */)
-                              ])
-                            ])
+                              _createElementVNode("span", _hoisted_173, _toDisplayString(item.status || item.state), 1 /* TEXT */),
+                              _createElementVNode("span", {
+                                class: "docker-cell docker-ports",
+                                title: item.ports || ''
+                              }, _toDisplayString(item.ports || "未映射端口"), 9 /* TEXT, PROPS */, _hoisted_174),
+                              _createElementVNode("span", _hoisted_175, [
+                                _createElementVNode("span", null, [
+                                  _cache[107] || (_cache[107] = _createTextVNode("CPU ")),
+                                  _createElementVNode("strong", null, _toDisplayString(_ctx.formatCpuShare(item.cpu_percent)), 1 /* TEXT */)
+                                ]),
+                                _createElementVNode("span", null, [
+                                  _cache[108] || (_cache[108] = _createTextVNode("内存 ")),
+                                  _createElementVNode("strong", null, _toDisplayString(item.memory_usage || "--"), 1 /* TEXT */)
+                                ])
+                              ]),
+                              _cache[109] || (_cache[109] = _createElementVNode("span", {
+                                class: "docker-chevron",
+                                "aria-hidden": "true"
+                              }, null, -1 /* CACHED */))
+                            ], 10 /* CLASS, PROPS */, _hoisted_170),
+                            (_ctx.dockerExpanded === item.id)
+                              ? (_openBlock(), _createElementBlock("div", _hoisted_176, [
+                                  _createElementVNode("div", _hoisted_177, [
+                                    _createElementVNode("button", {
+                                      type: "button",
+                                      class: _normalizeClass(["docker-tab", { active: _ctx.dockerTab === 'overview' }]),
+                                      role: "tab",
+                                      "aria-selected": _ctx.dockerTab === 'overview' ? 'true' : 'false',
+                                      onClick: _cache[24] || (_cache[24] = $event => (_ctx.setDockerTab('overview')))
+                                    }, "概览", 10 /* CLASS, PROPS */, _hoisted_178),
+                                    _createElementVNode("button", {
+                                      type: "button",
+                                      class: _normalizeClass(["docker-tab", { active: _ctx.dockerTab === 'logs' }]),
+                                      role: "tab",
+                                      "aria-selected": _ctx.dockerTab === 'logs' ? 'true' : 'false',
+                                      onClick: _cache[25] || (_cache[25] = $event => (_ctx.setDockerTab('logs')))
+                                    }, "日志", 10 /* CLASS, PROPS */, _hoisted_179),
+                                    _createElementVNode("code", _hoisted_180, _toDisplayString(item.id), 1 /* TEXT */)
+                                  ]),
+                                  (_ctx.dockerTab === 'overview')
+                                    ? (_openBlock(), _createElementBlock("div", _hoisted_181, [
+                                        (_ctx.dockerDetailLoading)
+                                          ? (_openBlock(), _createElementBlock("p", _hoisted_182, "正在读取容器详情…"))
+                                          : (_ctx.dockerDetailError)
+                                            ? (_openBlock(), _createElementBlock("p", _hoisted_183, _toDisplayString(_ctx.dockerDetailError), 1 /* TEXT */))
+                                            : (_ctx.dockerDetail)
+                                              ? (_openBlock(), _createElementBlock(_Fragment, { key: 2 }, [
+                                                  _createElementVNode("dl", _hoisted_184, [
+                                                    _createElementVNode("div", null, [
+                                                      _cache[110] || (_cache[110] = _createElementVNode("dt", null, "镜像", -1 /* CACHED */)),
+                                                      _createElementVNode("dd", null, [
+                                                        _createElementVNode("code", null, _toDisplayString(_ctx.dockerDetail.image || "--"), 1 /* TEXT */)
+                                                      ])
+                                                    ]),
+                                                    _createElementVNode("div", null, [
+                                                      _cache[111] || (_cache[111] = _createElementVNode("dt", null, "状态", -1 /* CACHED */)),
+                                                      _createElementVNode("dd", null, _toDisplayString(_ctx.dockerStateLabel(_ctx.dockerDetail)), 1 /* TEXT */)
+                                                    ]),
+                                                    _createElementVNode("div", null, [
+                                                      _cache[112] || (_cache[112] = _createElementVNode("dt", null, "启动时间", -1 /* CACHED */)),
+                                                      _createElementVNode("dd", null, _toDisplayString(_ctx.formatDockerTime(_ctx.dockerDetail.state.started_at)), 1 /* TEXT */)
+                                                    ]),
+                                                    _createElementVNode("div", null, [
+                                                      _cache[113] || (_cache[113] = _createElementVNode("dt", null, "重启次数", -1 /* CACHED */)),
+                                                      _createElementVNode("dd", null, _toDisplayString(_ctx.dockerDetail.state.restart_count === null ? "--" : _ctx.dockerDetail.state.restart_count), 1 /* TEXT */)
+                                                    ]),
+                                                    _createElementVNode("div", null, [
+                                                      _cache[114] || (_cache[114] = _createElementVNode("dt", null, "退出码", -1 /* CACHED */)),
+                                                      _createElementVNode("dd", null, _toDisplayString(_ctx.dockerDetail.state.exit_code === null ? "--" : _ctx.dockerDetail.state.exit_code), 1 /* TEXT */)
+                                                    ]),
+                                                    _createElementVNode("div", null, [
+                                                      _cache[115] || (_cache[115] = _createElementVNode("dt", null, "重启策略", -1 /* CACHED */)),
+                                                      _createElementVNode("dd", null, _toDisplayString(_ctx.dockerDetail.restart_policy || "no"), 1 /* TEXT */)
+                                                    ]),
+                                                    _createElementVNode("div", null, [
+                                                      _cache[116] || (_cache[116] = _createElementVNode("dt", null, "日志驱动", -1 /* CACHED */)),
+                                                      _createElementVNode("dd", null, _toDisplayString(_ctx.dockerDetail.log_driver || "--"), 1 /* TEXT */)
+                                                    ]),
+                                                    _createElementVNode("div", null, [
+                                                      _cache[117] || (_cache[117] = _createElementVNode("dt", null, "运行用户", -1 /* CACHED */)),
+                                                      _createElementVNode("dd", null, _toDisplayString(_ctx.dockerDetail.user || "镜像默认"), 1 /* TEXT */)
+                                                    ])
+                                                  ]),
+                                                  (_ctx.dockerDetail.ports.length)
+                                                    ? (_openBlock(), _createElementBlock("div", _hoisted_185, [
+                                                        _cache[119] || (_cache[119] = _createElementVNode("h4", null, "端口映射", -1 /* CACHED */)),
+                                                        (_openBlock(true), _createElementBlock(_Fragment, null, _renderList(_ctx.dockerDetail.ports, (port, index) => {
+                                                          return (_openBlock(), _createElementBlock("div", {
+                                                            key: 'port' + index,
+                                                            class: "docker-subrow"
+                                                          }, [
+                                                            _createElementVNode("span", null, _toDisplayString(port.host_ip || "0.0.0.0") + ":" + _toDisplayString(port.host_port), 1 /* TEXT */),
+                                                            _cache[118] || (_cache[118] = _createElementVNode("span", { class: "muted" }, "映射到", -1 /* CACHED */)),
+                                                            _createElementVNode("span", null, _toDisplayString(port.container), 1 /* TEXT */)
+                                                          ]))
+                                                        }), 128 /* KEYED_FRAGMENT */))
+                                                      ]))
+                                                    : _createCommentVNode("v-if", true),
+                                                  (_ctx.dockerDetail.mounts.length)
+                                                    ? (_openBlock(), _createElementBlock("div", _hoisted_186, [
+                                                        _cache[121] || (_cache[121] = _createElementVNode("h4", null, "挂载", -1 /* CACHED */)),
+                                                        (_openBlock(true), _createElementBlock(_Fragment, null, _renderList(_ctx.dockerDetail.mounts, (mount, index) => {
+                                                          return (_openBlock(), _createElementBlock("div", {
+                                                            key: 'mount' + index,
+                                                            class: "docker-subrow"
+                                                          }, [
+                                                            _createElementVNode("span", _hoisted_187, _toDisplayString(mount.type), 1 /* TEXT */),
+                                                            _createElementVNode("span", {
+                                                              class: "mono",
+                                                              title: mount.source
+                                                            }, _toDisplayString(mount.source), 9 /* TEXT, PROPS */, _hoisted_188),
+                                                            _cache[120] || (_cache[120] = _createElementVNode("span", { class: "muted" }, "→", -1 /* CACHED */)),
+                                                            _createElementVNode("span", _hoisted_189, _toDisplayString(mount.destination), 1 /* TEXT */),
+                                                            _createElementVNode("span", _hoisted_190, _toDisplayString(mount.rw ? "读写" : "只读"), 1 /* TEXT */)
+                                                          ]))
+                                                        }), 128 /* KEYED_FRAGMENT */))
+                                                      ]))
+                                                    : _createCommentVNode("v-if", true),
+                                                  (_ctx.dockerDetail.networks.length)
+                                                    ? (_openBlock(), _createElementBlock("div", _hoisted_191, [
+                                                        _cache[122] || (_cache[122] = _createElementVNode("h4", null, "网络", -1 /* CACHED */)),
+                                                        (_openBlock(true), _createElementBlock(_Fragment, null, _renderList(_ctx.dockerDetail.networks, (network, index) => {
+                                                          return (_openBlock(), _createElementBlock("div", {
+                                                            key: 'net' + index,
+                                                            class: "docker-subrow"
+                                                          }, [
+                                                            _createElementVNode("span", null, _toDisplayString(network.name), 1 /* TEXT */),
+                                                            _createElementVNode("span", _hoisted_192, _toDisplayString(network.ip || "无 IP"), 1 /* TEXT */),
+                                                            _createElementVNode("span", _hoisted_193, _toDisplayString(network.gateway), 1 /* TEXT */)
+                                                          ]))
+                                                        }), 128 /* KEYED_FRAGMENT */))
+                                                      ]))
+                                                    : _createCommentVNode("v-if", true),
+                                                  (_ctx.dockerDetail.env.length)
+                                                    ? (_openBlock(), _createElementBlock("details", _hoisted_194, [
+                                                        _createElementVNode("summary", null, [
+                                                          _createTextVNode(" 环境变量 " + _toDisplayString(_ctx.dockerDetail.env.length) + " 项 ", 1 /* TEXT */),
+                                                          _cache[123] || (_cache[123] = _createElementVNode("span", { class: "muted" }, "（名字像密钥的值已打码）", -1 /* CACHED */))
+                                                        ]),
+                                                        (_openBlock(true), _createElementBlock(_Fragment, null, _renderList(_ctx.dockerDetail.env, (env, index) => {
+                                                          return (_openBlock(), _createElementBlock("div", {
+                                                            key: 'env' + index,
+                                                            class: "docker-subrow"
+                                                          }, [
+                                                            _createElementVNode("span", _hoisted_195, _toDisplayString(env.key), 1 /* TEXT */),
+                                                            _createElementVNode("span", _hoisted_196, _toDisplayString(env.value || "（空）"), 1 /* TEXT */)
+                                                          ]))
+                                                        }), 128 /* KEYED_FRAGMENT */))
+                                                      ]))
+                                                    : _createCommentVNode("v-if", true)
+                                                ], 64 /* STABLE_FRAGMENT */))
+                                              : _createCommentVNode("v-if", true)
+                                      ]))
+                                    : (_openBlock(), _createElementBlock("div", _hoisted_197, [
+                                        _createElementVNode("div", _hoisted_198, [
+                                          _createElementVNode("div", _hoisted_199, [
+                                            _createElementVNode("button", {
+                                              type: "button",
+                                              class: _normalizeClass(["docker-seg-btn", { active: _ctx.dockerLogTail === 200 }]),
+                                              onClick: _cache[26] || (_cache[26] = $event => (_ctx.setDockerLogTail(200)))
+                                            }, "200", 2 /* CLASS */),
+                                            _createElementVNode("button", {
+                                              type: "button",
+                                              class: _normalizeClass(["docker-seg-btn", { active: _ctx.dockerLogTail === 500 }]),
+                                              onClick: _cache[27] || (_cache[27] = $event => (_ctx.setDockerLogTail(500)))
+                                            }, "500", 2 /* CLASS */),
+                                            _createElementVNode("button", {
+                                              type: "button",
+                                              class: _normalizeClass(["docker-seg-btn", { active: _ctx.dockerLogTail === 1000 }]),
+                                              onClick: _cache[28] || (_cache[28] = $event => (_ctx.setDockerLogTail(1000)))
+                                            }, "1000", 2 /* CLASS */)
+                                          ]),
+                                          _createElementVNode("button", {
+                                            type: "button",
+                                            class: "text-button",
+                                            disabled: _ctx.dockerLogsLoading,
+                                            onClick: _cache[29] || (_cache[29] = (...args) => (_ctx.loadDockerLogs && _ctx.loadDockerLogs(...args)))
+                                          }, _toDisplayString(_ctx.dockerLogsLoading ? "读取中" : "刷新"), 9 /* TEXT, PROPS */, _hoisted_200),
+                                          _createElementVNode("label", _hoisted_201, [
+                                            _createElementVNode("input", {
+                                              type: "checkbox",
+                                              checked: _ctx.dockerLogAuto,
+                                              onChange: _cache[30] || (_cache[30] = (...args) => (_ctx.toggleDockerLogAuto && _ctx.toggleDockerLogAuto(...args)))
+                                            }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_202),
+                                            _cache[124] || (_cache[124] = _createElementVNode("span", null, "自动刷新", -1 /* CACHED */))
+                                          ]),
+                                          (_ctx.dockerLogs)
+                                            ? (_openBlock(), _createElementBlock("span", _hoisted_203, _toDisplayString(_ctx.dockerLogs.lines) + " 行", 1 /* TEXT */))
+                                            : _createCommentVNode("v-if", true)
+                                        ]),
+                                        (_ctx.dockerLogsError)
+                                          ? (_openBlock(), _createElementBlock("p", _hoisted_204, _toDisplayString(_ctx.dockerLogsError), 1 /* TEXT */))
+                                          : (_openBlock(), _createElementBlock("pre", _hoisted_205, _toDisplayString(_ctx.dockerLogs ? (_ctx.dockerLogs.text || "（这个容器还没有输出）") : "正在读取日志…"), 1 /* TEXT */)),
+                                        (_ctx.dockerLogs && _ctx.dockerLogs.clipped)
+                                          ? (_openBlock(), _createElementBlock("p", _hoisted_206, "日志过长，仅保留最后 400KB"))
+                                          : _createCommentVNode("v-if", true)
+                                      ]))
+                                ]))
+                              : _createCommentVNode("v-if", true)
                           ]))
                         }), 128 /* KEYED_FRAGMENT */)),
                         (!_ctx.dockerContainers.length)
-                          ? (_openBlock(), _createElementBlock("div", _hoisted_175, _cache[102] || (_cache[102] = [
+                          ? (_openBlock(), _createElementBlock("div", _hoisted_207, _cache[125] || (_cache[125] = [
                               _createElementVNode("span", null, "✓", -1 /* CACHED */),
                               _createTextVNode(" 这台服务器上没有 docker 容器 ")
                             ])))
                           : _createCommentVNode("v-if", true)
                       ]))
-                    : (_openBlock(), _createElementBlock("div", _hoisted_176, [
-                        _cache[103] || (_cache[103] = _createElementVNode("strong", null, "读取不到 docker 容器", -1 /* CACHED */)),
+                    : (_openBlock(), _createElementBlock("div", _hoisted_208, [
+                        _cache[126] || (_cache[126] = _createElementVNode("strong", null, "读取不到 docker 容器", -1 /* CACHED */)),
                         _createElementVNode("p", null, _toDisplayString(_ctx.docker.reason || "docker 不可用"), 1 /* TEXT */),
                         (_ctx.docker.hint)
-                          ? (_openBlock(), _createElementBlock("code", _hoisted_177, _toDisplayString(_ctx.docker.hint), 1 /* TEXT */))
+                          ? (_openBlock(), _createElementBlock("code", _hoisted_209, _toDisplayString(_ctx.docker.hint), 1 /* TEXT */))
                           : _createCommentVNode("v-if", true)
+                      ])),
+                  (_ctx.docker.available)
+                    ? (_openBlock(), _createElementBlock("div", _hoisted_210, [
+                        _createElementVNode("details", _hoisted_211, [
+                          _createElementVNode("summary", null, [
+                            _cache[127] || (_cache[127] = _createElementVNode("span", null, "镜像", -1 /* CACHED */)),
+                            _createElementVNode("small", null, _toDisplayString(_ctx.dockerImages.length) + " 个", 1 /* TEXT */)
+                          ]),
+                          _createElementVNode("div", _hoisted_212, [
+                            _cache[128] || (_cache[128] = _createElementVNode("div", { class: "docker-table-head" }, [
+                              _createElementVNode("span", null, "仓库"),
+                              _createElementVNode("span", null, "标签"),
+                              _createElementVNode("span", null, "大小"),
+                              _createElementVNode("span", null, "创建")
+                            ], -1 /* CACHED */)),
+                            (_openBlock(true), _createElementBlock(_Fragment, null, _renderList(_ctx.dockerImages, (image) => {
+                              return (_openBlock(), _createElementBlock("div", {
+                                key: image.id + image.repository + image.tag,
+                                class: "docker-table-row"
+                              }, [
+                                _createElementVNode("span", {
+                                  class: "mono",
+                                  title: image.id
+                                }, _toDisplayString(image.repository), 9 /* TEXT, PROPS */, _hoisted_213),
+                                _createElementVNode("span", null, _toDisplayString(image.tag), 1 /* TEXT */),
+                                _createElementVNode("span", null, _toDisplayString(image.size), 1 /* TEXT */),
+                                _createElementVNode("span", _hoisted_214, _toDisplayString(image.created_since), 1 /* TEXT */)
+                              ]))
+                            }), 128 /* KEYED_FRAGMENT */)),
+                            (!_ctx.dockerImages.length)
+                              ? (_openBlock(), _createElementBlock("p", _hoisted_215, "没有镜像"))
+                              : _createCommentVNode("v-if", true)
+                          ])
+                        ]),
+                        _createElementVNode("details", _hoisted_216, [
+                          _createElementVNode("summary", null, [
+                            _cache[129] || (_cache[129] = _createElementVNode("span", null, "数据卷", -1 /* CACHED */)),
+                            _createElementVNode("small", null, _toDisplayString(_ctx.dockerVolumes.length) + " 个", 1 /* TEXT */)
+                          ]),
+                          _createElementVNode("div", _hoisted_217, [
+                            _cache[130] || (_cache[130] = _createElementVNode("div", { class: "docker-table-head three" }, [
+                              _createElementVNode("span", null, "名称"),
+                              _createElementVNode("span", null, "驱动"),
+                              _createElementVNode("span", null, "范围")
+                            ], -1 /* CACHED */)),
+                            (_openBlock(true), _createElementBlock(_Fragment, null, _renderList(_ctx.dockerVolumes, (volume) => {
+                              return (_openBlock(), _createElementBlock("div", {
+                                key: volume.name,
+                                class: "docker-table-row three"
+                              }, [
+                                _createElementVNode("span", _hoisted_218, _toDisplayString(volume.name), 1 /* TEXT */),
+                                _createElementVNode("span", null, _toDisplayString(volume.driver), 1 /* TEXT */),
+                                _createElementVNode("span", _hoisted_219, _toDisplayString(volume.scope), 1 /* TEXT */)
+                              ]))
+                            }), 128 /* KEYED_FRAGMENT */)),
+                            (!_ctx.dockerVolumes.length)
+                              ? (_openBlock(), _createElementBlock("p", _hoisted_220, "没有数据卷"))
+                              : _createCommentVNode("v-if", true)
+                          ])
+                        ]),
+                        _createElementVNode("details", _hoisted_221, [
+                          _createElementVNode("summary", null, [
+                            _cache[131] || (_cache[131] = _createElementVNode("span", null, "网络", -1 /* CACHED */)),
+                            _createElementVNode("small", null, _toDisplayString(_ctx.dockerNetworks.length) + " 个", 1 /* TEXT */)
+                          ]),
+                          _createElementVNode("div", _hoisted_222, [
+                            _cache[132] || (_cache[132] = _createElementVNode("div", { class: "docker-table-head" }, [
+                              _createElementVNode("span", null, "名称"),
+                              _createElementVNode("span", null, "驱动"),
+                              _createElementVNode("span", null, "范围"),
+                              _createElementVNode("span", null, "内部")
+                            ], -1 /* CACHED */)),
+                            (_openBlock(true), _createElementBlock(_Fragment, null, _renderList(_ctx.dockerNetworks, (network) => {
+                              return (_openBlock(), _createElementBlock("div", {
+                                key: network.name,
+                                class: "docker-table-row"
+                              }, [
+                                _createElementVNode("span", _hoisted_223, _toDisplayString(network.name), 1 /* TEXT */),
+                                _createElementVNode("span", null, _toDisplayString(network.driver), 1 /* TEXT */),
+                                _createElementVNode("span", _hoisted_224, _toDisplayString(network.scope), 1 /* TEXT */),
+                                _createElementVNode("span", _hoisted_225, _toDisplayString(network.internal ? "是" : "否"), 1 /* TEXT */)
+                              ]))
+                            }), 128 /* KEYED_FRAGMENT */)),
+                            (!_ctx.dockerNetworks.length)
+                              ? (_openBlock(), _createElementBlock("p", _hoisted_226, "没有网络"))
+                              : _createCommentVNode("v-if", true)
+                          ])
+                        ])
                       ]))
+                    : _createCommentVNode("v-if", true)
                 ])
               ], 64 /* STABLE_FRAGMENT */))
             : (_ctx.view === 'security')
               ? (_openBlock(), _createElementBlock(_Fragment, { key: 2 }, [
-                  _createElementVNode("section", _hoisted_178, [
+                  _createElementVNode("section", _hoisted_227, [
                     _createElementVNode("div", null, [
-                      _cache[104] || (_cache[104] = _createElementVNode("div", { class: "eyebrow" }, "DDOS DEFENSE", -1 /* CACHED */)),
-                      _cache[105] || (_cache[105] = _createElementVNode("div", { class: "hero-heading" }, [
+                      _cache[133] || (_cache[133] = _createElementVNode("div", { class: "eyebrow" }, "DDOS DEFENSE", -1 /* CACHED */)),
+                      _cache[134] || (_cache[134] = _createElementVNode("div", { class: "hero-heading" }, [
                         _createElementVNode("h1", { id: "security-title" }, "安全防护")
                       ], -1 /* CACHED */)),
-                      _createElementVNode("p", _hoisted_179, [
+                      _createElementVNode("p", _hoisted_228, [
                         _createElementVNode("span", null, _toDisplayString(_ctx.security.enabled ? "请求限速已开启" : "请求限速已关闭"), 1 /* TEXT */),
                         _createElementVNode("span", null, "单 IP 并发 " + _toDisplayString(_ctx.security.limits.max_concurrent || "--"), 1 /* TEXT */),
                         _createElementVNode("span", null, _toDisplayString(_ctx.security.active.tracked_ips || 0) + " 个来源 IP 在跟踪", 1 /* TEXT */)
                       ])
                     ]),
-                    _createElementVNode("div", _hoisted_180, [
-                      _createElementVNode("div", _hoisted_181, [
+                    _createElementVNode("div", _hoisted_229, [
+                      _createElementVNode("div", _hoisted_230, [
                         _createElementVNode("span", {
                           class: _normalizeClass(["status-badge", { error: !!_ctx.securityError, pending: !_ctx.securityReady && !_ctx.securityError }]),
                           role: "status",
                           "aria-live": "polite"
                         }, _toDisplayString(_ctx.securityError ? "读取异常" : (_ctx.securityReady ? (_ctx.security.recent.blocked ? "正在拦截异常请求" : "防护运行中") : "正在连接")), 3 /* TEXT, CLASS */)
                       ]),
-                      _createElementVNode("span", _hoisted_182, "数据更新于 " + _toDisplayString(_ctx.securityClock || "--"), 1 /* TEXT */)
+                      _createElementVNode("span", _hoisted_231, "数据更新于 " + _toDisplayString(_ctx.securityClock || "--"), 1 /* TEXT */)
                     ])
                   ]),
                   (_ctx.securityError)
-                    ? (_openBlock(), _createElementBlock("div", _hoisted_183, _toDisplayString(_ctx.securityError), 1 /* TEXT */))
+                    ? (_openBlock(), _createElementBlock("div", _hoisted_232, _toDisplayString(_ctx.securityError), 1 /* TEXT */))
                     : _createCommentVNode("v-if", true),
-                  _createElementVNode("section", _hoisted_184, [
-                    _createElementVNode("article", _hoisted_185, [
-                      _cache[107] || (_cache[107] = _createElementVNode("div", { class: "metric-card-head" }, [
+                  _createElementVNode("section", _hoisted_233, [
+                    _createElementVNode("article", _hoisted_234, [
+                      _cache[136] || (_cache[136] = _createElementVNode("div", { class: "metric-card-head" }, [
                         _createElementVNode("div", { class: "metric-label" }, "最近一分钟请求"),
                         _createElementVNode("span", { class: "metric-state normal" }, "实时")
                       ], -1 /* CACHED */)),
-                      _createElementVNode("div", _hoisted_186, [
-                        _createElementVNode("div", _hoisted_187, _toDisplayString(_ctx.security.recent.requests || 0), 1 /* TEXT */),
-                        _createElementVNode("div", _hoisted_188, [
+                      _createElementVNode("div", _hoisted_235, [
+                        _createElementVNode("div", _hoisted_236, _toDisplayString(_ctx.security.recent.requests || 0), 1 /* TEXT */),
+                        _createElementVNode("div", _hoisted_237, [
                           _createElementVNode("strong", null, _toDisplayString(_ctx.security.recent.allowed || 0), 1 /* TEXT */),
-                          _cache[106] || (_cache[106] = _createElementVNode("span", null, "次放行", -1 /* CACHED */))
+                          _cache[135] || (_cache[135] = _createElementVNode("span", null, "次放行", -1 /* CACHED */))
                         ])
                       ]),
-                      _createElementVNode("div", _hoisted_189, "累计 " + _toDisplayString(_ctx.security.totals.requests || 0) + " 次请求", 1 /* TEXT */)
+                      _createElementVNode("div", _hoisted_238, "累计 " + _toDisplayString(_ctx.security.totals.requests || 0) + " 次请求", 1 /* TEXT */)
                     ]),
-                    _createElementVNode("article", _hoisted_190, [
-                      _createElementVNode("div", _hoisted_191, [
-                        _cache[108] || (_cache[108] = _createElementVNode("div", { class: "metric-label" }, "最近一分钟拦截", -1 /* CACHED */)),
+                    _createElementVNode("article", _hoisted_239, [
+                      _createElementVNode("div", _hoisted_240, [
+                        _cache[137] || (_cache[137] = _createElementVNode("div", { class: "metric-label" }, "最近一分钟拦截", -1 /* CACHED */)),
                         _createElementVNode("span", {
                           class: _normalizeClass(["metric-state", _ctx.security.recent.blocked ? 'critical' : 'normal'])
                         }, _toDisplayString(_ctx.security.recent.blocked ? "拦截中" : "无异常"), 3 /* TEXT, CLASS */)
                       ]),
-                      _createElementVNode("div", _hoisted_192, [
-                        _createElementVNode("div", _hoisted_193, _toDisplayString(_ctx.security.recent.blocked || 0), 1 /* TEXT */),
-                        _createElementVNode("div", _hoisted_194, [
+                      _createElementVNode("div", _hoisted_241, [
+                        _createElementVNode("div", _hoisted_242, _toDisplayString(_ctx.security.recent.blocked || 0), 1 /* TEXT */),
+                        _createElementVNode("div", _hoisted_243, [
                           _createElementVNode("strong", null, _toDisplayString(_ctx.security.totals.blocked || 0), 1 /* TEXT */),
-                          _cache[109] || (_cache[109] = _createElementVNode("span", null, "次累计拦截", -1 /* CACHED */))
+                          _cache[138] || (_cache[138] = _createElementVNode("span", null, "次累计拦截", -1 /* CACHED */))
                         ])
                       ]),
-                      _cache[110] || (_cache[110] = _createElementVNode("div", { class: "metric-foot" }, "限速、超限并发与超大请求都计为拦截", -1 /* CACHED */))
+                      _cache[139] || (_cache[139] = _createElementVNode("div", { class: "metric-foot" }, "限速、超限并发与超大请求都计为拦截", -1 /* CACHED */))
                     ]),
-                    _createElementVNode("article", _hoisted_195, [
-                      _createElementVNode("div", _hoisted_196, [
-                        _cache[111] || (_cache[111] = _createElementVNode("div", { class: "metric-label" }, "当前封禁来源", -1 /* CACHED */)),
+                    _createElementVNode("article", _hoisted_244, [
+                      _createElementVNode("div", _hoisted_245, [
+                        _cache[140] || (_cache[140] = _createElementVNode("div", { class: "metric-label" }, "当前封禁来源", -1 /* CACHED */)),
                         _createElementVNode("span", {
                           class: _normalizeClass(["metric-state", _ctx.securityBans.length ? 'critical' : 'normal'])
                         }, _toDisplayString(_ctx.securityBans.length ? "已封禁" : "无封禁"), 3 /* TEXT, CLASS */)
                       ]),
-                      _createElementVNode("div", _hoisted_197, [
-                        _createElementVNode("div", _hoisted_198, _toDisplayString(_ctx.securityBans.length), 1 /* TEXT */),
-                        _createElementVNode("div", _hoisted_199, [
+                      _createElementVNode("div", _hoisted_246, [
+                        _createElementVNode("div", _hoisted_247, _toDisplayString(_ctx.securityBans.length), 1 /* TEXT */),
+                        _createElementVNode("div", _hoisted_248, [
                           _createElementVNode("strong", null, _toDisplayString(_ctx.security.limits.strike_limit || "--"), 1 /* TEXT */),
-                          _cache[112] || (_cache[112] = _createElementVNode("span", null, "次违规触发封禁", -1 /* CACHED */))
+                          _cache[141] || (_cache[141] = _createElementVNode("span", null, "次违规触发封禁", -1 /* CACHED */))
                         ])
                       ]),
-                      _createElementVNode("div", _hoisted_200, "首次 " + _toDisplayString(_ctx.formatDuration(_ctx.security.limits.ban_seconds)) + "，逐次翻倍", 1 /* TEXT */)
+                      _createElementVNode("div", _hoisted_249, "首次 " + _toDisplayString(_ctx.formatDuration(_ctx.security.limits.ban_seconds)) + "，逐次翻倍", 1 /* TEXT */)
                     ]),
-                    _createElementVNode("article", _hoisted_201, [
-                      _cache[114] || (_cache[114] = _createElementVNode("div", { class: "metric-card-head" }, [
+                    _createElementVNode("article", _hoisted_250, [
+                      _cache[143] || (_cache[143] = _createElementVNode("div", { class: "metric-card-head" }, [
                         _createElementVNode("div", { class: "metric-label" }, "在途并发请求"),
                         _createElementVNode("span", { class: "metric-state normal" }, "实时")
                       ], -1 /* CACHED */)),
-                      _createElementVNode("div", _hoisted_202, [
-                        _createElementVNode("div", _hoisted_203, _toDisplayString(_ctx.security.active.concurrent || 0), 1 /* TEXT */),
-                        _createElementVNode("div", _hoisted_204, [
+                      _createElementVNode("div", _hoisted_251, [
+                        _createElementVNode("div", _hoisted_252, _toDisplayString(_ctx.security.active.concurrent || 0), 1 /* TEXT */),
+                        _createElementVNode("div", _hoisted_253, [
                           _createElementVNode("strong", null, _toDisplayString(_ctx.security.limits.max_global_concurrent || "--"), 1 /* TEXT */),
-                          _cache[113] || (_cache[113] = _createElementVNode("span", null, "进程级上限", -1 /* CACHED */))
+                          _cache[142] || (_cache[142] = _createElementVNode("span", null, "进程级上限", -1 /* CACHED */))
                         ])
                       ]),
-                      _createElementVNode("div", _hoisted_205, "单 IP 上限 " + _toDisplayString(_ctx.security.limits.max_concurrent || "--") + " 个", 1 /* TEXT */)
+                      _createElementVNode("div", _hoisted_254, "单 IP 上限 " + _toDisplayString(_ctx.security.limits.max_concurrent || "--") + " 个", 1 /* TEXT */)
                     ])
                   ]),
-                  _createElementVNode("section", _hoisted_206, [
-                    _cache[121] || (_cache[121] = _createElementVNode("div", { class: "panel-head compact" }, [
+                  _createElementVNode("section", _hoisted_255, [
+                    _cache[150] || (_cache[150] = _createElementVNode("div", { class: "panel-head compact" }, [
                       _createElementVNode("div", null, [
                         _createElementVNode("div", { class: "eyebrow" }, "POLICY"),
                         _createElementVNode("h2", { id: "security-policy-title" }, "当前限流策略")
                       ]),
                       _createElementVNode("span", { class: "muted" }, "限流参数来自 FOXOPS_SECURITY_* 环境变量，改完重启服务生效")
                     ], -1 /* CACHED */)),
-                    _createElementVNode("div", _hoisted_207, [
-                      _createElementVNode("div", _hoisted_208, [
-                        _cache[115] || (_cache[115] = _createElementVNode("span", null, "突发窗口", -1 /* CACHED */)),
+                    _createElementVNode("div", _hoisted_256, [
+                      _createElementVNode("div", _hoisted_257, [
+                        _cache[144] || (_cache[144] = _createElementVNode("span", null, "突发窗口", -1 /* CACHED */)),
                         _createElementVNode("strong", null, _toDisplayString(_ctx.security.limits.burst || "--") + " 次 / " + _toDisplayString(_ctx.security.limits.burst_window_seconds || "--") + " 秒", 1 /* TEXT */)
                       ]),
-                      _createElementVNode("div", _hoisted_209, [
-                        _cache[116] || (_cache[116] = _createElementVNode("span", null, "持续窗口", -1 /* CACHED */)),
+                      _createElementVNode("div", _hoisted_258, [
+                        _cache[145] || (_cache[145] = _createElementVNode("span", null, "持续窗口", -1 /* CACHED */)),
                         _createElementVNode("strong", null, _toDisplayString(_ctx.security.limits.sustained || "--") + " 次 / " + _toDisplayString(_ctx.security.limits.sustained_window_seconds || "--") + " 秒", 1 /* TEXT */)
                       ]),
-                      _createElementVNode("div", _hoisted_210, [
-                        _cache[117] || (_cache[117] = _createElementVNode("span", null, "单 IP 并发", -1 /* CACHED */)),
+                      _createElementVNode("div", _hoisted_259, [
+                        _cache[146] || (_cache[146] = _createElementVNode("span", null, "单 IP 并发", -1 /* CACHED */)),
                         _createElementVNode("strong", null, _toDisplayString(_ctx.security.limits.max_concurrent || "--") + " 个", 1 /* TEXT */)
                       ]),
-                      _createElementVNode("div", _hoisted_211, [
-                        _cache[118] || (_cache[118] = _createElementVNode("span", null, "全局并发", -1 /* CACHED */)),
+                      _createElementVNode("div", _hoisted_260, [
+                        _cache[147] || (_cache[147] = _createElementVNode("span", null, "全局并发", -1 /* CACHED */)),
                         _createElementVNode("strong", null, _toDisplayString(_ctx.security.limits.max_global_concurrent || "--") + " 个", 1 /* TEXT */)
                       ]),
-                      _createElementVNode("div", _hoisted_212, [
-                        _cache[119] || (_cache[119] = _createElementVNode("span", null, "封禁触发", -1 /* CACHED */)),
+                      _createElementVNode("div", _hoisted_261, [
+                        _cache[148] || (_cache[148] = _createElementVNode("span", null, "封禁触发", -1 /* CACHED */)),
                         _createElementVNode("strong", null, _toDisplayString(_ctx.security.limits.strike_limit || "--") + " 次违规 / " + _toDisplayString(_ctx.security.limits.strike_window_seconds || "--") + " 秒", 1 /* TEXT */)
                       ]),
-                      _createElementVNode("div", _hoisted_213, [
-                        _cache[120] || (_cache[120] = _createElementVNode("span", null, "封禁时长", -1 /* CACHED */)),
+                      _createElementVNode("div", _hoisted_262, [
+                        _cache[149] || (_cache[149] = _createElementVNode("span", null, "封禁时长", -1 /* CACHED */)),
                         _createElementVNode("strong", null, _toDisplayString(_ctx.formatDuration(_ctx.security.limits.ban_seconds)) + " 起，最长 " + _toDisplayString(_ctx.formatDuration(_ctx.security.limits.max_ban_seconds)), 1 /* TEXT */)
                       ])
                     ])
                   ]),
-                  _createElementVNode("section", _hoisted_214, [
-                    _createElementVNode("div", _hoisted_215, [
-                      _cache[122] || (_cache[122] = _createElementVNode("div", null, [
+                  _createElementVNode("section", _hoisted_263, [
+                    _createElementVNode("div", _hoisted_264, [
+                      _cache[151] || (_cache[151] = _createElementVNode("div", null, [
                         _createElementVNode("div", { class: "eyebrow" }, "BLOCKED SOURCES"),
                         _createElementVNode("h2", { id: "security-bans-title" }, "当前封禁")
                       ], -1 /* CACHED */)),
-                      _createElementVNode("span", _hoisted_216, _toDisplayString(_ctx.securityBans.length) + " 个来源 IP", 1 /* TEXT */)
+                      _createElementVNode("span", _hoisted_265, _toDisplayString(_ctx.securityBans.length) + " 个来源 IP", 1 /* TEXT */)
                     ]),
-                    _createElementVNode("div", _hoisted_217, [
+                    _createElementVNode("div", _hoisted_266, [
                       (_openBlock(true), _createElementBlock(_Fragment, null, _renderList(_ctx.securityBans, (item) => {
                         return (_openBlock(), _createElementBlock("div", {
                           key: item.ip,
                           class: "security-row"
                         }, [
-                          _createElementVNode("div", _hoisted_218, [
+                          _createElementVNode("div", _hoisted_267, [
                             _createElementVNode("strong", null, _toDisplayString(item.ip), 1 /* TEXT */),
                             _createElementVNode("small", null, _toDisplayString(item.reason) + " · 第 " + _toDisplayString(item.bans) + " 次封禁 · " + _toDisplayString(_ctx.formatTime(item.banned_at)), 1 /* TEXT */)
                           ]),
-                          _createElementVNode("div", _hoisted_219, "剩余 " + _toDisplayString(_ctx.formatDuration(item.remaining_seconds)), 1 /* TEXT */),
+                          _createElementVNode("div", _hoisted_268, "剩余 " + _toDisplayString(_ctx.formatDuration(item.remaining_seconds)), 1 /* TEXT */),
                           _createElementVNode("button", {
                             type: "button",
                             class: "text-button",
                             onClick: $event => (_ctx.unbanIp(item.ip))
-                          }, "解封", 8 /* PROPS */, _hoisted_220)
+                          }, "解封", 8 /* PROPS */, _hoisted_269)
                         ]))
                       }), 128 /* KEYED_FRAGMENT */)),
                       (!_ctx.securityBans.length)
-                        ? (_openBlock(), _createElementBlock("div", _hoisted_221, _cache[123] || (_cache[123] = [
+                        ? (_openBlock(), _createElementBlock("div", _hoisted_270, _cache[152] || (_cache[152] = [
                             _createElementVNode("span", null, "✓", -1 /* CACHED */),
                             _createTextVNode(" 当前没有封禁来源，流量正常 ")
                           ])))
                         : _createCommentVNode("v-if", true)
                     ])
                   ]),
-                  _createElementVNode("section", _hoisted_222, [
-                    _cache[124] || (_cache[124] = _createElementVNode("div", { class: "panel-head compact" }, [
+                  _createElementVNode("section", _hoisted_271, [
+                    _cache[153] || (_cache[153] = _createElementVNode("div", { class: "panel-head compact" }, [
                       _createElementVNode("div", null, [
                         _createElementVNode("div", { class: "eyebrow" }, "TOP SOURCES"),
                         _createElementVNode("h2", { id: "security-offenders-title" }, "高频来源")
                       ]),
                       _createElementVNode("span", { class: "muted" }, "按拦截次数排序")
                     ], -1 /* CACHED */)),
-                    _createElementVNode("div", _hoisted_223, [
+                    _createElementVNode("div", _hoisted_272, [
                       (_openBlock(true), _createElementBlock(_Fragment, null, _renderList(_ctx.securityOffenders, (item) => {
                         return (_openBlock(), _createElementBlock("div", {
                           key: item.ip,
                           class: "security-row"
                         }, [
-                          _createElementVNode("div", _hoisted_224, [
+                          _createElementVNode("div", _hoisted_273, [
                             _createElementVNode("strong", null, _toDisplayString(item.ip), 1 /* TEXT */),
                             _createElementVNode("small", null, "最近活跃 " + _toDisplayString(_ctx.formatDuration(item.last_seen_seconds_ago)) + "前", 1 /* TEXT */)
                           ]),
-                          _createElementVNode("div", _hoisted_225, [
+                          _createElementVNode("div", _hoisted_274, [
                             _createTextVNode(" 请求 " + _toDisplayString(item.requests) + " 次 · 拦截 " + _toDisplayString(item.blocked) + " 次 ", 1 /* TEXT */),
                             (item.banned)
                               ? (_openBlock(), _createElementBlock(_Fragment, { key: 0 }, [
@@ -1818,33 +2200,33 @@ return function render(_ctx, _cache) {
                                 ], 64 /* STABLE_FRAGMENT */))
                               : _createCommentVNode("v-if", true)
                           ]),
-                          _createElementVNode("div", _hoisted_226, _toDisplayString(item.violations) + " 次待触发违规", 1 /* TEXT */)
+                          _createElementVNode("div", _hoisted_275, _toDisplayString(item.violations) + " 次待触发违规", 1 /* TEXT */)
                         ]))
                       }), 128 /* KEYED_FRAGMENT */)),
                       (!_ctx.securityOffenders.length)
-                        ? (_openBlock(), _createElementBlock("div", _hoisted_227, " 还没有来源 IP 触发限速 "))
+                        ? (_openBlock(), _createElementBlock("div", _hoisted_276, " 还没有来源 IP 触发限速 "))
                         : _createCommentVNode("v-if", true)
                     ])
                   ])
                 ], 64 /* STABLE_FRAGMENT */))
               : (_openBlock(), _createElementBlock(_Fragment, { key: 3 }, [
-                  _createElementVNode("section", _hoisted_228, [
+                  _createElementVNode("section", _hoisted_277, [
                     _createElementVNode("div", null, [
-                      _cache[125] || (_cache[125] = _createElementVNode("div", { class: "eyebrow" }, "SECURITY POLICY", -1 /* CACHED */)),
-                      _cache[126] || (_cache[126] = _createElementVNode("div", { class: "hero-heading" }, [
+                      _cache[154] || (_cache[154] = _createElementVNode("div", { class: "eyebrow" }, "SECURITY POLICY", -1 /* CACHED */)),
+                      _cache[155] || (_cache[155] = _createElementVNode("div", { class: "hero-heading" }, [
                         _createElementVNode("h1", { id: "admin-title" }, "后台管理"),
                         _createElementVNode("span", { class: "environment-badge" }, "ADMIN")
                       ], -1 /* CACHED */)),
-                      _createElementVNode("p", _hoisted_229, [
+                      _createElementVNode("p", _hoisted_278, [
                         _createElementVNode("span", null, _toDisplayString(_ctx.policy.current.enabled ? "防护已启用" : "防护已停用"), 1 /* TEXT */),
                         _createElementVNode("span", null, _toDisplayString(_ctx.policy.source === "runtime" ? "当前为自定义策略" : "当前为环境默认值"), 1 /* TEXT */),
                         (_ctx.policy.updated_at)
-                          ? (_openBlock(), _createElementBlock("span", _hoisted_230, "更新于 " + _toDisplayString(_ctx.formatTime(_ctx.policy.updated_at)), 1 /* TEXT */))
+                          ? (_openBlock(), _createElementBlock("span", _hoisted_279, "更新于 " + _toDisplayString(_ctx.formatTime(_ctx.policy.updated_at)), 1 /* TEXT */))
                           : _createCommentVNode("v-if", true)
                       ])
                     ]),
-                    _createElementVNode("div", _hoisted_231, [
-                      _createElementVNode("div", _hoisted_232, [
+                    _createElementVNode("div", _hoisted_280, [
+                      _createElementVNode("div", _hoisted_281, [
                         _createElementVNode("span", {
                           class: _normalizeClass(["status-badge", { error: !!_ctx.policyError, pending: _ctx.policyLoading }]),
                           role: "status",
@@ -1854,56 +2236,56 @@ return function render(_ctx, _cache) {
                           type: "button",
                           class: "text-button",
                           disabled: _ctx.policyLoading,
-                          onClick: _cache[24] || (_cache[24] = (...args) => (_ctx.refreshPolicy && _ctx.refreshPolicy(...args)))
-                        }, _toDisplayString(_ctx.policyLoading ? "刷新中" : "重新读取"), 9 /* TEXT, PROPS */, _hoisted_233)
+                          onClick: _cache[31] || (_cache[31] = (...args) => (_ctx.refreshPolicy && _ctx.refreshPolicy(...args)))
+                        }, _toDisplayString(_ctx.policyLoading ? "刷新中" : "重新读取"), 9 /* TEXT, PROPS */, _hoisted_282)
                       ]),
-                      _cache[127] || (_cache[127] = _createElementVNode("span", { class: "hero-status-uptime muted" }, "保存后立即生效，无需重启", -1 /* CACHED */))
+                      _cache[156] || (_cache[156] = _createElementVNode("span", { class: "hero-status-uptime muted" }, "保存后立即生效，无需重启", -1 /* CACHED */))
                     ])
                   ]),
                   (_ctx.policyError)
-                    ? (_openBlock(), _createElementBlock("div", _hoisted_234, _toDisplayString(_ctx.policyError), 1 /* TEXT */))
+                    ? (_openBlock(), _createElementBlock("div", _hoisted_283, _toDisplayString(_ctx.policyError), 1 /* TEXT */))
                     : _createCommentVNode("v-if", true),
                   (_ctx.policySuccess)
-                    ? (_openBlock(), _createElementBlock("div", _hoisted_235, _toDisplayString(_ctx.policySuccess), 1 /* TEXT */))
+                    ? (_openBlock(), _createElementBlock("div", _hoisted_284, _toDisplayString(_ctx.policySuccess), 1 /* TEXT */))
                     : _createCommentVNode("v-if", true),
-                  _createElementVNode("section", _hoisted_236, [
-                    _cache[129] || (_cache[129] = _createElementVNode("div", { class: "panel-head compact" }, [
+                  _createElementVNode("section", _hoisted_285, [
+                    _cache[158] || (_cache[158] = _createElementVNode("div", { class: "panel-head compact" }, [
                       _createElementVNode("div", null, [
                         _createElementVNode("div", { class: "eyebrow" }, "SWITCH"),
                         _createElementVNode("h2", { id: "policy-toggle-title" }, "防护开关")
                       ]),
                       _createElementVNode("span", { class: "muted" }, "关闭后所有请求直接放行")
                     ], -1 /* CACHED */)),
-                    _createElementVNode("label", _hoisted_237, [
+                    _createElementVNode("label", _hoisted_286, [
                       _withDirectives(_createElementVNode("input", {
                         id: "policy-enabled",
                         type: "checkbox",
-                        "onUpdate:modelValue": _cache[25] || (_cache[25] = $event => ((_ctx.policyForm.enabled) = $event))
+                        "onUpdate:modelValue": _cache[32] || (_cache[32] = $event => ((_ctx.policyForm.enabled) = $event))
                       }, null, 512 /* NEED_PATCH */), [
                         [_vModelCheckbox, _ctx.policyForm.enabled]
                       ]),
-                      _cache[128] || (_cache[128] = _createElementVNode("span", null, "启用请求级限速、并发上限与自动封禁", -1 /* CACHED */))
+                      _cache[157] || (_cache[157] = _createElementVNode("span", null, "启用请求级限速、并发上限与自动封禁", -1 /* CACHED */))
                     ])
                   ]),
-                  _createElementVNode("section", _hoisted_238, [
-                    _cache[137] || (_cache[137] = _createElementVNode("div", { class: "panel-head compact" }, [
+                  _createElementVNode("section", _hoisted_287, [
+                    _cache[166] || (_cache[166] = _createElementVNode("div", { class: "panel-head compact" }, [
                       _createElementVNode("div", null, [
                         _createElementVNode("div", { class: "eyebrow" }, "RATE LIMIT"),
                         _createElementVNode("h2", { id: "policy-limit-title" }, "限速与并发")
                       ]),
                       _createElementVNode("span", { class: "muted" }, "按来源 IP 统计")
                     ], -1 /* CACHED */)),
-                    _createElementVNode("div", _hoisted_239, [
-                      _createElementVNode("label", _hoisted_240, [
-                        _cache[130] || (_cache[130] = _createElementVNode("span", null, "突发上限（次）", -1 /* CACHED */)),
+                    _createElementVNode("div", _hoisted_288, [
+                      _createElementVNode("label", _hoisted_289, [
+                        _cache[159] || (_cache[159] = _createElementVNode("span", null, "突发上限（次）", -1 /* CACHED */)),
                         _withDirectives(_createElementVNode("input", {
                           id: "policy-burst",
                           type: "number",
-                          "onUpdate:modelValue": _cache[26] || (_cache[26] = $event => ((_ctx.policyForm.burst_limit) = $event)),
+                          "onUpdate:modelValue": _cache[33] || (_cache[33] = $event => ((_ctx.policyForm.burst_limit) = $event)),
                           min: _ctx.policyMin('burst_limit'),
                           max: _ctx.policyMax('burst_limit'),
                           step: "1"
-                        }, null, 8 /* PROPS */, _hoisted_241), [
+                        }, null, 8 /* PROPS */, _hoisted_290), [
                           [
                             _vModelText,
                             _ctx.policyForm.burst_limit,
@@ -1912,16 +2294,16 @@ return function render(_ctx, _cache) {
                           ]
                         ])
                       ]),
-                      _createElementVNode("label", _hoisted_242, [
-                        _cache[131] || (_cache[131] = _createElementVNode("span", null, "突发窗口（秒）", -1 /* CACHED */)),
+                      _createElementVNode("label", _hoisted_291, [
+                        _cache[160] || (_cache[160] = _createElementVNode("span", null, "突发窗口（秒）", -1 /* CACHED */)),
                         _withDirectives(_createElementVNode("input", {
                           id: "policy-burst-window",
                           type: "number",
-                          "onUpdate:modelValue": _cache[27] || (_cache[27] = $event => ((_ctx.policyForm.burst_window_seconds) = $event)),
+                          "onUpdate:modelValue": _cache[34] || (_cache[34] = $event => ((_ctx.policyForm.burst_window_seconds) = $event)),
                           min: _ctx.policyMin('burst_window_seconds'),
                           max: _ctx.policyMax('burst_window_seconds'),
                           step: "any"
-                        }, null, 8 /* PROPS */, _hoisted_243), [
+                        }, null, 8 /* PROPS */, _hoisted_292), [
                           [
                             _vModelText,
                             _ctx.policyForm.burst_window_seconds,
@@ -1930,16 +2312,16 @@ return function render(_ctx, _cache) {
                           ]
                         ])
                       ]),
-                      _createElementVNode("label", _hoisted_244, [
-                        _cache[132] || (_cache[132] = _createElementVNode("span", null, "持续上限（次）", -1 /* CACHED */)),
+                      _createElementVNode("label", _hoisted_293, [
+                        _cache[161] || (_cache[161] = _createElementVNode("span", null, "持续上限（次）", -1 /* CACHED */)),
                         _withDirectives(_createElementVNode("input", {
                           id: "policy-sustained",
                           type: "number",
-                          "onUpdate:modelValue": _cache[28] || (_cache[28] = $event => ((_ctx.policyForm.sustained_limit) = $event)),
+                          "onUpdate:modelValue": _cache[35] || (_cache[35] = $event => ((_ctx.policyForm.sustained_limit) = $event)),
                           min: _ctx.policyMin('sustained_limit'),
                           max: _ctx.policyMax('sustained_limit'),
                           step: "1"
-                        }, null, 8 /* PROPS */, _hoisted_245), [
+                        }, null, 8 /* PROPS */, _hoisted_294), [
                           [
                             _vModelText,
                             _ctx.policyForm.sustained_limit,
@@ -1948,16 +2330,16 @@ return function render(_ctx, _cache) {
                           ]
                         ])
                       ]),
-                      _createElementVNode("label", _hoisted_246, [
-                        _cache[133] || (_cache[133] = _createElementVNode("span", null, "持续窗口（秒）", -1 /* CACHED */)),
+                      _createElementVNode("label", _hoisted_295, [
+                        _cache[162] || (_cache[162] = _createElementVNode("span", null, "持续窗口（秒）", -1 /* CACHED */)),
                         _withDirectives(_createElementVNode("input", {
                           id: "policy-sustained-window",
                           type: "number",
-                          "onUpdate:modelValue": _cache[29] || (_cache[29] = $event => ((_ctx.policyForm.sustained_window_seconds) = $event)),
+                          "onUpdate:modelValue": _cache[36] || (_cache[36] = $event => ((_ctx.policyForm.sustained_window_seconds) = $event)),
                           min: _ctx.policyMin('sustained_window_seconds'),
                           max: _ctx.policyMax('sustained_window_seconds'),
                           step: "any"
-                        }, null, 8 /* PROPS */, _hoisted_247), [
+                        }, null, 8 /* PROPS */, _hoisted_296), [
                           [
                             _vModelText,
                             _ctx.policyForm.sustained_window_seconds,
@@ -1966,16 +2348,16 @@ return function render(_ctx, _cache) {
                           ]
                         ])
                       ]),
-                      _createElementVNode("label", _hoisted_248, [
-                        _cache[134] || (_cache[134] = _createElementVNode("span", null, "单 IP 并发（个）", -1 /* CACHED */)),
+                      _createElementVNode("label", _hoisted_297, [
+                        _cache[163] || (_cache[163] = _createElementVNode("span", null, "单 IP 并发（个）", -1 /* CACHED */)),
                         _withDirectives(_createElementVNode("input", {
                           id: "policy-max-concurrent",
                           type: "number",
-                          "onUpdate:modelValue": _cache[30] || (_cache[30] = $event => ((_ctx.policyForm.max_concurrent) = $event)),
+                          "onUpdate:modelValue": _cache[37] || (_cache[37] = $event => ((_ctx.policyForm.max_concurrent) = $event)),
                           min: _ctx.policyMin('max_concurrent'),
                           max: _ctx.policyMax('max_concurrent'),
                           step: "1"
-                        }, null, 8 /* PROPS */, _hoisted_249), [
+                        }, null, 8 /* PROPS */, _hoisted_298), [
                           [
                             _vModelText,
                             _ctx.policyForm.max_concurrent,
@@ -1984,16 +2366,16 @@ return function render(_ctx, _cache) {
                           ]
                         ])
                       ]),
-                      _createElementVNode("label", _hoisted_250, [
-                        _cache[135] || (_cache[135] = _createElementVNode("span", null, "全局并发（个）", -1 /* CACHED */)),
+                      _createElementVNode("label", _hoisted_299, [
+                        _cache[164] || (_cache[164] = _createElementVNode("span", null, "全局并发（个）", -1 /* CACHED */)),
                         _withDirectives(_createElementVNode("input", {
                           id: "policy-max-global",
                           type: "number",
-                          "onUpdate:modelValue": _cache[31] || (_cache[31] = $event => ((_ctx.policyForm.max_global_concurrent) = $event)),
+                          "onUpdate:modelValue": _cache[38] || (_cache[38] = $event => ((_ctx.policyForm.max_global_concurrent) = $event)),
                           min: _ctx.policyMin('max_global_concurrent'),
                           max: _ctx.policyMax('max_global_concurrent'),
                           step: "1"
-                        }, null, 8 /* PROPS */, _hoisted_251), [
+                        }, null, 8 /* PROPS */, _hoisted_300), [
                           [
                             _vModelText,
                             _ctx.policyForm.max_global_concurrent,
@@ -2002,12 +2384,12 @@ return function render(_ctx, _cache) {
                           ]
                         ])
                       ]),
-                      _createElementVNode("label", _hoisted_252, [
-                        _cache[136] || (_cache[136] = _createElementVNode("span", null, "请求体上限（KiB）", -1 /* CACHED */)),
+                      _createElementVNode("label", _hoisted_301, [
+                        _cache[165] || (_cache[165] = _createElementVNode("span", null, "请求体上限（KiB）", -1 /* CACHED */)),
                         _withDirectives(_createElementVNode("input", {
                           id: "policy-body-kib",
                           type: "number",
-                          "onUpdate:modelValue": _cache[32] || (_cache[32] = $event => ((_ctx.policyForm.max_body_kib) = $event)),
+                          "onUpdate:modelValue": _cache[39] || (_cache[39] = $event => ((_ctx.policyForm.max_body_kib) = $event)),
                           min: "1",
                           max: "10240",
                           step: "1"
@@ -2021,27 +2403,27 @@ return function render(_ctx, _cache) {
                         ])
                       ])
                     ]),
-                    _cache[138] || (_cache[138] = _createElementVNode("p", { class: "policy-note" }, "持续上限不能低于突发上限；全局并发不能低于单 IP 并发。", -1 /* CACHED */))
+                    _cache[167] || (_cache[167] = _createElementVNode("p", { class: "policy-note" }, "持续上限不能低于突发上限；全局并发不能低于单 IP 并发。", -1 /* CACHED */))
                   ]),
-                  _createElementVNode("section", _hoisted_253, [
-                    _cache[143] || (_cache[143] = _createElementVNode("div", { class: "panel-head compact" }, [
+                  _createElementVNode("section", _hoisted_302, [
+                    _cache[172] || (_cache[172] = _createElementVNode("div", { class: "panel-head compact" }, [
                       _createElementVNode("div", null, [
                         _createElementVNode("div", { class: "eyebrow" }, "AUTO BAN"),
                         _createElementVNode("h2", { id: "policy-ban-title" }, "封禁策略")
                       ]),
                       _createElementVNode("span", { class: "muted" }, "重复违规逐次翻倍")
                     ], -1 /* CACHED */)),
-                    _createElementVNode("div", _hoisted_254, [
-                      _createElementVNode("label", _hoisted_255, [
-                        _cache[139] || (_cache[139] = _createElementVNode("span", null, "触发封禁的违规次数", -1 /* CACHED */)),
+                    _createElementVNode("div", _hoisted_303, [
+                      _createElementVNode("label", _hoisted_304, [
+                        _cache[168] || (_cache[168] = _createElementVNode("span", null, "触发封禁的违规次数", -1 /* CACHED */)),
                         _withDirectives(_createElementVNode("input", {
                           id: "policy-strike",
                           type: "number",
-                          "onUpdate:modelValue": _cache[33] || (_cache[33] = $event => ((_ctx.policyForm.strike_limit) = $event)),
+                          "onUpdate:modelValue": _cache[40] || (_cache[40] = $event => ((_ctx.policyForm.strike_limit) = $event)),
                           min: _ctx.policyMin('strike_limit'),
                           max: _ctx.policyMax('strike_limit'),
                           step: "1"
-                        }, null, 8 /* PROPS */, _hoisted_256), [
+                        }, null, 8 /* PROPS */, _hoisted_305), [
                           [
                             _vModelText,
                             _ctx.policyForm.strike_limit,
@@ -2050,16 +2432,16 @@ return function render(_ctx, _cache) {
                           ]
                         ])
                       ]),
-                      _createElementVNode("label", _hoisted_257, [
-                        _cache[140] || (_cache[140] = _createElementVNode("span", null, "违规统计窗口（秒）", -1 /* CACHED */)),
+                      _createElementVNode("label", _hoisted_306, [
+                        _cache[169] || (_cache[169] = _createElementVNode("span", null, "违规统计窗口（秒）", -1 /* CACHED */)),
                         _withDirectives(_createElementVNode("input", {
                           id: "policy-strike-window",
                           type: "number",
-                          "onUpdate:modelValue": _cache[34] || (_cache[34] = $event => ((_ctx.policyForm.strike_window_seconds) = $event)),
+                          "onUpdate:modelValue": _cache[41] || (_cache[41] = $event => ((_ctx.policyForm.strike_window_seconds) = $event)),
                           min: _ctx.policyMin('strike_window_seconds'),
                           max: _ctx.policyMax('strike_window_seconds'),
                           step: "any"
-                        }, null, 8 /* PROPS */, _hoisted_258), [
+                        }, null, 8 /* PROPS */, _hoisted_307), [
                           [
                             _vModelText,
                             _ctx.policyForm.strike_window_seconds,
@@ -2068,16 +2450,16 @@ return function render(_ctx, _cache) {
                           ]
                         ])
                       ]),
-                      _createElementVNode("label", _hoisted_259, [
-                        _cache[141] || (_cache[141] = _createElementVNode("span", null, "首次封禁时长（秒）", -1 /* CACHED */)),
+                      _createElementVNode("label", _hoisted_308, [
+                        _cache[170] || (_cache[170] = _createElementVNode("span", null, "首次封禁时长（秒）", -1 /* CACHED */)),
                         _withDirectives(_createElementVNode("input", {
                           id: "policy-ban",
                           type: "number",
-                          "onUpdate:modelValue": _cache[35] || (_cache[35] = $event => ((_ctx.policyForm.ban_seconds) = $event)),
+                          "onUpdate:modelValue": _cache[42] || (_cache[42] = $event => ((_ctx.policyForm.ban_seconds) = $event)),
                           min: _ctx.policyMin('ban_seconds'),
                           max: _ctx.policyMax('ban_seconds'),
                           step: "any"
-                        }, null, 8 /* PROPS */, _hoisted_260), [
+                        }, null, 8 /* PROPS */, _hoisted_309), [
                           [
                             _vModelText,
                             _ctx.policyForm.ban_seconds,
@@ -2086,16 +2468,16 @@ return function render(_ctx, _cache) {
                           ]
                         ])
                       ]),
-                      _createElementVNode("label", _hoisted_261, [
-                        _cache[142] || (_cache[142] = _createElementVNode("span", null, "最长封禁时长（秒）", -1 /* CACHED */)),
+                      _createElementVNode("label", _hoisted_310, [
+                        _cache[171] || (_cache[171] = _createElementVNode("span", null, "最长封禁时长（秒）", -1 /* CACHED */)),
                         _withDirectives(_createElementVNode("input", {
                           id: "policy-max-ban",
                           type: "number",
-                          "onUpdate:modelValue": _cache[36] || (_cache[36] = $event => ((_ctx.policyForm.max_ban_seconds) = $event)),
+                          "onUpdate:modelValue": _cache[43] || (_cache[43] = $event => ((_ctx.policyForm.max_ban_seconds) = $event)),
                           min: _ctx.policyMin('max_ban_seconds'),
                           max: _ctx.policyMax('max_ban_seconds'),
                           step: "any"
-                        }, null, 8 /* PROPS */, _hoisted_262), [
+                        }, null, 8 /* PROPS */, _hoisted_311), [
                           [
                             _vModelText,
                             _ctx.policyForm.max_ban_seconds,
@@ -2105,27 +2487,27 @@ return function render(_ctx, _cache) {
                         ])
                       ])
                     ]),
-                    _cache[144] || (_cache[144] = _createElementVNode("p", { class: "policy-note" }, "最长封禁时长不能低于首次封禁时长；封禁只会影响单个来源 IP。", -1 /* CACHED */))
+                    _cache[173] || (_cache[173] = _createElementVNode("p", { class: "policy-note" }, "最长封禁时长不能低于首次封禁时长；封禁只会影响单个来源 IP。", -1 /* CACHED */))
                   ]),
-                  _createElementVNode("div", _hoisted_263, [
+                  _createElementVNode("div", _hoisted_312, [
                     _createElementVNode("button", {
                       type: "button",
                       class: "primary-button",
                       disabled: _ctx.policySaving,
-                      onClick: _cache[37] || (_cache[37] = (...args) => (_ctx.savePolicy && _ctx.savePolicy(...args)))
-                    }, _toDisplayString(_ctx.policySaving ? "保存中…" : "保存策略"), 9 /* TEXT, PROPS */, _hoisted_264),
+                      onClick: _cache[44] || (_cache[44] = (...args) => (_ctx.savePolicy && _ctx.savePolicy(...args)))
+                    }, _toDisplayString(_ctx.policySaving ? "保存中…" : "保存策略"), 9 /* TEXT, PROPS */, _hoisted_313),
                     _createElementVNode("button", {
                       type: "button",
                       class: "ghost-button",
                       disabled: _ctx.policySaving,
-                      onClick: _cache[38] || (_cache[38] = (...args) => (_ctx.resetPolicy && _ctx.resetPolicy(...args)))
-                    }, " 恢复环境默认 ", 8 /* PROPS */, _hoisted_265),
-                    _cache[145] || (_cache[145] = _createElementVNode("span", { class: "muted" }, "策略保存在数据卷 SQLite，重启后仍生效；恢复默认会删除自定义值。", -1 /* CACHED */))
+                      onClick: _cache[45] || (_cache[45] = (...args) => (_ctx.resetPolicy && _ctx.resetPolicy(...args)))
+                    }, " 恢复环境默认 ", 8 /* PROPS */, _hoisted_314),
+                    _cache[174] || (_cache[174] = _createElementVNode("span", { class: "muted" }, "策略保存在数据卷 SQLite，重启后仍生效；恢复默认会删除自定义值。", -1 /* CACHED */))
                   ])
                 ], 64 /* STABLE_FRAGMENT */)),
         _createElementVNode("footer", null, [
-          _createElementVNode("a", _hoisted_266, "FoxOps " + _toDisplayString(_ctx.summary.version || "?.?"), 1 /* TEXT */),
-          _createElementVNode("span", _hoisted_267, " · © " + _toDisplayString(_ctx.currentYear), 1 /* TEXT */)
+          _createElementVNode("a", _hoisted_315, "FoxOps " + _toDisplayString(_ctx.summary.version || "?.?"), 1 /* TEXT */),
+          _createElementVNode("span", _hoisted_316, " · © " + _toDisplayString(_ctx.currentYear), 1 /* TEXT */)
         ])
       ])
     ])

@@ -88,6 +88,7 @@ services:
 
   # 可选：容器总览探针。root 身份读 docker.sock，把快照写进共享卷给 app 只读。
   # 不启用这个 profile 时，面板 Docker 一栏显示"读取不到容器"，属预期。
+  # 每秒醒一次处理面板的日志/详情请求，快照本身在 docker_probe 内部按 10s 节流。
   docker-probe:
     profiles: ["docker-panel"]
     image: foxops:${FOXOPS_IMAGE_TAG:-0.2.2}
@@ -96,7 +97,7 @@ services:
     entrypoint:
       - /bin/sh
       - -c
-      - while :; do python -m app.docker_probe || true; sleep 10; done
+      - while :; do python -m app.docker_probe || true; sleep 1; done
     environment:
       PYTHONPATH: /opt/foxops
     healthcheck:
