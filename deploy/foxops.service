@@ -7,6 +7,9 @@ Wants=network-online.target
 Type=simple
 User=foxops
 Group=foxops
+# 系统运维页「系统日志」要读 journal：补上 systemd-journal 组，否则 journalctl
+# 会以“没有权限看系统日志”退出。删掉这一行也能跑，日志页会提示不可用。
+SupplementaryGroups=systemd-journal
 WorkingDirectory=/opt/foxops
 EnvironmentFile=/etc/foxops/foxops.env
 ExecStart=/opt/foxops/.venv/bin/uvicorn app.main:app --host 127.0.0.1 --port 8000 --workers 1 --no-access-log

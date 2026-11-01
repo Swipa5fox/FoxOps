@@ -188,6 +188,11 @@ class Settings:
     systemctl_path: str = os.getenv(
         "FOXOPS_SYSTEMCTL_PATH", "/usr/bin/systemctl"
     )
+    # 系统运维页「系统日志」用的 journalctl 路径。容器部署没有 systemd，
+    # 这个路径不存在时接口返回"不可用 + 原因"，不会报错。
+    journalctl_path: str = os.getenv(
+        "FOXOPS_JOURNALCTL_PATH", "/usr/bin/journalctl"
+    )
     services: tuple[str, ...] = _services()
     ignored_services: frozenset[str] = field(default_factory=_ignored_services)
     service_labels: dict[str, str] = field(default_factory=_service_labels)
@@ -283,8 +288,13 @@ class Settings:
             raise RuntimeError("FOXOPS_SECURITY_MAX_TRACKED_IPS must be at least 64")
         for name, value in (
             ("FOXOPS_SYSTEMCTL_PATH", self.systemctl_path),
+            ("FOXOPS_JOURNALCTL_PATH", self.journalctl_path),
         ):
-            if not Path(value).is_absolute() or any(char.isspace() for char in value):
+            # 不用 Path.is_absolute() 单独判定：Windows 开发机上 /usr/bin/journalctl
+            # 会被判成相对路径，而它在目标 Linux 服务器上是合法的绝对路径。
+            if not (value.startswith("/") or Path(value).is_absolute()) or any(
+                char.isspace() for char in value
+            ):
                 raise RuntimeError(f"{name} must be an absolute command path")
 
 

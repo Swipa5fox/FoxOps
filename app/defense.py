@@ -38,6 +38,19 @@ logger = logging.getLogger("foxops.defense")
 RECENT_WINDOW_SECONDS = 60
 MAX_OFFENDERS = 5
 
+# 「安全日志」用的事件环形缓冲：只留进程内的最近事件，重启即清空。
+# 需要长期留痕的操作（登录、解封、改策略）另有 audit_logs 落库，两者在
+# security_logs() 里合并展示。风暴期间不写库，避免攻击把数据库打满。
+MAX_EVENTS = 300
+# 同一来源在同一秒内重复触发同一类拦截时合并成一条并累计次数——否则一次
+# 刷量就能把封禁记录挤出窗口，面板上反而看不到"为什么被封"。
+EVENT_COALESCE_SECONDS = 1.0
+
+EVENT_LABELS = {
+    "blocked": "拦截请求",
+    "banned": "自动封禁",
+}
+
 
 def _normalize_ip(value: str | None) -> Any | None:
     """把字符串解析成 ip_address；非法值（含 TestClient 的 "testclient"）返回 None。"""
@@ -85,6 +98,8 @@ class Decision:
     status_code: int = 200
     detail: str = ""
     retry_after: float = 0.0
+    # 机器可读的拒绝原因（rate limit / banned / ...），写安全日志用。
+    reason: str = ""
 
 
 @dataclass
@@ -120,6 +135,9 @@ class RequestGuard:
         self._pruned_at = 0.0
         self._totals = {"requests": 0, "allowed": 0, "blocked": 0}
         self._started_at = time.time()
+        # 安全日志事件：新事件追加在尾部，查询时倒序取。只在持锁路径写入。
+        self._events: deque[dict[str, Any]] = deque(maxlen=MAX_EVENTS)
+        self._event_seq = 0
 
     # ------------------------------------------------------------------
     # 真实 IP
@@ -155,7 +173,9 @@ class RequestGuard:
     # ------------------------------------------------------------------
     # 准入 / 释放
     # ------------------------------------------------------------------
-    def begin(self, ip: str, content_length: int | None = None) -> Decision:
+    def begin(
+        self, ip: str, content_length: int | None = None, path: str = ""
+    ) -> Decision:
         config = self.config
         with self._lock:
             now = time.monotonic()
@@ -171,11 +191,21 @@ class RequestGuard:
                     client = self._client(ip, now)
                     client.blocked += 1
                     seconds = max(1, int(remaining))
+                    self._push_event(
+                        action="blocked",
+                        level="warning",
+                        ip=ip,
+                        path=path,
+                        status=403,
+                        reason="banned",
+                        detail=f"封禁期内被拒绝，剩余 {seconds} 秒",
+                    )
                     return Decision(
                         False,
                         status_code=403,
                         detail=f"来源 IP 已被临时封禁，请 {seconds} 秒后再试",
                         retry_after=remaining,
+                        reason="banned",
                     )
                 self._bans.pop(ip, None)
 
@@ -192,6 +222,7 @@ class RequestGuard:
                     client,
                     now,
                     "request body too large",
+                    path=path,
                     status_code=413,
                     detail="请求体超出大小限制",
                 )
@@ -201,6 +232,7 @@ class RequestGuard:
                     client,
                     now,
                     "global concurrency",
+                    path=path,
                     detail="服务器繁忙，请稍后重试",
                 )
             if client.active >= config.max_concurrent:
@@ -209,10 +241,11 @@ class RequestGuard:
                     client,
                     now,
                     "per-ip concurrency",
+                    path=path,
                     detail="并发请求过多，请稍后重试",
                 )
             if not self._take(client, now):
-                return self._reject(ip, client, now, "rate limit")
+                return self._reject(ip, client, now, "rate limit", path=path)
 
             client.active += 1
             client.requests += 1
@@ -347,6 +380,15 @@ class RequestGuard:
             )
         return counts
 
+    def events(self, limit: int = 100) -> list[dict[str, Any]]:
+        """最近的安全事件（新到旧）。内存环形缓冲，重启清空。"""
+        with self._lock:
+            items = list(self._events)[-max(1, int(limit)):]
+        return [
+            {key: value for key, value in item.items() if not key.startswith("_")}
+            for item in reversed(items)
+        ]
+
     # ------------------------------------------------------------------
     # 内部实现（调用方持锁）
     # ------------------------------------------------------------------
@@ -404,34 +446,72 @@ class RequestGuard:
         client: _Client,
         now: float,
         reason: str,
+        *,
+        path: str = "",
         status_code: int = 429,
         detail: str = "请求过于频繁，请稍后重试",
     ) -> Decision:
         self._totals["blocked"] += 1
         self._mark(now, blocked=True)
         client.blocked += 1
-        self._register_violation(ip, client, now, reason)
+        banned_level = self._register_violation(ip, client, now, reason)
         ban = self._bans.get(ip)
         if ban is not None and ban.until > now:
             seconds = max(1, int(ban.until - now))
+            self._push_event(
+                action="blocked",
+                level="warning",
+                ip=ip,
+                path=path,
+                status=403,
+                reason="banned",
+                detail=f"触发封禁后被拒绝，剩余 {seconds} 秒",
+            )
+            if banned_level is not None:
+                self._push_event(
+                    action="banned",
+                    level="critical",
+                    ip=ip,
+                    path=path,
+                    status=403,
+                    reason=reason,
+                    detail=f"第 {banned_level} 次封禁，持续 {seconds} 秒，原因：{reason}",
+                )
             return Decision(
                 False,
                 status_code=403,
                 detail=f"来源 IP 已被临时封禁，请 {seconds} 秒后再试",
                 retry_after=ban.until - now,
+                reason="banned",
             )
-        return Decision(False, status_code=status_code, detail=detail, retry_after=1.0)
+        self._push_event(
+            action="blocked",
+            level="warning",
+            ip=ip,
+            path=path,
+            status=status_code,
+            reason=reason,
+            detail=detail,
+        )
+        return Decision(
+            False,
+            status_code=status_code,
+            detail=detail,
+            retry_after=1.0,
+            reason=reason,
+        )
 
     def _register_violation(
         self, ip: str, client: _Client, now: float, reason: str
-    ) -> None:
+    ) -> int | None:
+        """累计违规；到阈值就封禁并返回封禁层级，否则返回 None。"""
         config = self.config
         if now - client.last_violation > config.strike_window_seconds:
             client.violations = 0
         client.violations += 1
         client.last_violation = now
         if client.violations < config.strike_limit:
-            return
+            return None
         client.violations = 0
         previous = self._bans.get(ip)
         level = previous.level + 1 if previous else 1
@@ -455,6 +535,7 @@ class RequestGuard:
         if len(self._bans) > config.max_tracked_ips:
             oldest = min(self._bans.items(), key=lambda item: item[1].until)
             self._bans.pop(oldest[0], None)
+        return level
 
     def _prune(self, now: float) -> None:
         # 每 5 秒清一次过期封禁，避免每个请求都遍历整张表。
@@ -471,6 +552,55 @@ class RequestGuard:
             self._recent.append([second, 0, 0])
         slot = self._recent[-1]
         slot[2 if blocked else 1] += 1
+
+    def _push_event(
+        self,
+        *,
+        action: str,
+        level: str,
+        ip: str,
+        detail: str,
+        path: str = "",
+        status: int = 0,
+        reason: str = "",
+    ) -> None:
+        """记录一条安全事件（调用方持锁）。
+
+        同一来源、同一路径、同一原因的重复拦截在 EVENT_COALESCE_SECONDS 内
+        合并成一条并累加 count，避免风暴把窗口刷满。
+        """
+        now = time.time()
+        previous = self._events[-1] if self._events else None
+        if (
+            previous is not None
+            and previous["action"] == action
+            and previous["ip"] == ip
+            and previous["path"] == path
+            and previous["reason"] == reason
+            and now - previous["_wall"] < EVENT_COALESCE_SECONDS
+        ):
+            previous["count"] += 1
+            previous["_wall"] = now
+            previous["ts"] = datetime.now(timezone.utc).isoformat(timespec="seconds")
+            return
+        self._event_seq += 1
+        self._events.append(
+            {
+                "id": f"evt-{self._event_seq}",
+                "ts": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+                "category": "ban" if action == "banned" else "block",
+                "level": level,
+                "action": action,
+                "label": EVENT_LABELS.get(action, action),
+                "ip": ip,
+                "path": path,
+                "status": status,
+                "reason": reason,
+                "detail": detail,
+                "count": 1,
+                "_wall": now,
+            }
+        )
 
     def _recent_counts(self, now: float) -> dict[str, int]:
         floor = now - RECENT_WINDOW_SECONDS
@@ -655,6 +785,81 @@ def reset_policy() -> dict[str, Any]:
     return policy
 
 
+# ---------------------------------------------------------------------------
+# 安全日志（面板查看）
+# ---------------------------------------------------------------------------
+
+# 审计动作 -> 面板文案。未知动作原样展示，不丢掉记录。
+AUDIT_LABELS = {
+    "login": "登录",
+    "logout": "退出登录",
+    "change_password": "修改密码",
+    "unban_ip": "解封 IP",
+    "update_security_policy": "修改限流策略",
+    "reset_security_policy": "恢复默认策略",
+    "restart_service": "重启服务",
+    "run_maintenance": "执行备份",
+}
+
+
+def _audit_events(limit: int) -> list[dict[str, Any]]:
+    """把落库的审计记录转成与拦截事件同构的条目。"""
+    entries: list[dict[str, Any]] = []
+    for row in db.audit_logs(limit):
+        action = str(row.get("action") or "unknown")
+        success = bool(row.get("success"))
+        target = str(row.get("target") or "")
+        detail = str(row.get("detail") or "")
+        # 登录记录的目标是用户名，unban 记录的目标是 IP：和说明拼在一起才读得懂。
+        if target and target != str(row.get("remote_addr") or ""):
+            detail = f"{target} · {detail}" if detail else target
+        entries.append(
+            {
+                "id": f"audit-{row['id']}",
+                "ts": row["ts"],
+                "category": "audit",
+                "level": "info" if success else "warning",
+                "action": action,
+                "label": AUDIT_LABELS.get(action, action),
+                "ip": str(row.get("remote_addr") or ""),
+                "path": "",
+                "status": 0,
+                "reason": "",
+                "detail": detail,
+                "count": 1,
+            }
+        )
+    return entries
+
+
+def security_logs(limit: int = 100, kind: str = "all") -> dict[str, Any]:
+    """安全日志：内存里的拦截/封禁事件 + 数据库里的操作审计。
+
+    kind: all / block / ban / audit。内存事件重启即清空（风暴期间不写库），
+    登录、解封、改策略这类需要长期留痕的动作走 audit_logs，重启后仍在。
+    """
+    limit = max(1, min(int(limit), MAX_EVENTS))
+    if kind == "audit":
+        entries = _audit_events(limit)
+    elif kind in ("block", "ban"):
+        entries = [
+            item for item in guard.events(MAX_EVENTS) if item["category"] == kind
+        ][:limit]
+    elif kind == "all":
+        entries = guard.events(MAX_EVENTS) + _audit_events(limit)
+        # 两边都是 UTC ISO 字符串，按字典序倒排就是时间倒序。
+        entries.sort(key=lambda item: item["ts"], reverse=True)
+        entries = entries[:limit]
+    else:
+        raise ValueError("日志类型不合法")
+    return {
+        "entries": entries,
+        "kind": kind,
+        "limit": limit,
+        "generated_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+    }
+
+
 class RequestDefenseMiddleware:
     """ASGI 中间件：只处理 http，websocket 等原样放行。"""
 
@@ -682,7 +887,7 @@ class RequestDefenseMiddleware:
         raw_length = headers.get("content-length", "")
         content_length = int(raw_length) if raw_length.isdigit() else None
 
-        decision = guard.begin(ip, content_length)
+        decision = guard.begin(ip, content_length, scope.get("path", ""))
         if not decision.allowed:
             response = JSONResponse(
                 {"detail": decision.detail},

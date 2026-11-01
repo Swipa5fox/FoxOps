@@ -2297,7 +2297,8 @@ footer {
   font-variant-numeric: tabular-nums;
 }
 
-.docker-offline {
+.docker-offline,
+.log-offline {
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -2307,18 +2308,21 @@ footer {
   background: rgba(251, 113, 133, 0.05);
 }
 
-.docker-offline strong {
+.docker-offline strong,
+.log-offline strong {
   color: #fda4af;
   font-size: 12px;
 }
 
-.docker-offline p {
+.docker-offline p,
+.log-offline p {
   color: var(--muted);
   font-size: 11px;
   word-break: break-all;
 }
 
-.docker-offline code {
+.docker-offline code,
+.log-offline code {
   padding: 8px 10px;
   border-radius: 6px;
   background: rgba(0, 0, 0, 0.26);
@@ -2328,7 +2332,8 @@ footer {
   word-break: break-all;
 }
 
-:root[data-theme="light"] .docker-offline strong {
+:root[data-theme="light"] .docker-offline strong,
+:root[data-theme="light"] .log-offline strong {
   color: var(--danger);
 }
 
@@ -2421,13 +2426,15 @@ footer {
   gap: 12px;
 }
 
-.docker-note {
+.docker-note,
+.log-note {
   margin: 0;
   color: var(--muted);
   font-size: 11px;
 }
 
-.docker-note.error {
+.docker-note.error,
+.log-note.error {
   color: #fda4af;
 }
 
@@ -2519,14 +2526,16 @@ footer {
   font-size: 10px;
 }
 
-.docker-log-toolbar {
+.docker-log-toolbar,
+.log-toolbar {
   display: flex;
   align-items: center;
   gap: 10px;
   flex-wrap: wrap;
 }
 
-.docker-seg {
+.docker-seg,
+.log-seg {
   display: inline-flex;
   padding: 2px;
   border: 1px solid var(--border);
@@ -2534,7 +2543,8 @@ footer {
   background: var(--chip-bg);
 }
 
-.docker-seg-btn {
+.docker-seg-btn,
+.log-seg-btn {
   padding: 3px 9px;
   border: 0;
   border-radius: 5px;
@@ -2544,12 +2554,14 @@ footer {
   cursor: pointer;
 }
 
-.docker-seg-btn.active {
+.docker-seg-btn.active,
+.log-seg-btn.active {
   color: var(--teal);
   background: rgba(94, 234, 212, 0.12);
 }
 
-.docker-auto {
+.docker-auto,
+.log-auto {
   display: inline-flex;
   align-items: center;
   gap: 5px;
@@ -2564,7 +2576,8 @@ footer {
   font-size: 10px;
 }
 
-.docker-log-body {
+.docker-log-body,
+.log-body {
   overflow: auto;
   max-height: 340px;
   margin: 0;
@@ -2578,6 +2591,36 @@ footer {
   line-height: 1.6;
   white-space: pre-wrap;
   word-break: break-all;
+}
+
+/* 日志面板通用：下拉选来源 + 行数/时间说明 */
+.log-select {
+  min-height: 26px;
+  max-width: 220px;
+  padding: 3px 8px;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  background: var(--chip-bg);
+  color: var(--text);
+  font-size: 10px;
+  cursor: pointer;
+}
+
+.log-meta-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 8px;
+}
+
+.log-meta {
+  color: var(--muted);
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+}
+
+.log-panel {
+  margin-top: 18px;
 }
 
 /* 镜像 / 数据卷 / 网络 */
@@ -2670,7 +2713,8 @@ footer {
   background: rgba(72, 62, 100, 0.03);
 }
 
-:root[data-theme="light"] .docker-log-body {
+:root[data-theme="light"] .docker-log-body,
+:root[data-theme="light"] .log-body {
   border-color: rgba(72, 62, 100, 0.12);
   background: rgba(72, 62, 100, 0.05);
   color: var(--text);
@@ -2680,7 +2724,8 @@ footer {
   background: rgba(72, 62, 100, 0.02);
 }
 
-:root[data-theme="light"] .docker-note.error {
+:root[data-theme="light"] .docker-note.error,
+:root[data-theme="light"] .log-note.error {
   color: var(--danger);
 }
 
@@ -2773,6 +2818,89 @@ footer {
 .security-list .empty-state {
   min-height: 96px;
   border-top: 1px solid rgba(163, 154, 186, 0.09);
+}
+
+/* 安全日志：时间 + 级别 + 事件正文 */
+.security-log {
+  display: flex;
+  flex-direction: column;
+}
+
+.security-log-row {
+  display: grid;
+  grid-template-columns: 132px 56px minmax(0, 1fr);
+  align-items: start;
+  gap: 12px;
+  padding: 10px 0;
+  border-top: 1px solid rgba(163, 154, 186, 0.09);
+}
+
+.security-log-row:first-child {
+  border-top: 0;
+}
+
+.security-log-time {
+  color: var(--muted);
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.security-log-level {
+  justify-self: start;
+  padding: 1px 7px;
+  border: 1px solid var(--border);
+  border-radius: 99px;
+  color: var(--muted);
+  font-size: 9px;
+  line-height: 16px;
+  white-space: nowrap;
+}
+
+.security-log-level.warning {
+  border-color: rgba(245, 158, 11, 0.32);
+  color: var(--amber);
+  background: rgba(245, 158, 11, 0.08);
+}
+
+.security-log-level.critical {
+  border-color: rgba(251, 113, 133, 0.34);
+  color: #fda4af;
+  background: rgba(251, 113, 133, 0.1);
+}
+
+.security-log-main {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.security-log-main strong {
+  font-size: 12px;
+  font-weight: 580;
+}
+
+.security-log-main small {
+  color: var(--muted);
+  font-size: 10px;
+  line-height: 1.5;
+  word-break: break-all;
+}
+
+.security-log-count {
+  margin-left: 6px;
+  color: var(--amber);
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+}
+
+.security-log .empty-state {
+  min-height: 96px;
+}
+
+:root[data-theme="light"] .security-log-level.critical {
+  color: var(--danger);
 }
 
 :root[data-theme="light"] .security-policy-item {
@@ -3018,6 +3146,15 @@ footer {
 
   .security-tally {
     text-align: left;
+  }
+
+  .security-log-row {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 6px 12px;
+  }
+
+  .security-log-main {
+    grid-column: 1 / -1;
   }
 }
 

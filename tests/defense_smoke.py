@@ -5,9 +5,11 @@
 
 from __future__ import annotations
 
+import dataclasses
 import os
 import sys
 import tempfile
+import time
 from pathlib import Path
 
 
@@ -226,5 +228,41 @@ with TestClient(app) as client:
     # 解封后立刻不再是 403（令牌还没回满，429 是预期）。
     assert guard.unban("testclient") is True
     assert client.get("/api/health").status_code in (200, 429, 503)
+
+    # 安全日志：拦截/封禁来自内存事件，解封与策略变更来自审计日志。
+    # 上面把 testclient 打到了封禁 + 令牌见底，先放宽限流并清掉封禁，否则
+    # 门禁断言只会看到 403/429，测不到日志接口本身。
+    guard.apply_config(
+        dataclasses.replace(
+            guard.config,
+            burst_limit=10_000,
+            sustained_limit=10_000,
+            burst_window_seconds=1,
+            sustained_window_seconds=1,
+        )
+    )
+    guard.unban("testclient")
+    time.sleep(0.05)
+
+    assert client.get("/api/security/logs").status_code == 401
+    assert client.get("/api/security/logs", headers=guest_headers).status_code == 403
+    log_payload = client.get("/api/security/logs", headers=admin_headers)
+    assert log_payload.status_code == 200, log_payload.text
+    entries = log_payload.json()["entries"]
+    assert entries, "security log must not be empty after blocks"
+    assert entries[0]["ts"] >= entries[-1]["ts"], "log must be newest first"
+    actions = {entry["action"] for entry in entries}
+    assert "blocked" in actions and "banned" in actions, actions
+    assert "unban_ip" in actions, actions
+    # 分类过滤：只看封禁时不混入拦截与审计。
+    ban_entries = client.get(
+        "/api/security/logs", params={"kind": "ban"}, headers=admin_headers
+    ).json()["entries"]
+    assert ban_entries and all(item["category"] == "ban" for item in ban_entries)
+    # 一次风暴里同类事件应合并成一条带次数的记录，而不是刷满整个窗口。
+    assert any(item["count"] > 1 for item in entries), entries[:3]
+    assert client.get(
+        "/api/security/logs", params={"limit": 999}, headers=admin_headers
+    ).status_code == 422
 
 print("FoxOps defense smoke test passed")

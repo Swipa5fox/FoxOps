@@ -57,6 +57,13 @@ echo "security_unauthorized=$security_status security_guest=$security_guest_stat
 test "$security_status" = 401
 test "$security_guest_status" = 403
 
+# 系统日志同样只给管理员：journal 里可能有凭据与内部路径。
+syslog_status=$(curl --silent --output /dev/null --write-out "%{http_code}" "http://127.0.0.1:$PUBLIC_PORT/api/sysops/logs")
+syslog_guest_status=$(curl --silent --output /dev/null --write-out "%{http_code}" --header "Authorization: Bearer $guest_token" "http://127.0.0.1:$PUBLIC_PORT/api/sysops/logs")
+echo "syslog_unauthorized=$syslog_status syslog_guest=$syslog_guest_status"
+test "$syslog_status" = 401
+test "$syslog_guest_status" = 403
+
 echo "STATIC_ASSETS"
 curl --fail --silent --show-error --head "http://127.0.0.1:$PUBLIC_PORT/vendor/vue.runtime.global.prod.js" | head -n 8
 curl --fail --silent --show-error --head "http://127.0.0.1:$PUBLIC_PORT/render.js" | head -n 8

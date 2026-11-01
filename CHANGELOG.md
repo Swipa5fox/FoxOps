@@ -1,3 +1,27 @@
+# 🎉 版本 0.2.3 更新日志
+
+## FoxOps 轻量服务器监控系统版本更新
+
+发布日期：2026-11-01
+
+### 新增
+
+- **安全防护页「安全日志」**：新增 `GET /api/security/logs`（仅 Admin），把限速拦截、自动封禁的内存事件与登录、解封、改策略等落库审计合并成一条时间线，支持「全部 / 拦截 / 封禁 / 审计」筛选、50/100/200 条切换、手动刷新与 5 秒自动刷新。同一来源、同一路径、同一原因的重复拦截在 1 秒内合并成一条并标 `×N`，风暴不会把封禁记录挤出窗口；拦截事件只留在内存环形缓冲（最近 300 条，重启清空），不写库。
+- **系统运维页「系统日志」**：新增 `GET /api/sysops/logs`（仅 Admin），通过 `journalctl` 读取 FoxOps 自己与面板里受监控服务的日志尾部，支持来源下拉、200/500/1000 行、「全部 / 警告+ / 错误」三档过滤与自动刷新。来源由服务端白名单下发，unit 名以参数数组传给 `journalctl`，不经过 shell；没有 journald（容器部署）或缺少 `systemd-journal` 组权限时返回 `available=false` 与修复提示，不会 500。
+- `deploy/foxops.service` 增加 `SupplementaryGroups=systemd-journal`，让 foxops 用户能读 journal；新增运行时配置 `FOXOPS_JOURNALCTL_PATH`（默认 `/usr/bin/journalctl`）。
+- 新增冒烟用例：安全日志的门禁、分类筛选与合并计数；系统日志的门禁、来源白名单、参数校验与环境降级。
+
+### 说明
+
+- 安全日志的「拦截 / 封禁」来自进程内存，重启后清空；「审计」来自 `audit_logs` 表，随数据库保留期落库，重启后仍在。
+- 容器部署没有 systemd，系统日志面板会明确提示改用 `docker compose logs app`，与 Docker 容器总览的降级方式一致。
+
+### 提示
+
+Docker 部署需重建 `app` 镜像（`docker compose build app`）；静态文件是 bind mount，还要 `docker compose up -d --force-recreate web` 才能拿到新的 `index.html` / `render.js`。原生部署重跑 `deploy/install.sh` 会同时刷新带 `SupplementaryGroups` 的 systemd 单元。
+
+---
+
 # 🎉 版本 0.2.2 更新日志
 
 ## FoxOps 轻量服务器监控系统版本更新

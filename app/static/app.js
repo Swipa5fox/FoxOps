@@ -22,6 +22,9 @@
   var dockerLogTimer = null;
   var securityTimer = null;
   var securityClockTimer = null;
+  // 日志自动刷新单独两个表：跟着视图切走就停，不跟状态轮询绑在一起。
+  var securityLogTimer = null;
+  var syslogTimer = null;
   var session = window.FoxOpsSession;
   var weatherPlaceStore = session.weatherPlace;
 
@@ -167,7 +170,34 @@
         policyLoading: false,
         policySaving: false,
         policyError: "",
-        policySuccess: ""
+        policySuccess: "",
+        // 安全日志：内存拦截/封禁事件 + 数据库审计，按需拉取，默认不自动刷新。
+        securityLogs: { entries: [], generated_at: "" },
+        securityLogKind: "all",
+        securityLogLimit: 100,
+        securityLogLoading: false,
+        securityLogError: "",
+        securityLogAuto: false,
+        // 系统日志（仅管理员）：journalctl 尾部，来源限定 FoxOps 与受监控服务。
+        syslog: {
+          available: true,
+          unit: "",
+          sources: [],
+          level: "all",
+          tail: 0,
+          lines: 0,
+          text: "",
+          clipped: false,
+          reason: "",
+          hint: null,
+          generated_at: ""
+        },
+        syslogUnit: "",
+        syslogLevel: "all",
+        syslogLines: 200,
+        syslogLoading: false,
+        syslogError: "",
+        syslogAuto: false
       };
     },
     computed: {
@@ -238,6 +268,17 @@
       securityOffenders: function () {
         var offenders = this.security && this.security.offenders;
         return Array.isArray(offenders) ? offenders : [];
+      },
+      securityLogEntries: function () {
+        var entries = this.securityLogs && this.securityLogs.entries;
+        return Array.isArray(entries) ? entries : [];
+      },
+      syslogSourceList: function () {
+        var sources = this.syslog && this.syslog.sources;
+        // 首次读取前先给一个占位来源，select 不会因为空列表而闪一下。
+        return Array.isArray(sources) && sources.length
+          ? sources
+          : [{ unit: "foxops", label: "FoxOps 面板" }];
       },
       rootDiskLabel: function () {
         var disks = this.realtimeDisks;
@@ -441,6 +482,8 @@
         window.clearInterval(dockerLogTimer);
         window.clearInterval(securityTimer);
         window.clearTimeout(securityClockTimer);
+        window.clearInterval(securityLogTimer);
+        window.clearInterval(syslogTimer);
       },
     methods: {
       authHeaders: function () {
@@ -754,8 +797,10 @@
         // 切走就停表：看不见的页面不该继续定时敲服务器。
         window.clearInterval(sysopsTimer);
         window.clearInterval(dockerTimer);
-        // 日志自动刷新只在展开容器的那一屏有意义，切视图立刻收掉。
+        // 日志自动刷新只在对应的日志面板可见时才有意义，切视图立刻收掉。
         this.stopDockerLogTimer();
+        this.stopSecurityLogTimer();
+        this.stopSyslogTimer();
         window.clearInterval(securityTimer);
         window.clearTimeout(securityClockTimer);
         sysopsTimer = null;
@@ -765,6 +810,10 @@
         if (this.view === "sysops") {
           this.refreshSysops();
           this.refreshDocker();
+          // 日志面板只给管理员：访客不该为看不到的面板付一次 403。
+          if (this.isAdmin) {
+            this.loadSyslog();
+          }
           sysopsTimer = window.setInterval(this.refreshSysops, SYSOPS_REFRESH_MS);
           dockerTimer = window.setInterval(this.refreshDocker, DOCKER_REFRESH_MS);
           return;
@@ -772,6 +821,7 @@
         if (this.view === "security" && this.isAdmin) {
           this.tickSecurityClock();
           this.refreshSecurity();
+          this.loadSecurityLogs();
           securityTimer = window.setInterval(
             this.refreshSecurity,
             SECURITY_REFRESH_MS
@@ -1033,6 +1083,130 @@
         } catch (error) {
           window.alert("解封失败：" + error.message);
         }
+      },
+      loadSecurityLogs: async function () {
+        if (this.view !== "security" || !this.isAdmin || this.securityLogLoading) {
+          return;
+        }
+        this.securityLogLoading = true;
+        this.securityLogError = "";
+        try {
+          var payload = await this.fetchJson(
+            "/api/security/logs?kind=" +
+              encodeURIComponent(this.securityLogKind) +
+              "&limit=" +
+              this.securityLogLimit,
+            { headers: this.authHeaders() }
+          );
+          // generated_at 每次都变，比对时忽略；条目没变就不重渲染列表。
+          if (payloadChanged(this.securityLogs, payload, ["generated_at"])) {
+            this.securityLogs = payload;
+          }
+        } catch (error) {
+          this.securityLogError = error.message || "无法读取安全日志";
+        } finally {
+          this.securityLogLoading = false;
+        }
+      },
+      setSecurityLogKind: function (kind) {
+        if (this.securityLogKind === kind) {
+          return;
+        }
+        this.securityLogKind = kind;
+        this.securityLogs = { entries: [], generated_at: "" };
+        this.loadSecurityLogs();
+      },
+      setSecurityLogLimit: function (limit) {
+        var next = Number(limit) || 100;
+        if (this.securityLogLimit === next) {
+          return;
+        }
+        this.securityLogLimit = next;
+        this.loadSecurityLogs();
+      },
+      toggleSecurityLogAuto: function (event) {
+        this.stopSecurityLogTimer();
+        var checked = !!(event && event.target && event.target.checked);
+        this.securityLogAuto = checked;
+        if (!checked) {
+          return;
+        }
+        var self = this;
+        securityLogTimer = window.setInterval(function () {
+          self.loadSecurityLogs();
+        }, 5000);
+      },
+      stopSecurityLogTimer: function () {
+        if (securityLogTimer) {
+          window.clearInterval(securityLogTimer);
+          securityLogTimer = null;
+        }
+        this.securityLogAuto = false;
+      },
+      securityLogLevelLabel: function (level) {
+        if (level === "critical") {
+          return "严重";
+        }
+        return level === "warning" ? "警告" : "记录";
+      },
+      loadSyslog: async function () {
+        if (this.view !== "sysops" || !this.isAdmin || this.syslogLoading) {
+          return;
+        }
+        this.syslogLoading = true;
+        this.syslogError = "";
+        try {
+          var query = "?lines=" + this.syslogLines + "&level=" + encodeURIComponent(this.syslogLevel);
+          if (this.syslogUnit) {
+            query += "&unit=" + encodeURIComponent(this.syslogUnit);
+          }
+          var payload = await this.fetchJson("/api/sysops/logs" + query, {
+            headers: this.authHeaders()
+          });
+          this.syslog = payload;
+          // 首次读回的服务端单位名回填到下拉框，之后切来源不会再回退。
+          if (!this.syslogUnit && payload.unit) {
+            this.syslogUnit = payload.unit;
+          }
+        } catch (error) {
+          this.syslogError = error.message || "无法读取系统日志";
+        } finally {
+          this.syslogLoading = false;
+        }
+      },
+      setSyslogLevel: function (level) {
+        if (this.syslogLevel === level) {
+          return;
+        }
+        this.syslogLevel = level;
+        this.loadSyslog();
+      },
+      setSyslogLines: function (lines) {
+        var next = Number(lines) || 200;
+        if (this.syslogLines === next) {
+          return;
+        }
+        this.syslogLines = next;
+        this.loadSyslog();
+      },
+      toggleSyslogAuto: function (event) {
+        this.stopSyslogTimer();
+        var checked = !!(event && event.target && event.target.checked);
+        this.syslogAuto = checked;
+        if (!checked) {
+          return;
+        }
+        var self = this;
+        syslogTimer = window.setInterval(function () {
+          self.loadSyslog();
+        }, 5000);
+      },
+      stopSyslogTimer: function () {
+        if (syslogTimer) {
+          window.clearInterval(syslogTimer);
+          syslogTimer = null;
+        }
+        this.syslogAuto = false;
       },
       refreshPolicy: async function () {
         if (this.view !== "admin" || !this.isAdmin || this.policyLoading) {

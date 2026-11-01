@@ -161,6 +161,16 @@ assert "/api/security/status" in script, "the security view must read the guard 
 assert "/api/security/unban" in script, "the security view must be able to unban a source"
 assert "security" in render, "render.js must be regenerated after adding the security view"
 assert "securityClock" in script, "the security page clock must tick every second"
+# 安全日志：拦截/封禁事件 + 操作审计，管理员可见。
+assert "/api/security/logs" in script, "the security view must read the security log API"
+assert 'id="security-log-title"' in index
+assert "securityLogKind" in script and "securityLogAuto" in script
+assert "securityLogEntries" in render, "render.js must be regenerated after adding the security log panel"
+# 系统日志（journalctl）：仅管理员，来源由服务端白名单下发。
+assert "/api/sysops/logs" in script, "the sysops view must read the journal log API"
+assert 'id="syslog-title"' in index
+assert "syslogSourceList" in script and "syslogUnit" in script
+assert "syslog-title" in render, "render.js must be regenerated after adding the syslog panel"
 assert "后台管理" in index, "the admin policy page must be reachable from the sidebar"
 assert 'id="admin-title"' in index
 assert 'id="security-submenu"' in index, "admin must be nested under the security group"

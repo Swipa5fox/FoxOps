@@ -113,6 +113,8 @@ with TestClient(app) as client:
     # 容器详情与日志可能带出挂载路径、环境变量，必须走管理员门禁。
     assert client.get("/api/docker/containers/0123456789ab/logs").status_code == 401
     assert client.get("/api/docker/containers/0123456789ab/inspect").status_code == 401
+    # 系统日志同样只能给管理员：journal 里可能有凭据与内部路径。
+    assert client.get("/api/sysops/logs").status_code == 401
 
     # 角色权限：Guest 只读，管理操作一律 403；Admin 会话拥有管理权限。
     guest_login = client.post(
@@ -130,6 +132,7 @@ with TestClient(app) as client:
         "/api/maintenance/run", headers=guest_headers
     ).status_code == 403
     assert client.get("/api/audit", headers=guest_headers).status_code == 403
+    assert client.get("/api/sysops/logs", headers=guest_headers).status_code == 403
 
     admin_login = client.post(
         "/api/login", json={"username": "Admin", "password": "123456"}
@@ -142,6 +145,24 @@ with TestClient(app) as client:
 
     audit = client.get("/api/audit", headers=admin_headers)
     assert audit.status_code == 200, audit.text
+
+    # 系统日志：来源限定 FoxOps 与受监控服务；环境没有 journald 时返回
+    # available=False + 原因，而不是 500。
+    syslog = client.get("/api/sysops/logs", headers=admin_headers)
+    assert syslog.status_code == 200, syslog.text
+    syslog_payload = syslog.json()
+    assert isinstance(syslog_payload["available"], bool)
+    assert syslog_payload["unit"] == "foxops"
+    assert any(item["unit"] == "foxops" for item in syslog_payload["sources"])
+    assert client.get(
+        "/api/sysops/logs",
+        params={"unit": "../../etc/passwd"},
+        headers=admin_headers,
+    ).status_code == 400
+    assert client.get(
+        "/api/sysops/logs", params={"level": "debug"}, headers=admin_headers
+    ).status_code == 422
+
     # 白名单外服务即使持有 admin 会话也被拒。
     assert client.post(
         "/api/services/not-allowed/restart", headers=admin_headers

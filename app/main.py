@@ -26,7 +26,17 @@ from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
-from . import __version__, collector, db, defense, docker_ops, ownership, sysops, weather
+from . import (
+    __version__,
+    collector,
+    db,
+    defense,
+    docker_ops,
+    journal,
+    ownership,
+    sysops,
+    weather,
+)
 from .settings import settings
 
 
@@ -397,6 +407,23 @@ def sysops_docker() -> dict:
     return sysops.containers()
 
 
+@app.get("/api/sysops/logs", dependencies=[Depends(require_admin_access)])
+def sysops_logs(
+    unit: Annotated[Optional[str], Query(min_length=1, max_length=64)] = None,
+    lines: Annotated[int, Query(ge=20, le=1000)] = 200,
+    level: Annotated[str, Query(pattern="^(all|warning|error)$")] = "all",
+) -> dict:
+    """systemd 日志尾部（journalctl）。
+
+    只允许 FoxOps 自己与面板里受监控的服务；读不到 journald（权限 / 容器部署）
+    时返回 available=False 与修复提示，不报 500。
+    """
+    try:
+        return journal.read(unit or journal.FOXOPS_UNIT, lines, level)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+
 @app.get(
     "/api/docker/containers/{container_id}/logs",
     dependencies=[Depends(require_admin_access)],
@@ -472,6 +499,19 @@ def security_status() -> dict:
     封禁名单属于攻击面情报，只给管理员看；访客进不到这里（403）。
     """
     return defense.guard.status()
+
+
+@app.get("/api/security/logs", dependencies=[Depends(require_admin_access)])
+def security_logs(
+    limit: Annotated[int, Query(ge=1, le=300)] = 100,
+    kind: Annotated[str, Query(pattern="^(all|block|ban|audit)$")] = "all",
+) -> dict:
+    """安全日志：拦截/封禁事件（内存）+ 操作审计（数据库）。
+
+    请求路径不写库（风暴期间会把数据库打满），只留在内存环形缓冲；登录、
+    解封、改策略这类需要长期留痕的动作走 audit_logs，重启后仍在。
+    """
+    return defense.security_logs(limit=limit, kind=kind)
 
 
 @app.post("/api/security/unban", dependencies=[Depends(require_admin_access)])

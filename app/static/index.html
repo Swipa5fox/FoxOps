@@ -972,6 +972,57 @@
               </details>
             </div>
           </section>
+
+          <section v-if="isAdmin" class="panel log-panel" aria-labelledby="syslog-title">
+            <div class="panel-head compact">
+              <div>
+                <div class="eyebrow">SYSTEM LOG</div>
+                <h2 id="syslog-title">系统日志</h2>
+              </div>
+              <div class="log-toolbar">
+                <select
+                  id="syslog-unit"
+                  class="log-select"
+                  v-model="syslogUnit"
+                  aria-label="日志来源"
+                  @change="loadSyslog"
+                >
+                  <option v-for="item in syslogSourceList" :key="item.unit" :value="item.unit">{{ item.label }}</option>
+                </select>
+                <div class="log-seg" role="group" aria-label="日志级别">
+                  <button type="button" class="log-seg-btn" :class="{ active: syslogLevel === 'all' }" @click="setSyslogLevel('all')">全部</button>
+                  <button type="button" class="log-seg-btn" :class="{ active: syslogLevel === 'warning' }" @click="setSyslogLevel('warning')">警告+</button>
+                  <button type="button" class="log-seg-btn" :class="{ active: syslogLevel === 'error' }" @click="setSyslogLevel('error')">错误</button>
+                </div>
+                <div class="log-seg" role="group" aria-label="日志行数">
+                  <button type="button" class="log-seg-btn" :class="{ active: syslogLines === 200 }" @click="setSyslogLines(200)">200</button>
+                  <button type="button" class="log-seg-btn" :class="{ active: syslogLines === 500 }" @click="setSyslogLines(500)">500</button>
+                  <button type="button" class="log-seg-btn" :class="{ active: syslogLines === 1000 }" @click="setSyslogLines(1000)">1000</button>
+                </div>
+                <label class="log-auto">
+                  <input type="checkbox" :checked="syslogAuto" @change="toggleSyslogAuto" />
+                  <span>自动刷新</span>
+                </label>
+                <button type="button" class="text-button" :disabled="syslogLoading" @click="loadSyslog">
+                  {{ syslogLoading ? "读取中" : "刷新" }}
+                </button>
+              </div>
+            </div>
+            <p v-if="syslogError" class="log-note error">{{ syslogError }}</p>
+            <div v-else-if="syslog.available === false" class="log-offline">
+              <strong>读取不到系统日志</strong>
+              <p>{{ syslog.reason || "journald 不可用" }}</p>
+              <code v-if="syslog.hint">{{ syslog.hint }}</code>
+            </div>
+            <template v-else>
+              <div class="log-meta-row">
+                <span class="log-meta">{{ syslog.unit || "--" }} · 最近 {{ syslog.lines || 0 }} 行</span>
+                <span v-if="syslog.generated_at" class="log-meta">读取于 {{ formatTime(syslog.generated_at) }}</span>
+              </div>
+              <pre class="log-body">{{ syslogLoading && !syslog.text ? "正在读取日志…" : (syslog.text || "（这个单元最近没有日志输出）") }}</pre>
+              <p v-if="syslog.clipped" class="log-note">日志过长，仅保留最后 400 KB</p>
+            </template>
+          </section>
         </template>
 
         <template v-else-if="view === 'security'">
@@ -1144,6 +1195,54 @@
               </div>
               <div v-if="!securityOffenders.length" class="empty-state">
                 还没有来源 IP 触发限速
+              </div>
+            </div>
+          </section>
+
+          <section class="panel security-panel" aria-labelledby="security-log-title">
+            <div class="panel-head compact">
+              <div>
+                <div class="eyebrow">SECURITY LOG</div>
+                <h2 id="security-log-title">安全日志</h2>
+              </div>
+              <div class="log-toolbar">
+                <div class="log-seg" role="group" aria-label="日志类型">
+                  <button type="button" class="log-seg-btn" :class="{ active: securityLogKind === 'all' }" @click="setSecurityLogKind('all')">全部</button>
+                  <button type="button" class="log-seg-btn" :class="{ active: securityLogKind === 'block' }" @click="setSecurityLogKind('block')">拦截</button>
+                  <button type="button" class="log-seg-btn" :class="{ active: securityLogKind === 'ban' }" @click="setSecurityLogKind('ban')">封禁</button>
+                  <button type="button" class="log-seg-btn" :class="{ active: securityLogKind === 'audit' }" @click="setSecurityLogKind('audit')">审计</button>
+                </div>
+                <div class="log-seg" role="group" aria-label="日志条数">
+                  <button type="button" class="log-seg-btn" :class="{ active: securityLogLimit === 50 }" @click="setSecurityLogLimit(50)">50</button>
+                  <button type="button" class="log-seg-btn" :class="{ active: securityLogLimit === 100 }" @click="setSecurityLogLimit(100)">100</button>
+                  <button type="button" class="log-seg-btn" :class="{ active: securityLogLimit === 200 }" @click="setSecurityLogLimit(200)">200</button>
+                </div>
+                <label class="log-auto">
+                  <input type="checkbox" :checked="securityLogAuto" @change="toggleSecurityLogAuto" />
+                  <span>自动刷新</span>
+                </label>
+                <button type="button" class="text-button" :disabled="securityLogLoading" @click="loadSecurityLogs">
+                  {{ securityLogLoading ? "读取中" : "刷新" }}
+                </button>
+              </div>
+            </div>
+            <p v-if="securityLogError" class="log-note error">{{ securityLogError }}</p>
+            <div class="security-log">
+              <div v-for="entry in securityLogEntries" :key="entry.id" class="security-log-row">
+                <span class="security-log-time">{{ formatTime(entry.ts) }}</span>
+                <span class="security-log-level" :class="entry.level">{{ securityLogLevelLabel(entry.level) }}</span>
+                <div class="security-log-main">
+                  <strong>{{ entry.label }}<span v-if="entry.count > 1" class="security-log-count">×{{ entry.count }}</span></strong>
+                  <small>
+                    <span v-if="entry.ip">{{ entry.ip }}</span>
+                    <span v-if="entry.path"> · {{ entry.path }}</span>
+                    <span v-if="entry.status"> · HTTP {{ entry.status }}</span>
+                    <span v-if="entry.detail"> · {{ entry.detail }}</span>
+                  </small>
+                </div>
+              </div>
+              <div v-if="!securityLogEntries.length" class="empty-state">
+                {{ securityLogLoading ? "正在读取日志…" : "还没有安全事件，流量正常" }}
               </div>
             </div>
           </section>
