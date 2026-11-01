@@ -171,6 +171,12 @@ assert "/api/sysops/logs" in script, "the sysops view must read the journal log 
 assert 'id="syslog-title"' in index
 assert "syslogSourceList" in script and "syslogUnit" in script
 assert "syslog-title" in render, "render.js must be regenerated after adding the syslog panel"
+# 系统运维分组：管理员下拉出「实时监控 / 日志查看」，访客只保留单层入口。
+assert 'id="ops-submenu"' in index, "system operations must expose a submenu for admins"
+assert "日志查看" in index
+assert "opsOpen" in script, "the ops group must expand and collapse"
+assert 'id="logs-title"' in index
+assert "logs-title" in render, "render.js must be regenerated after adding the logs view"
 assert "后台管理" in index, "the admin policy page must be reachable from the sidebar"
 assert 'id="admin-title"' in index
 assert 'id="security-submenu"' in index, "admin must be nested under the security group"

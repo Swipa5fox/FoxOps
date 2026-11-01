@@ -43,6 +43,7 @@
             <span>总览</span>
           </button>
           <button
+            v-if="!isAdmin"
             type="button"
             class="sidebar-item"
             :class="{ active: view === 'sysops' }"
@@ -55,6 +56,57 @@
             </svg>
             <span>系统运维</span>
           </button>
+          <div
+            v-else
+            class="sidebar-group"
+            :class="{ open: opsOpen, active: view === 'sysops' || view === 'logs' }"
+          >
+            <button
+              type="button"
+              class="sidebar-item sidebar-parent"
+              :class="{ active: view === 'sysops' || view === 'logs' }"
+              :aria-current="view === 'sysops' || view === 'logs' ? 'page' : null"
+              @click="openOpsGroup"
+            >
+              <svg class="sidebar-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <path d="M12 3.1 4.6 6.4v5.2c0 4.4 3.1 7.8 7.4 9.3 4.3-1.5 7.4-4.9 7.4-9.3V6.4Z"></path>
+                <path d="M8.9 8.4h6.2M8.9 12h6.2M8.9 15.6h3.6"></path>
+              </svg>
+              <span>系统运维</span>
+            </button>
+            <button
+              type="button"
+              class="sidebar-caret-button"
+              :aria-expanded="opsOpen ? 'true' : 'false'"
+              aria-controls="ops-submenu"
+              aria-label="展开或收起系统运维菜单"
+              @click.stop="toggleOpsGroup"
+            >
+              <svg class="sidebar-caret" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <path d="M8 10l4 4 4-4"></path>
+              </svg>
+            </button>
+          </div>
+          <div v-if="isAdmin" v-show="opsOpen" id="ops-submenu" class="sidebar-submenu">
+            <button
+              type="button"
+              class="sidebar-subitem"
+              :class="{ active: view === 'sysops' }"
+              :aria-current="view === 'sysops' ? 'page' : null"
+              @click="setView('sysops')"
+            >
+              <span>实时监控</span>
+            </button>
+            <button
+              type="button"
+              class="sidebar-subitem"
+              :class="{ active: view === 'logs' }"
+              :aria-current="view === 'logs' ? 'page' : null"
+              @click="setView('logs')"
+            >
+              <span>日志查看</span>
+            </button>
+          </div>
           <div
             v-if="isAdmin"
             class="sidebar-group"
@@ -580,6 +632,7 @@
                   {{ sysopsError ? "采集异常" : (realtime.ready ? "实时采集中" : "正在连接") }}
                 </span>
                 <span class="muted" aria-live="polite">{{ sysopsUpdatedAt || "等待数据" }}</span>
+                <button v-if="isAdmin" type="button" class="text-button" @click="setView('logs')">日志查看</button>
               </div>
               <span class="hero-status-uptime muted" aria-label="服务器运行时间">
                 <svg class="uptime-glyph" width="12" height="12" viewBox="0 0 16 16" fill="none" aria-hidden="true">
@@ -973,7 +1026,38 @@
             </div>
           </section>
 
-          <section v-if="isAdmin" class="panel log-panel" aria-labelledby="syslog-title">
+        </template>
+
+        <template v-else-if="view === 'logs'">
+          <section class="hero sysops-hero" aria-labelledby="logs-title">
+            <div>
+              <div class="eyebrow">LOG VIEWER</div>
+              <div class="hero-heading">
+                <h1 id="logs-title">日志查看</h1>
+              </div>
+              <p class="host-summary">
+                <span>{{ host.hostname || "--" }}</span>
+                <span>{{ syslogSourceLabel }}</span>
+                <span>{{ syslog.lines || 0 }} 行</span>
+              </p>
+            </div>
+            <div class="hero-status">
+              <div class="hero-status-row">
+                <span
+                  class="status-badge"
+                  :class="{ error: !!syslogError || syslog.available === false, pending: syslogLoading }"
+                  role="status"
+                  aria-live="polite"
+                >
+                  {{ syslogError ? "读取异常" : (syslog.available === false ? "来源不可用" : (syslogLoading ? "正在读取" : "日志可查看")) }}
+                </span>
+                <span v-if="syslog.generated_at" class="muted">读取于 {{ formatTime(syslog.generated_at) }}</span>
+              </div>
+              <span class="hero-status-uptime muted">日志落库 SQLite，重启不丢，随保留期清理</span>
+            </div>
+          </section>
+
+          <section class="panel log-panel" aria-labelledby="syslog-title">
             <div class="panel-head compact">
               <div>
                 <div class="eyebrow">SYSTEM LOG</div>

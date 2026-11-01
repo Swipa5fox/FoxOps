@@ -149,6 +149,8 @@
         // 数据更新时间：按服务器时间校正后的本地读数，每秒走一格。
         securityClock: "",
         securityServerOffsetMs: 0,
+        // 侧栏「系统运维」分组展开状态；进入 sysops/logs 时自动展开。
+        opsOpen: false,
         // 侧栏「安全防护」分组展开状态；进入 security/admin 时自动展开。
         securityOpen: false,
         // 后台管理：限流策略（current 是生效值，defaults 是环境变量默认值）
@@ -279,6 +281,18 @@
         return Array.isArray(sources) && sources.length
           ? sources
           : [{ unit: "app-log", label: "FoxOps 应用日志（数据库）" }];
+      },
+      syslogSourceLabel: function () {
+        var unit = this.syslog && this.syslog.unit;
+        var sources = this.syslog && this.syslog.sources;
+        if (Array.isArray(sources)) {
+          for (var index = 0; index < sources.length; index += 1) {
+            if (sources[index].unit === unit) {
+              return sources[index].label;
+            }
+          }
+        }
+        return unit || "日志来源";
       },
       rootDiskLabel: function () {
         var disks = this.realtimeDisks;
@@ -459,13 +473,17 @@
         }
         this.refresh();
         this.initializeWeather();
-        // 带 #sysops / #security / #admin 直接进来时落在对应页面；管理页只认管理员。
+        // 带 #sysops / #logs / #security / #admin 直接进来时落在对应页面；管理页只认管理员。
         var initialView = window.location.hash.replace("#", "");
-        var adminViews = initialView === "security" || initialView === "admin";
+        var adminViews =
+          initialView === "security" ||
+          initialView === "admin" ||
+          initialView === "logs";
         if (initialView === "sysops" || (adminViews && this.isAdmin)) {
           this.view = initialView;
         }
         this.securityOpen = this.view === "security" || this.view === "admin";
+        this.opsOpen = this.view === "sysops" || this.view === "logs";
         this.syncViewTimers();
         refreshTimer = window.setInterval(this.refresh, 30000);
         weatherTimer = window.setInterval(this.refreshWeather, WEATHER_REFRESH_MS);
@@ -773,18 +791,31 @@
         if (this.view === next) {
           return;
         }
-        // 安全防护 / 后台管理只对管理员开放；访客即便手改 hash 也留在原页。
-        if ((next === "security" || next === "admin") && !this.isAdmin) {
+        // 安全防护 / 后台管理 / 日志查看只对管理员开放；访客即便手改 hash 也留在原页。
+        if (
+          (next === "security" || next === "admin" || next === "logs") &&
+          !this.isAdmin
+        ) {
           return;
         }
         this.view = next;
         if (next === "security" || next === "admin") {
           this.securityOpen = true;
         }
+        if (next === "sysops" || next === "logs") {
+          this.opsOpen = true;
+        }
         if ("#" + next !== window.location.hash) {
           window.history.replaceState(null, "", "#" + next);
         }
         this.syncViewTimers();
+      },
+      openOpsGroup: function () {
+        this.opsOpen = true;
+        this.setView("sysops");
+      },
+      toggleOpsGroup: function () {
+        this.opsOpen = !this.opsOpen;
       },
       openSecurityGroup: function () {
         this.securityOpen = true;
@@ -810,12 +841,13 @@
         if (this.view === "sysops") {
           this.refreshSysops();
           this.refreshDocker();
-          // 日志面板只给管理员：访客不该为看不到的面板付一次 403。
-          if (this.isAdmin) {
-            this.loadSyslog();
-          }
           sysopsTimer = window.setInterval(this.refreshSysops, SYSOPS_REFRESH_MS);
           dockerTimer = window.setInterval(this.refreshDocker, DOCKER_REFRESH_MS);
+          return;
+        }
+        if (this.view === "logs" && this.isAdmin) {
+          // 日志页没有轮询流，进来拉一次；自动刷新由面板自己的开关控制。
+          this.loadSyslog();
           return;
         }
         if (this.view === "security" && this.isAdmin) {
@@ -1150,7 +1182,7 @@
         return level === "warning" ? "警告" : "记录";
       },
       loadSyslog: async function () {
-        if (this.view !== "sysops" || !this.isAdmin || this.syslogLoading) {
+        if (this.view !== "logs" || !this.isAdmin || this.syslogLoading) {
           return;
         }
         this.syslogLoading = true;
