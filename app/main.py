@@ -33,6 +33,7 @@ from . import (
     defense,
     docker_ops,
     journal,
+    logstore,
     ownership,
     sysops,
     weather,
@@ -137,6 +138,8 @@ def scheduled_maintenance() -> None:
 async def lifespan(_: FastAPI):
     settings.validate()
     db.init_db()
+    # 应用日志与安全事件从这里开始落库（有界队列 + 后台批量写入）。
+    logstore.start()
     # 后台管理里保存的策略优先于环境变量；损坏时忽略并沿用默认值。
     defense.load_saved_policy()
     try:
@@ -167,6 +170,7 @@ async def lifespan(_: FastAPI):
     sysops.start()
     yield
     sysops.stop()
+    logstore.stop()
     scheduler.shutdown(wait=False)
 
 
@@ -413,13 +417,13 @@ def sysops_logs(
     lines: Annotated[int, Query(ge=20, le=1000)] = 200,
     level: Annotated[str, Query(pattern="^(all|warning|error)$")] = "all",
 ) -> dict:
-    """systemd 日志尾部（journalctl）。
+    """系统日志尾部。默认读落库的应用日志（app_logs），原生部署可切 journald。
 
-    只允许 FoxOps 自己与面板里受监控的服务；读不到 journald（权限 / 容器部署）
-    时返回 available=False 与修复提示，不报 500。
+    只允许数据库来源、FoxOps 自己与面板里受监控的服务；journald 读不到
+    （权限 / 容器部署）时返回 available=False 与修复提示，不报 500。
     """
     try:
-        return journal.read(unit or journal.FOXOPS_UNIT, lines, level)
+        return journal.read(unit, lines, level)
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
 
@@ -506,11 +510,7 @@ def security_logs(
     limit: Annotated[int, Query(ge=1, le=300)] = 100,
     kind: Annotated[str, Query(pattern="^(all|block|ban|audit)$")] = "all",
 ) -> dict:
-    """安全日志：拦截/封禁事件（内存）+ 操作审计（数据库）。
-
-    请求路径不写库（风暴期间会把数据库打满），只留在内存环形缓冲；登录、
-    解封、改策略这类需要长期留痕的动作走 audit_logs，重启后仍在。
-    """
+    """安全日志：拦截/封禁事件（SQLite 历史 + 内存实时）+ 操作审计。"""
     return defense.security_logs(limit=limit, kind=kind)
 
 

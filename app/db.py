@@ -91,6 +91,35 @@ CREATE TABLE IF NOT EXISTS app_settings (
     value TEXT NOT NULL,
     updated_at TEXT NOT NULL
 );
+
+-- 运行日志落库：应用日志与安全防护事件。面板直接读这两张表，进程重启后
+-- 历史仍在；写入走 app/logstore.py 的有界队列 + 后台批量落库，不在请求路径
+-- 直接写库，避免拦截风暴把 SQLite 拖成限速器的瓶颈。
+CREATE TABLE IF NOT EXISTS app_logs (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    ts TEXT NOT NULL,
+    level TEXT NOT NULL,
+    logger TEXT NOT NULL,
+    message TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_app_logs_ts ON app_logs(ts);
+CREATE INDEX IF NOT EXISTS idx_app_logs_level ON app_logs(level, ts);
+
+CREATE TABLE IF NOT EXISTS security_events (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    event_id TEXT NOT NULL UNIQUE,
+    ts TEXT NOT NULL,
+    category TEXT NOT NULL,
+    level TEXT NOT NULL,
+    action TEXT NOT NULL,
+    ip TEXT NOT NULL,
+    path TEXT NOT NULL DEFAULT '',
+    status INTEGER NOT NULL DEFAULT 0,
+    reason TEXT NOT NULL DEFAULT '',
+    detail TEXT NOT NULL DEFAULT '',
+    count INTEGER NOT NULL DEFAULT 1
+);
+CREATE INDEX IF NOT EXISTS idx_security_events_ts ON security_events(ts);
 """
 
 # 会话存活时间：7 天，超过后需要重新登录。
@@ -501,6 +530,85 @@ def audit_logs(limit: int = 100) -> list[dict[str, Any]]:
     return [dict(row) for row in rows]
 
 
+# ---------------------------------------------------------------------------
+# 运行日志：应用日志与安全事件（写入方见 app/logstore.py）
+# ---------------------------------------------------------------------------
+
+# 面板只给三档；warning/error 对应 Python logging 的同名 level。
+_LOG_LEVELS: dict[str, tuple[str, ...]] = {
+    "all": (),
+    "warning": ("warning", "error", "critical"),
+    "error": ("error", "critical"),
+}
+
+
+def insert_log_batch(
+    log_rows: list[tuple[str, str, str, str]],
+    event_rows: list[tuple[str, str, str, str, str, str, str, int, str, str, int]],
+) -> None:
+    """一次事务写入一批应用日志与安全事件。
+
+    事件用 event_id 做 upsert：同一个事件在合并计数后会再次投递，只更新不新增。
+    """
+    if not log_rows and not event_rows:
+        return
+    with connect() as conn:
+        if log_rows:
+            conn.executemany(
+                """
+                INSERT INTO app_logs (ts, level, logger, message)
+                VALUES (?, ?, ?, ?)
+                """,
+                log_rows,
+            )
+        if event_rows:
+            conn.executemany(
+                """
+                INSERT INTO security_events (
+                    event_id, ts, category, level, action, ip, path,
+                    status, reason, detail, count
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ON CONFLICT(event_id) DO UPDATE SET
+                    ts = excluded.ts,
+                    level = excluded.level,
+                    ip = excluded.ip,
+                    path = excluded.path,
+                    status = excluded.status,
+                    reason = excluded.reason,
+                    detail = excluded.detail,
+                    count = excluded.count
+                """,
+                event_rows,
+            )
+
+
+def app_logs(limit: int = 200, level: str = "all") -> list[dict[str, Any]]:
+    """最近的应用日志（旧→新，直接给面板按 tail 展示）。"""
+    levels = _LOG_LEVELS.get(level)
+    if levels is None:
+        raise ValueError("日志级别不合法")
+    query = "SELECT ts, level, logger, message FROM app_logs"
+    params: list[Any] = []
+    if levels:
+        query += f" WHERE level IN ({','.join('?' * len(levels))})"
+        params.extend(levels)
+    query += " ORDER BY id DESC LIMIT ?"
+    params.append(max(1, int(limit)))
+    with connect() as conn:
+        rows = conn.execute(query, params).fetchall()
+    return [dict(row) for row in reversed(rows)]
+
+
+def security_events(limit: int = 100) -> list[dict[str, Any]]:
+    """最近的安全事件（新→旧），面板再与内存缓冲合并。"""
+    with connect() as conn:
+        rows = conn.execute(
+            "SELECT * FROM security_events ORDER BY id DESC LIMIT ?",
+            (max(1, int(limit)),),
+        ).fetchall()
+    return [dict(row) for row in rows]
+
+
 def get_setting(key: str) -> dict[str, str] | None:
     """读取运行期配置；不存在返回 None。"""
     with connect() as conn:
@@ -543,6 +651,12 @@ def cleanup_old_data() -> dict[str, int]:
         audit_deleted = conn.execute(
             "DELETE FROM audit_logs WHERE ts < ?", (cutoff,)
         ).rowcount
+        app_logs_deleted = conn.execute(
+            "DELETE FROM app_logs WHERE ts < ?", (cutoff,)
+        ).rowcount
+        security_events_deleted = conn.execute(
+            "DELETE FROM security_events WHERE ts < ?", (cutoff,)
+        ).rowcount
         alerts_deleted = conn.execute(
             """
             DELETE FROM alerts
@@ -554,6 +668,8 @@ def cleanup_old_data() -> dict[str, int]:
         "metrics": metrics_deleted,
         "service_samples": services_deleted,
         "audit_logs": audit_deleted,
+        "app_logs": app_logs_deleted,
+        "security_events": security_events_deleted,
         "alerts": alerts_deleted,
     }
 

@@ -1,12 +1,11 @@
-"""系统日志读取（systemd journal）。
+"""系统日志读取：应用日志（SQLite）与 systemd journal。
 
-只读 journalctl，不改任何状态。app 以 foxops 用户运行，读 journal 依赖
-systemd-journal 组（见 deploy/foxops.service 的 SupplementaryGroups）——
-读不到时把原因说清楚（没装 systemd / 没权限），而不是给一个空列表让管理员
-自己去猜。
+默认来源是落库的 FoxOps 应用日志（app_logs），容器部署也能用；原生部署还可
+以切到 journald，读 FoxOps 与受监控服务的系统日志。journalctl 只读、不改任何
+状态，读不到时把原因说清楚（没装 systemd / 没权限），而不是给一个空列表。
 
-可查看的范围只有 FoxOps 自己与面板里受监控的服务：unit 名来自服务端白名单，
-调用时以参数数组传给 subprocess，不经过 shell，也不接受任意路径。
+journald 的可查看范围只有 FoxOps 自己与面板里受监控的服务：unit 名来自服务端
+白名单，调用时以参数数组传给 subprocess，不经过 shell，也不接受任意路径。
 """
 
 from __future__ import annotations
@@ -19,7 +18,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from . import collector
+from . import collector, db
 from .settings import settings
 
 
@@ -29,6 +28,8 @@ MAX_LINES = 1000
 MAX_TEXT_BYTES = 400_000
 COMMAND_TIMEOUT_SECONDS = 8
 FOXOPS_UNIT = "foxops"
+# 数据库日志来源（app_logs）：不依赖 journald，容器部署的默认值。
+APP_LOG_UNIT = "app-log"
 
 # 前端只给三档：全部 / 警告及以上 / 仅错误。journalctl 的优先级名分别是
 # warning 与 err（不是 error），写错会直接退出 1。
@@ -47,25 +48,32 @@ def _iso_now() -> str:
 
 
 def sources() -> list[dict[str, str]]:
-    """可选日志来源：FoxOps 面板 + 面板里正在监控的 systemd 服务。"""
+    """可选日志来源：数据库里的 FoxOps 应用日志 + journald 里的系统日志。"""
     now = time.monotonic()
     cached = _sources_cache["items"]
     if cached and now - _sources_cache["at"] < _SOURCES_TTL_SECONDS:
         return cached
 
-    items: list[dict[str, str]] = [{"unit": FOXOPS_UNIT, "label": "FoxOps 面板"}]
-    seen = {FOXOPS_UNIT}
-    try:
-        discovered = collector.discovered_services()
-    except Exception:  # noqa: BLE001 - 服务发现失败不该让日志页整体不可用
-        logger.exception("journal: service discovery failed")
-        discovered = list(settings.services)
-    for name in discovered:
-        if name in seen or not _UNIT_NAME.fullmatch(name):
-            continue
-        seen.add(name)
-        label = settings.service_labels.get(name)
-        items.append({"unit": name, "label": f"{name}（{label}）" if label else name})
+    items: list[dict[str, str]] = [
+        {"unit": APP_LOG_UNIT, "label": "FoxOps 应用日志（数据库）"}
+    ]
+    # 没有 journalctl（容器部署）时只列数据库来源，不给选不到的东西。
+    if Path(settings.journalctl_path).is_file():
+        items.append({"unit": FOXOPS_UNIT, "label": "FoxOps 服务日志（journald）"})
+        seen = {APP_LOG_UNIT, FOXOPS_UNIT}
+        try:
+            discovered = collector.discovered_services()
+        except Exception:  # noqa: BLE001 - 服务发现失败不该让日志页整体不可用
+            logger.exception("journal: service discovery failed")
+            discovered = list(settings.services)
+        for name in discovered:
+            if name in seen or not _UNIT_NAME.fullmatch(name):
+                continue
+            seen.add(name)
+            label = settings.service_labels.get(name)
+            items.append(
+                {"unit": name, "label": f"{name}（{label}）" if label else name}
+            )
 
     _sources_cache["at"] = now
     _sources_cache["items"] = items
@@ -102,20 +110,53 @@ def _permission_hint(stderr: str) -> str | None:
     return None
 
 
-def read(unit: str = FOXOPS_UNIT, lines: int = 200, level: str = "all") -> dict[str, Any]:
-    """读取某个 unit 的日志尾部。
+def _read_app_logs(
+    tail: int, level: str, items: list[dict[str, str]]
+) -> dict[str, Any]:
+    """从 SQLite 读应用日志，格式化成与 journalctl 相近的行。"""
+    rows = db.app_logs(tail, level)
+    text = "\n".join(
+        f"{row['ts']} {str(row['level']).upper():<8} {row['logger']} {row['message']}"
+        for row in rows
+    )
+    clipped = len(text.encode("utf-8")) > MAX_TEXT_BYTES
+    if clipped:
+        text = text.encode("utf-8")[-MAX_TEXT_BYTES:].decode("utf-8", "ignore")
+    return {
+        "available": True,
+        "reason": "",
+        "hint": None,
+        "unit": APP_LOG_UNIT,
+        "sources": items,
+        "level": level,
+        "tail": tail,
+        "lines": len(rows),
+        "text": text,
+        "clipped": clipped,
+        "generated_at": _iso_now(),
+    }
 
-    返回结构与 docker 的日志接口保持一致（available / text / lines / clipped），
-    前端可以复用同一套展示逻辑。
+
+def read(
+    unit: str | None = None, lines: int = 200, level: str = "all"
+) -> dict[str, Any]:
+    """读取日志尾部。
+
+    默认读数据库里的应用日志；unit 以 journald 的服务名传入时改读 systemd
+    日志。返回结构与 docker 的日志接口保持一致（available / text / lines /
+    clipped），前端可以复用同一套展示逻辑。
     """
     items = sources()
-    unit = (unit or FOXOPS_UNIT).strip() or FOXOPS_UNIT
+    unit = (unit or APP_LOG_UNIT).strip() or APP_LOG_UNIT
     allowed = {item["unit"] for item in items}
     if unit not in allowed:
         raise ValueError("只能查看 FoxOps 与受监控服务的日志")
     if level not in _LEVELS:
         raise ValueError("日志级别不合法")
     tail = max(20, min(int(lines), MAX_LINES))
+
+    if unit == APP_LOG_UNIT:
+        return _read_app_logs(tail, level, items)
 
     binary = settings.journalctl_path
     if not Path(binary).is_file():

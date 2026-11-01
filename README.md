@@ -65,7 +65,7 @@ FoxOps 是一个轻量的 Linux 服务器监控面板，主要功能：
 - 内存：已用 / 总量 / 可用，含 Swap；
 - 磁盘：每个分区用量 + 整盘读写速率，外加最近 90 秒 CPU / 内存 / 磁盘三线实时走势；
 - Docker 容器：`docker ps -a` 列出名称、镜像、状态、端口映射，`docker stats` 补 CPU 与内存占用，运行中的排前面；
-- **系统日志（仅 Admin）**：通过 `journalctl` 查看 FoxOps 自己与面板里受监控服务的日志尾部，支持来源下拉、200/500/1000 行、全部 / 警告+ / 错误三档过滤与 5 秒自动刷新；来源由服务端白名单下发，unit 名以参数数组传给 `journalctl`，不会拼进 shell；容器部署没有 systemd、或运行用户不在 `systemd-journal` 组时，面板直接显示原因与修复命令；
+- **系统日志（仅 Admin）**：默认读落库的 FoxOps 应用日志（SQLite `app_logs`，INFO 及以上），支持 200/500/1000 行、全部 / 警告+ / 错误三档过滤与 5 秒自动刷新；容器部署同样可用。原生部署还可切换 journald，查看 FoxOps 与受监控服务的系统日志（来源白名单下发，unit 名以参数数组传入、不经过 shell）；读不到 journald 或权限不足时直接显示原因与修复命令；
 - Docker 数据来自 root 侧探针（`foxops-docker.timer` → `/var/lib/foxops/docker.json`），`foxops` 用户不碰 docker.sock——docker 组等于 root 级控制权，服务端只读文件。
 
 ### 账户与权限
@@ -85,7 +85,7 @@ FoxOps 是一个轻量的 Linux 服务器监控面板，主要功能：
 ### 安全与个性化体验
 
 - **DDoS 防护**：Nginx 先按来源 IP 限速限连（原生部署 API 20 次/秒、静态 50 次/秒，Docker 内置代理统一 30 次/秒；单 IP 32 条并发连接、1 MiB 请求体上限与慢速攻击超时），应用层再按 IP 做双窗口令牌桶限速、每 IP 与进程级并发上限，超限 429；反复违规的来源自动封禁（首次 10 分钟，逐次翻倍，最长 24 小时），封禁期 403；
-- **安全防护页（仅 Admin）**：看到最近一分钟请求/拦截量、正在封禁的来源与剩余时间、高频来源榜和当前限流策略，可一键解封误伤来源（写审计日志）；右上角时钟与服务器时间同步、每秒更新；页底的「安全日志」把拦截/封禁事件与登录、解封、改策略等审计记录合成一条时间线，可按全部 / 拦截 / 封禁 / 审计筛选、切换条数并自动刷新（同一来源同类拦截会合并成 `×N`）；
+- **安全防护页（仅 Admin）**：看到最近一分钟请求/拦截量、正在封禁的来源与剩余时间、高频来源榜和当前限流策略，可一键解封误伤来源（写审计日志）；右上角时钟与服务器时间同步、每秒更新；页底的「安全日志」把拦截/封禁事件与登录、解封、改策略等审计记录合成一条时间线，可按全部 / 拦截 / 封禁 / 审计筛选、切换条数并自动刷新（同一来源同类拦截会合并成 `×N`）；拦截事件同时落库，重启后仍可回看；
 - **后台管理页（仅 Admin，侧栏安全防护展开进入）**：在线调整限流与封禁策略（开关、双窗口限速、并发、请求体、封禁规则），保存立即生效并持久化到数据卷 SQLite，重启后仍沿用；「恢复环境默认」删除自定义值；所有修改与重置都写审计日志；
 - 白名单与本机回环永不被拦，真实 IP 只从受信反代（回环 / 内网网段）的 `X-Real-IP`、`X-Forwarded-For` 取，伪造请求头绕不过限速；
 - 严格 CSP（script-src 'self'，无 unsafe-eval）、Permissions-Policy、隐藏 Nginx 版本号；
@@ -98,10 +98,10 @@ FoxOps 是一个轻量的 Linux 服务器监控面板，主要功能：
 ### 后端
 
 - **采集与调度**：`collector` 模块用 psutil 读取系统指标，APScheduler（后台线程池）驱动"采集 + 每日维护"两个任务，采集频率与保留期可配置；
-- **存储**：SQLite（WAL 模式）单文件存储指标、服务采样、告警、审计日志与用户会话；指标与审计默认保留 7 天，每日 3 点清理过期数据并做一致性备份；
+- **存储**：SQLite（WAL 模式）单文件存储指标、服务采样、告警、审计日志、应用日志（`app_logs`）、安全事件（`security_events`）与用户会话；均默认保留 7 天，每日 3 点清理过期数据并做一致性备份；
 - **认证与授权**：登录签发随机会话 token（7 天有效），密码 PBKDF2 哈希；用户表带 `role` 列区分 admin/guest；管理操作通过 FastAPI 依赖注入 `require_admin_access` 统一门禁——仅 admin 角色会话放行，访客会话返回 403，无凭证会话返回 401；
-- **DDoS 防护**：`defense` 模块以 ASGI 中间件挂在最外层，先于路由完成 IP 识别、双窗口令牌桶限速、并发计数与封禁判定，被拦的请求不再进入路由、数据库或静态文件处理；封禁与拦截计数留在内存（默认跟踪 4096 个来源），不写库，采集线程每分钟把拦截量折成一条活动告警；手工解封走受保护接口并落审计日志；限流策略可在「后台管理」热更新，覆盖值存 SQLite `app_settings`，启动时优先于环境变量；
-- **日志查看**：安全日志把限速/封禁的内存事件（1 秒内同类合并、最多 300 条，风暴期间不写库）与 `audit_logs` 合并成一条时间线；系统日志只读 `journalctl`，来源限定 FoxOps 与面板里受监控的服务，unit 名以参数数组传入、不经过 shell，读不到 journald 或权限不足时返回原因与修复提示而不是报错；
+- **DDoS 防护**：`defense` 模块以 ASGI 中间件挂在最外层，先于路由完成 IP 识别、双窗口令牌桶限速、并发计数与封禁判定，被拦的请求不再进入路由、数据库或静态文件处理；封禁与拦截计数留在内存（默认跟踪 4096 个来源），采集线程每分钟把拦截量折成一条活动告警，拦截/封禁明细由 `logstore` 异步落库（不在请求路径写库）；手工解封走受保护接口并落审计日志；限流策略可在「后台管理」热更新，覆盖值存 SQLite `app_settings`，启动时优先于环境变量；
+- **日志查看**：`app/logstore.py` 把 `foxops.*` 应用日志与限速/封禁事件统一放进有界队列，由后台线程每 0.5 秒批量写入 SQLite（`app_logs` / `security_events`）；队列满时丢最旧的记录，不在请求路径直接写库，避免拦截风暴把数据库拖成限速器的瓶颈。安全日志合并数据库历史与内存实时视图（按 event_id 去重，保留最新合并次数），系统日志默认读 `app_logs`，原生部署还可切 journalctl；全部日志随保留期自动清理；
 - **API 设计**：只读数据接口（summary/metrics/services/alerts/weather）不设门槛保证面板可用，写操作集中收口到受保护接口，风险面最小。
 
 ### 前端
@@ -226,7 +226,7 @@ DDoS 防护的相关项写在运行配置里，改完执行 `foxopsctl restart` 
 - FOXOPS_SECURITY_TRUSTED_PROXIES=127.0.0.0/8,::1/128,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16
   受信反代网段；只有这些来源传来的 `X-Real-IP` / `X-Forwarded-For` 会被采信。
 - FOXOPS_JOURNALCTL_PATH=/usr/bin/journalctl
-  「系统运维 → 系统日志」调用的 journalctl 路径，必须是不含空格的绝对路径；容器部署没有 systemd，该面板会显示不可用并提示改用 `docker compose logs app`。原生部署的 `foxops.service` 已带 `SupplementaryGroups=systemd-journal`，若删掉这一行，日志面板会提示需要把运行用户加入该组。
+  「系统运维 → 系统日志」切到 journald 来源时调用的路径，必须是不含空格的绝对路径。默认的「FoxOps 应用日志（数据库）」不依赖它：容器部署照样可看，没有 journalctl 时下拉框里只列数据库来源。原生部署的 `foxops.service` 已带 `SupplementaryGroups=systemd-journal`，删掉这一行会让 journald 来源提示需要把运行用户加入该组。
 
 Nginx 侧的限速阈值（`limit_req_zone`、`limit_conn`、超时）在 `deploy/foxops.nginx.conf` 与 `docker/nginx.conf` 中，改动后执行 `foxopsctl nginx-reload` 或重启容器。
 
@@ -237,6 +237,7 @@ Nginx 侧的限速阈值（`limit_req_zone`、`limit_conn`、超时）在 `deplo
 | 应用 | /opt/foxops |
 | Python 虚拟环境 | /opt/foxops/.venv |
 | SQLite 数据 | /var/lib/foxops/foxops.db |
+| 运行日志 | SQLite `app_logs` / `security_events`，随保留期清理 |
 | 自动备份 | /var/lib/foxops/backups |
 | 运行配置 | /etc/foxops/foxops.env，0640 root:foxops |
 | 非敏感部署信息 | /etc/foxops/deployment.env |
@@ -315,9 +316,9 @@ bash -n deploy/foxopsctl deploy/verify-server.sh
 测试命令说明：
 
 - python -m compileall -q app tests：编译全部 Python 源码，检查语法错误；
-- python tests/smoke.py：冒烟测试，用临时目录隔离数据库，验证建库、指标采集等核心流程；
-- python tests/api_smoke.py：API 冒烟测试，用 FastAPI TestClient 验证健康检查与各接口行为（含系统日志接口的门禁、来源白名单与环境降级）；
-- python tests/defense_smoke.py：DDoS 防护测试，用极小阈值验证限速 429、超大请求 413、反复违规升级封禁 403、手工解封与真实 IP 解析，以及安全日志的门禁、分类筛选与同类事件合并；
+- python tests/smoke.py：冒烟测试，用临时目录隔离数据库，验证建库、指标采集、日志落库与安全事件 upsert 等核心流程；
+- python tests/api_smoke.py：API 冒烟测试，用 FastAPI TestClient 验证健康检查与各接口行为（含系统日志默认读数据库、接口门禁与参数校验）；
+- python tests/defense_smoke.py：DDoS 防护测试，用极小阈值验证限速 429、超大请求 413、反复违规升级封禁 403、手工解封与真实 IP 解析，以及安全日志的门禁、分类筛选、落库持久化与同类事件合并；
 - python tests/frontend_smoke.py：前端静态检查，解析 HTML/JS，校验 id 引用、内联脚本/样式与 CSP 约束；
 - node --check app/static/app.js / render.js：对前端 JS 文件做语法检查（render.js 为生成文件）；
 - bash tests/platform_detection.sh：测试跨发行版平台识别逻辑（os-release、架构、包管理器等）；

@@ -21,6 +21,7 @@ import json
 import logging
 import threading
 import time
+import uuid
 from collections import OrderedDict, deque
 from dataclasses import dataclass
 from datetime import datetime, timezone
@@ -28,7 +29,7 @@ from typing import Any, Iterable, Mapping
 
 from starlette.responses import JSONResponse
 
-from . import db
+from . import db, logstore
 from .settings import SECURITY_POLICY_BOUNDS, settings
 
 
@@ -50,6 +51,11 @@ EVENT_LABELS = {
     "blocked": "拦截请求",
     "banned": "自动封禁",
 }
+
+
+def _public_event(event: Mapping[str, Any]) -> dict[str, Any]:
+    """去掉内部字段（_wall 等）后的对外事件。"""
+    return {key: value for key, value in event.items() if not key.startswith("_")}
 
 
 def _normalize_ip(value: str | None) -> Any | None:
@@ -381,13 +387,10 @@ class RequestGuard:
         return counts
 
     def events(self, limit: int = 100) -> list[dict[str, Any]]:
-        """最近的安全事件（新到旧）。内存环形缓冲，重启清空。"""
+        """最近的安全事件（新到旧）。内存只是实时视图，落库历史见 security_logs()。"""
         with self._lock:
             items = list(self._events)[-max(1, int(limit)):]
-        return [
-            {key: value for key, value in item.items() if not key.startswith("_")}
-            for item in reversed(items)
-        ]
+        return [_public_event(item) for item in reversed(items)]
 
     # ------------------------------------------------------------------
     # 内部实现（调用方持锁）
@@ -582,25 +585,27 @@ class RequestGuard:
             previous["count"] += 1
             previous["_wall"] = now
             previous["ts"] = datetime.now(timezone.utc).isoformat(timespec="seconds")
+            # 合并计数也要同步落库（按 event_id 覆盖），否则数据库里的次数会停在 1。
+            logstore.record_security(_public_event(previous))
             return
         self._event_seq += 1
-        self._events.append(
-            {
-                "id": f"evt-{self._event_seq}",
-                "ts": datetime.now(timezone.utc).isoformat(timespec="seconds"),
-                "category": "ban" if action == "banned" else "block",
-                "level": level,
-                "action": action,
-                "label": EVENT_LABELS.get(action, action),
-                "ip": ip,
-                "path": path,
-                "status": status,
-                "reason": reason,
-                "detail": detail,
-                "count": 1,
-                "_wall": now,
-            }
-        )
+        event = {
+            "id": uuid.uuid4().hex,
+            "ts": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+            "category": "ban" if action == "banned" else "block",
+            "level": level,
+            "action": action,
+            "label": EVENT_LABELS.get(action, action),
+            "ip": ip,
+            "path": path,
+            "status": status,
+            "reason": reason,
+            "detail": detail,
+            "count": 1,
+            "_wall": now,
+        }
+        self._events.append(event)
+        logstore.record_security(_public_event(event))
 
     def _recent_counts(self, now: float) -> dict[str, int]:
         floor = now - RECENT_WINDOW_SECONDS
@@ -832,22 +837,56 @@ def _audit_events(limit: int) -> list[dict[str, Any]]:
     return entries
 
 
-def security_logs(limit: int = 100, kind: str = "all") -> dict[str, Any]:
-    """安全日志：内存里的拦截/封禁事件 + 数据库里的操作审计。
+def _persisted_events(limit: int) -> list[dict[str, Any]]:
+    """把落库的安全事件转成与内存事件同构的条目。"""
+    entries: list[dict[str, Any]] = []
+    for row in db.security_events(limit):
+        action = str(row.get("action") or "")
+        entries.append(
+            {
+                "id": row["event_id"],
+                "ts": row["ts"],
+                "category": row["category"],
+                "level": row["level"],
+                "action": action,
+                "label": EVENT_LABELS.get(action, action),
+                "ip": row["ip"],
+                "path": row["path"],
+                "status": row["status"],
+                "reason": row["reason"],
+                "detail": row["detail"],
+                "count": row["count"],
+            }
+        )
+    return entries
 
-    kind: all / block / ban / audit。内存事件重启即清空（风暴期间不写库），
-    登录、解封、改策略这类需要长期留痕的动作走 audit_logs，重启后仍在。
+
+def _merge_events(limit: int) -> list[dict[str, Any]]:
+    """数据库历史 + 内存实时，按 event_id 去重（内存版本带最新的合并计数）。"""
+    merged = {item["id"]: item for item in _persisted_events(limit)}
+    for item in guard.events(limit):
+        merged[item["id"]] = item
+    entries = list(merged.values())
+    # 两边都是 UTC ISO 字符串，按字典序倒排就是时间倒序。
+    entries.sort(key=lambda item: item["ts"], reverse=True)
+    return entries
+
+
+def security_logs(limit: int = 100, kind: str = "all") -> dict[str, Any]:
+    """安全日志：拦截/封禁事件（数据库历史 + 内存实时）+ 操作审计。
+
+    kind: all / block / ban / audit。拦截事件由 logstore 异步落库，内存环形
+    缓冲只负责实时显示；进程重启后历史仍可从 security_events 读回。
     """
     limit = max(1, min(int(limit), MAX_EVENTS))
     if kind == "audit":
         entries = _audit_events(limit)
     elif kind in ("block", "ban"):
         entries = [
-            item for item in guard.events(MAX_EVENTS) if item["category"] == kind
+            item for item in _merge_events(MAX_EVENTS) if item["category"] == kind
         ][:limit]
     elif kind == "all":
-        entries = guard.events(MAX_EVENTS) + _audit_events(limit)
-        # 两边都是 UTC ISO 字符串，按字典序倒排就是时间倒序。
+        entries = _merge_events(MAX_EVENTS) + _audit_events(limit)
         entries.sort(key=lambda item: item["ts"], reverse=True)
         entries = entries[:limit]
     else:

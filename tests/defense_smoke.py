@@ -34,7 +34,7 @@ if os.name == "nt":
 
 from fastapi.testclient import TestClient  # noqa: E402
 
-from app import collector, db, defense  # noqa: E402
+from app import collector, db, defense, logstore  # noqa: E402
 from app.main import app  # noqa: E402
 
 
@@ -243,6 +243,14 @@ with TestClient(app) as client:
     )
     guard.unban("testclient")
     time.sleep(0.05)
+
+    # 落库：应用日志与安全事件都写 SQLite；清掉内存环形缓冲后仍能读回历史，
+    # 这时接口只能从 security_events 取数据，能同时验证持久化与合并逻辑。
+    logstore.flush()
+    persisted = db.security_events(50)
+    assert any(item["action"] == "banned" for item in persisted), persisted[:2]
+    with guard._lock:
+        guard._events.clear()
 
     assert client.get("/api/security/logs").status_code == 401
     assert client.get("/api/security/logs", headers=guest_headers).status_code == 403

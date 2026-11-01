@@ -278,7 +278,7 @@
         // 首次读取前先给一个占位来源，select 不会因为空列表而闪一下。
         return Array.isArray(sources) && sources.length
           ? sources
-          : [{ unit: "foxops", label: "FoxOps 面板" }];
+          : [{ unit: "app-log", label: "FoxOps 应用日志（数据库）" }];
       },
       rootDiskLabel: function () {
         var disks = this.realtimeDisks;

@@ -19,7 +19,7 @@ if os.name == "nt":
 
 from fastapi.testclient import TestClient  # noqa: E402
 
-from app import db, weather, __version__  # noqa: E402
+from app import db, logstore, weather, __version__  # noqa: E402
 from app.main import app  # noqa: E402
 
 
@@ -146,14 +146,23 @@ with TestClient(app) as client:
     audit = client.get("/api/audit", headers=admin_headers)
     assert audit.status_code == 200, audit.text
 
-    # 系统日志：来源限定 FoxOps 与受监控服务；环境没有 journald 时返回
-    # available=False + 原因，而不是 500。
+    # 系统日志：默认读落库的应用日志（app_logs），不依赖 journald；
+    # 容器/无 systemd 环境同样可用，不会因为读不到 journal 而失败。
+    logstore.flush()
     syslog = client.get("/api/sysops/logs", headers=admin_headers)
     assert syslog.status_code == 200, syslog.text
     syslog_payload = syslog.json()
-    assert isinstance(syslog_payload["available"], bool)
-    assert syslog_payload["unit"] == "foxops"
-    assert any(item["unit"] == "foxops" for item in syslog_payload["sources"])
+    assert syslog_payload["available"] is True
+    assert syslog_payload["unit"] == "app-log"
+    assert any(item["unit"] == "app-log" for item in syslog_payload["sources"])
+    # 启动采集的 INFO 日志已经落库（logger 名都以 foxops 开头）。
+    assert "foxops" in syslog_payload["text"].lower(), syslog_payload["text"][:200]
+    warning_logs = client.get(
+        "/api/sysops/logs",
+        params={"unit": "app-log", "level": "warning"},
+        headers=admin_headers,
+    )
+    assert warning_logs.status_code == 200, warning_logs.text
     assert client.get(
         "/api/sysops/logs",
         params={"unit": "../../etc/passwd"},
